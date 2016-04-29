@@ -21,6 +21,8 @@
 #ifndef yap_StaticDataAccessor_h
 #define yap_StaticDataAccessor_h
 
+#include "fwd/DataPointBase.h"
+
 #include "DataAccessor.h"
 #include "Exceptions.h"
 #include "ParticleCombination.h"
@@ -32,7 +34,7 @@ class StatusManager;
 class Model;
 
 /// \name StaticDataAccessor
-/// \brief Base class for all data accessors that will only write to DataPoint once at initial data loading
+/// \brief Base class for all data accessors that will only write to DataPointBase once at initial data loading
 /// \author Johannes Rauch, Daniel Greenwald
 class StaticDataAccessor : public DataAccessor
 {
@@ -64,9 +66,9 @@ public:
         addToModel();
     }
 
-    /// calculate cachedDataValues, store to DataPoint, and update StatusManager.
+    /// calculate cachedDataValues, store to DataPointBase, and update StatusManager.
     /// Must be overriden in derived classes.
-    virtual void calculate(DataPoint& d, StatusManager& sm) const = 0;
+    virtual void calculate(DataPointBase& d, StatusManager& sm) const = 0;
 
     /// \return Raw pointer to owning Model
     const Model* model() const override

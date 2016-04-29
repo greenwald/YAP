@@ -21,6 +21,8 @@
 #ifndef yap_BlattWeisskopf_h
 #define yap_BlattWeisskopf_h
 
+#include "fwd/DataPointBase.h"
+
 #include "AmplitudeComponent.h"
 #include "DataAccessor.h"
 #include "RequiresMeasuredBreakupMomenta.h"
@@ -31,7 +33,6 @@
 namespace yap {
 
 class DataPartition;
-class DataPoint;
 class DecayingParticle;
 class Model;
 class ParticleCombination;
@@ -56,16 +57,16 @@ public:
     { return L_; }
 
     /// Calculate amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d pointer to DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param sm StatusManager to update
-    virtual double amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const;
+    virtual double amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const;
 
     /// functor
     /// \return Blatt-Weisskopf barrier factor for data point and particle combination
-    /// \param d DataPoint
+    /// \param d pointer to DataPointBase
     /// \param pc shared_ptr to ParticleCombination
-    double operator()(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const;
+    double operator()(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const;
 
     /// Calculate barrier factor for and store into each data point in a partition
     /// \param D DataPartition to calculate on

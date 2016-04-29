@@ -21,9 +21,9 @@
 #ifndef yap_DataSet_h
 #define yap_DataSet_h
 
-#include "DataPoint.h"
-#include "DataPartition.h"
-#include "FourVector.h"
+#include "DataPointBase.h"
+#include "DataSetBase.h"
+#include "Exceptions.h"
 
 #include <vector>
 
@@ -32,46 +32,29 @@ namespace yap {
 class Model;
 class StatusManager;
 
-/// \class DataSet
-/// \brief Class holding a set of DataPoint objects.
-/// \author Johannes Rauch, Daniel Greenwald
-/// \ingroup Data
-class DataSet :
-    public DataPartitionBlock
+template <typename T>
+class DataSet : public DataSetBase
 {
 public:
 
     /// Constructor
-    DataSet(const Model& m);
-
-    /// Copy constructor
-    DataSet(const DataSet& other);
-
-    /// Move constructor
-    DataSet(DataSet&& other);
-
-    /// Copy assignment operator
-    DataSet& operator=(const DataSet& other);
-
-    /// Move assignment operator
-    DataSet& operator=(DataSet&& other);
-
-    /// Swap
-    void swap(DataSet& other);
-
-    /// Check if data point is consisent with data set
-    bool consistent(const DataPoint& d) const;
-
-    /// add empty data points
-    /// \param n number of points to add
-    void addEmptyPoints(size_t n);
+    DataSet(const Model& m) : DataSetBase(m)
+    {}
 
     /// add single empty data point
-    void addEmptyPoint();
+    void addEmptyPoint()
+    {
+        if (!model())
+            throw exceptions::Exception("Model unset or deleted", "DataSet::add");
+        DataPoints_.emplace_back(*this);
 
-    /// Add data point
-    /// \param P vector of four momenta
-    void add(const std::vector<FourVector<double> >& P);
+        auto& d = DataPoints_.back();
+
+        if (!consistent(d)) {
+            DataPoints_.pop_back();
+            throw exceptions::Exception("produced inconsistent data point", "Model::addDataPoint");
+        }
+    }
 
     /// \return iterator to front of set
     const DataIterator& begin() const override
@@ -81,76 +64,13 @@ public:
     const DataIterator& end() const override
     { return const_cast<DataSet*>(this)->setEnd(const_cast<DataPointVector*>(&DataPoints_)->end()); }
 
-    /// access by index
-    DataPoint& operator[](size_t i)
-    { return DataPoints_[i]; }
-
-    /// access by index (with check)
-    DataPoint& at(size_t i)
-    { return DataPoints_.at(i); }
-
-    /// access back
-    DataPoint& back()
-    { return DataPoints_.back(); }
-
-    size_t size() const
-    { return DataPoints_.size(); }
-
-    /// const access to DataPoints_
-    const DataPointVector& points() const
-    { return DataPoints_; }
-
-    /// reserve storage space
-    void reserve(size_t n)
-    { DataPoints_.reserve(n); }
-
-    /// call shrink to fit on DataPoints_
-    void shrink_to_fit()
-    { DataPoints_.shrink_to_fit(); }
-
-    /// \return raw pointer to associated model
-    const Model* model() const
-    { return Model_; }
-
-    /// \return global status manager
-    StatusManager& globalStatusManager()
-    { return GlobalStatusManager_; }
-
-    /// grant friend status to DataPartition to access non-const dataPoints()
-    friend DataPartition;
-
 protected:
 
-    /// non-const access to DataPoints_
-    DataPointVector& dataPoints()
-    { return DataPoints_; }
-
-private:
-
-    /// sets this as owner of all its data points
-    void assertDataPointOwnership();
-
-    /// vector of data points contained in set
-    DataPointVector DataPoints_;
-
-    /// Associated model
-    const Model* Model_;
-
-    /// Global StatusManager
-    StatusManager GlobalStatusManager_;
 };
 
 /// swap
-inline void swap(DataSet& A, DataSet& B)
-{ A.swap(B); }
-
-}
-
-namespace std {
-
-/// swap
-template <>
-inline void swap<yap::DataSet>(yap::DataSet& A, yap::DataSet& B)
+template <typename T>
+inline void swap(DataSet<T>& A, DataSet<T>& B)
 { A.swap(B); }
 
 }

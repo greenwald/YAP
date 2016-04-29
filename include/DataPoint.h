@@ -21,95 +21,81 @@
 #ifndef yap_DataPoint_h
 #define yap_DataPoint_h
 
-#include "FourVector.h"
+#include "fwd/DataSet.h"
 
+#include "FourVector.h"
+#include "Model.h"
+
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace yap {
 
-class DataSet;
-class Model;
 class StatusManager;
 
-/// \class DataPoint
-/// \brief Class for holding data and cached values per data point for fast calculation
-/// \author Johannes Rauch, Daniel Greenwald
-/// \defgroup Data Data-related classes
-class DataPoint
+template <typename T>
+class DataPoint : public DataPointBase
 {
+
 public:
-
-    /// Constructor
-    /// \param dataSet DataSet this DataPoint belongs to
-    DataPoint(DataSet& dataSet);
-
-    /// set four momenta of data point
-    /// \param P vector of FourVectors of final-state momenta
-    /// \param sm StatusManager to update
-    void setFinalStateMomenta(const std::vector<FourVector<double> >& P, StatusManager& sm);
-
-    /// set four momenta of data point
-    /// \param P vector of FourVectors of final-state momenta
-    void setFinalStateMomenta(const std::vector<FourVector<double> >& P);
-
-    /// \return number of data accessor rows
-    size_t nDataAccessors() const
-    { return Data_.size(); }
-
-    /// \return number of sym indices rows for data accessor
-    /// \param i index of DataAccessor
-    size_t nSymIndices(unsigned i) const
-    { return Data_[i].size(); }
-
-    /// \return number of elements for data accessor
-    /// \param i index of DataAccessor
-    /// \param j index of symmetrization
-    size_t nElements(unsigned i, unsigned j = 0) const
-    { return Data_[i][j].size(); }
-
-    /// \return size of data point
-    unsigned dataSize() const;
-
-    /// \return string of size of data point
-    std::string dataSizeString() const
-    { return "Size of DataPoint: " + std::to_string(dataSize()) + " byte (for " + std::to_string(Data_.size()) + " data accessors"; }
-
+    
+    DataPoint::DataPoint(DataSet<T>& dataSet)
+        : DataPointBase(dataSet),
+        Data_(model()->dataAccessors().size())
+        {
+            for (auto da : model()->dataAccessors())
+                Data_[da->index()].assign(da->maxSymmetrizationIndex() + 1, std::vector<T>(da->size(), T(0)));
+        }
+    
+    /// \return size of data point [bytes]
+    unsigned dataSize() const override
+    {
+        unsigned size = sizeof(Data_);
+        for (auto& v : Data_) {
+            size += sizeof(v);
+            for (auto& vv : v) {
+                size += sizeof(vv);
+                for (auto vvv : vv)
+                    size += sizeof(vvv);
+            }
+        }
+        return size;
+    }
+    
     /// check that two DataPoint's have same internal structure
-    friend bool equalStructure(const DataPoint& A, const DataPoint& B);
+    bool equalStructure(const DataPointBase* other) const override
+    {
+        auto O = dynamic_cast<DataPoint<T>*>(other);
+        if (!O)
+            return false;
+        if (Data_.size() != O->Data_.size())
+            return false;
+        for (size_t i = 0; i < Data_.size(); ++i) {
+            if (Data_[i].size() != O->Data_[i].size())
+                return false;
+            for (size_t j = 0; j < Data_[i].size(); ++j) {
+                if (A.Data_[i][j].size() != O->Data_[i][j].size())
+                    return false;
+            }
+        }
+        return true;
+    }
+    
+protected:
 
-    /// check that two DataPoint's are equal
-    friend bool operator==(const DataPoint& lhs, const DataPoint& rhs)
-    { return lhs.Data_ == rhs.Data_; }
-
-    const DataSet* dataSet() const
-    { return DataSet_; }
-
-    /// \return model to which DataPoint belongs
-    const Model* model() const;
-
-    /// grant friend status to CachedDataValue to access Data_
-    friend class CachedDataValue;
-
-    /// grant friend status to DataSet to set itself owner
-    friend DataSet;
+    const double& operator()(size_t i, size_t j, size_t k) const override
+    { return static_cast<const double&>(Data_[i][j][k]); }
 
 private:
-
-    /// raw pointer to owning DataSet
-    DataSet* DataSet_;
 
     /// Data storage for all DataAccessors
     /// first index is for the DataAccessor
     /// second index is for the symmeterization state (as known by the DataAccessor)
     /// third index is internal to the DataAccessor
-    std::vector<std::vector<std::vector<double> > > Data_;
-
+    std::vector<std::vector<std::vector<T> > > Data_;
+    
 };
-
-/// \typedef DataPointVector
-/// \brief stl vector of DataPoint's
-using DataPointVector = std::vector<DataPoint>;
 
 }
 

@@ -21,6 +21,8 @@
 #ifndef yap_DecayChannel_h
 #define yap_DecayChannel_h
 
+#include "fwd/DataPointBase.h"
+
 #include "AmplitudeComponent.h"
 #include "AmplitudePair.h"
 #include "Constants.h"
@@ -38,7 +40,6 @@
 namespace yap {
 
 class ComplexCachedDataValue;
-class DataPoint;
 class DecayingParticle;
 class FinalStateParticle;
 class ParticleCombination;
@@ -70,11 +71,11 @@ public:
     /// @}
 
     /// Calculate complex amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param two_m 2 * the spin projection to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc,
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc,
                                            int two_m, StatusManager& sm) const;
 
     /// check consistency of object

@@ -1,13 +1,12 @@
-#include "DataSet.h"
+#include "DataSetBase.h"
 
-#include "DataPoint.h"
-#include "Exceptions.h"
+#include "DataPointBase.h"
 #include "Model.h"
 
 namespace yap {
 
 //-------------------------
-DataSet::DataSet(const Model& m) :
+DataSetBase::DataSetBase(const Model& m) :
     DataPartitionBlock(m.dataAccessors()),
     Model_(&m),
     GlobalStatusManager_(m.dataAccessors())
@@ -15,7 +14,7 @@ DataSet::DataSet(const Model& m) :
 }
 
 //-------------------------
-DataSet::DataSet(const DataSet& other) :
+DataSetBase::DataSetBase(const DataSetBase& other) :
     DataPartitionBlock(other),
     DataPoints_(other.DataPoints_),
     Model_(other.Model_),
@@ -25,7 +24,7 @@ DataSet::DataSet(const DataSet& other) :
 }
 
 //-------------------------
-DataSet::DataSet(DataSet&& other) :
+DataSetBase::DataSetBase(DataSetBase&& other) :
     DataPartitionBlock(std::move(other)),
     DataPoints_(std::move(other.DataPoints_)),
     Model_(std::move(other.Model_)),
@@ -35,7 +34,7 @@ DataSet::DataSet(DataSet&& other) :
 }
 
 //-------------------------
-DataSet& DataSet::operator=(const DataSet& other)
+DataSetBase& DataSetBase::operator=(const DataSetBase& other)
 {
     DataPartitionBlock::operator=(other);
     Model_ = other.Model_;
@@ -46,7 +45,7 @@ DataSet& DataSet::operator=(const DataSet& other)
 }
 
 //-------------------------
-DataSet& DataSet::operator=(DataSet&& other)
+DataSetBase& DataSetBase::operator=(DataSetBase&& other)
 {
     DataPartitionBlock::operator=(std::move(other));
     Model_ = std::move(other.Model_);
@@ -57,7 +56,15 @@ DataSet& DataSet::operator=(DataSet&& other)
 }
 
 //-------------------------
-void DataSet::swap(DataSet& other)
+DataSetBase::~DataSetBase()
+{
+    // delete data points
+    for (auto& d : DataPoints_)
+        delete d;
+}
+
+//-------------------------
+void DataSetBase::swap(DataSetBase& other)
 {
     using std::swap;
     swap(static_cast<DataPartitionBlock&>(*this), static_cast<DataPartitionBlock&>(other));
@@ -68,43 +75,21 @@ void DataSet::swap(DataSet& other)
 }
 
 //-------------------------
-void DataSet::assertDataPointOwnership()
-{
-    for (auto& d : DataPoints_)
-        d.DataSet_ = this;
-}
+bool DataSetBase::consistent(const DataPointBase* d) const
+{ return DataPoints_.empty() or DataPoints_.front()->equalStructure(d); }
 
 //-------------------------
-bool DataSet::consistent(const DataPoint& d) const
-{
-    return points().empty() or equalStructure(points().front(), d);
-}
-
-//-------------------------
-void DataSet::addEmptyPoint()
-{
-    if (!model())
-        throw exceptions::Exception("Model unset or deleted", "DataSet::add");
-
-    DataPoints_.emplace_back(*this);
-    auto& d = DataPoints_.back();
-
-    if (!consistent(d))
-        throw exceptions::Exception("produced inconsistent data point", "Model::addDataPoint");
-}
-
-//-------------------------
-void DataSet::addEmptyPoints(size_t n)
-{
-    for (size_t i = 0; i < n; ++i)
-        addEmptyPoint();
-}
-
-//-------------------------
-void DataSet::add(const std::vector<FourVector<double> >& P)
+void DataSetBase::add(const std::vector<FourVector<double> >& P)
 {
     addEmptyPoint();
-    DataPoints_.back().setFinalStateMomenta(P);
+    DataPoints_.back()->setFinalStateMomenta(P);
+}
+
+//-------------------------
+void DataSetBase::assertDataPointOwnership()
+{
+    for (auto& d : DataPoints_)
+        d->DataSet_ = this;
 }
 
 }

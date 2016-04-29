@@ -21,6 +21,8 @@
 #ifndef yap_BreitWigner_h
 #define yap_BreitWigner_h
 
+#include "fwd/DataPointBase.h"
+
 #include "MassShapeWithNominalMass.h"
 
 #include <complex>
@@ -29,7 +31,6 @@
 namespace yap {
 
 class DataPartition;
-class DataPoint;
 class ParticleCombination;
 
 /// \class BreitWigner
@@ -48,12 +49,12 @@ public:
     BreitWigner(double w = -1);
 
     /// Calculate complex amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const override;
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const override;
 
-    /// Calculate complex amplitudes for and store in each DataPoint in DataPartition
+    /// Calculate complex amplitudes for and store in each DataPointBase in DataPartition
     /// Must be overrided in derived classes.
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     virtual void calculate(DataPartition& D, const std::shared_ptr<ParticleCombination>& pc) const override;

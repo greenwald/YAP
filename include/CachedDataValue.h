@@ -21,6 +21,8 @@
 #ifndef yap_CachedDataValue_h
 #define yap_CachedDataValue_h
 
+#include "fwd/DataPointBase.h"
+
 #include "FourVector.h"
 #include "Parameter.h"
 
@@ -34,7 +36,6 @@ namespace yap {
 class CachedDataValue;
 enum class CalculationStatus : bool;
 class DataAccessor;
-class DataPoint;
 class ParticleCombination;
 class StatusManager;
 enum class VariableStatus;
@@ -176,12 +177,12 @@ public:
     int index() const
     { return Index_; }
 
-    /// Get value from #DataPoint for particular symmetrization
+    /// Get value from #DataPointBase for particular symmetrization
     /// \param index index of value to get from within cached value (must be less than #Size_)
-    /// \param d #DataPoint to get value from
+    /// \param d #DataPointBase to get value from
     /// \param sym_index index of symmetrization to grab from
     /// \return Value of CachedDataValue inside the data point
-    double value(unsigned index, const DataPoint& d, unsigned sym_index) const;
+    double value(unsigned index, const DataPointBase& d, unsigned sym_index) const;
 
     /// \return Size of cached value (number of real elements)
     virtual unsigned size() const
@@ -204,13 +205,13 @@ public:
     /// \name Setters
     /// @{
 
-    /// Set value into #DataPoint for particular symmetrization
+    /// Set value into #DataPointBase for particular symmetrization
     /// (No update to VariableStatus or CalculationStatus is made!)
     /// \param index index of value to get from within cached value (must be less than #Size_)
     /// \param val Value to set to
-    /// \param d #DataPoint to update
+    /// \param d #DataPointBase to update
     /// \param sym_index index of symmetrization to apply to
-    void setValue(unsigned index, double val, DataPoint& d, unsigned sym_index) const;
+    void setValue(unsigned index, double val, DataPointBase& d, unsigned sym_index) const;
 
     /// @}
 
@@ -254,7 +255,7 @@ private:
 };
 
 /// \class RealCachedDataValue
-/// \brief Class for managing a single real cached value inside a #DataPoint
+/// \brief Class for managing a single real cached value inside a #DataPointBase
 /// \author Johannes Rauch, Daniel Greenwald
 /// \ingroup Data
 /// \ingroup Cache
@@ -268,19 +269,19 @@ public:
     /// \param vals set of shared pointers to CachedValues cached value depends on
     static std::shared_ptr<RealCachedDataValue> create(DataAccessor* da, ParameterSet pars = {}, CachedDataValueSet vals = {});
 
-    /// Set value into #DataPoint for particular symmetrization, and
+    /// Set value into #DataPointBase for particular symmetrization, and
     /// update VariableStatus for symm. and partition index
     /// \param val Value to set to
-    /// \param d #DataPoint to update
+    /// \param d #DataPointBase to update
     /// \param sym_index index of symmetrization to apply to
     /// \param sm StatusManager
-    void setValue(double val, DataPoint& d, unsigned sym_index, StatusManager& sm) const;
+    void setValue(double val, DataPointBase& d, unsigned sym_index, StatusManager& sm) const;
 
-    /// Get value from #DataPoint for particular symmetrization
-    /// \param d #DataPoint to get value from
+    /// Get value from #DataPointBase for particular symmetrization
+    /// \param d #DataPointBase to get value from
     /// \param sym_index index of symmetrization to grab from
     /// \return Value of CachedDataValue inside the data point
-    double value(const DataPoint& d, unsigned sym_index) const
+    double value(const DataPointBase& d, unsigned sym_index) const
     { return CachedDataValue::value(0, d, sym_index); }
 
 private:
@@ -292,7 +293,7 @@ private:
 };
 
 /// \class ComplexCachedDataValue
-/// \brief Class for managing a complex cached value inside a #DataPoint
+/// \brief Class for managing a complex cached value inside a #DataPointBase
 /// \author Johannes Rauch, Daniel Greenwald
 /// \ingroup Data
 /// \ingroup Cache
@@ -306,29 +307,29 @@ public:
     /// \param vals set of shared pointers to CachedValues cached value depends on
     static std::shared_ptr<ComplexCachedDataValue> create(DataAccessor* da, ParameterSet pars = {}, CachedDataValueSet vals = {});
 
-    /// Set value into #DataPoint for particular symmetrization, and
+    /// Set value into #DataPointBase for particular symmetrization, and
     /// update VariableStatus for symm. and partition index
     /// \param val Value to set to
-    /// \param d #DataPoint to update
+    /// \param d #DataPointBase to update
     /// \param sym_index index of symmetrization to apply to
     /// \param sm StatusManager
-    void setValue(std::complex<double> val, DataPoint& d, unsigned sym_index, StatusManager& sm) const
+    void setValue(std::complex<double> val, DataPointBase& d, unsigned sym_index, StatusManager& sm) const
     { setValue(real(val), imag(val), d, sym_index, sm); }
 
-    /// Set value into #DataPoint for particular symmetrization, and
+    /// Set value into #DataPointBase for particular symmetrization, and
     /// update VariableStatus for symm. and partition index
     /// \param val_re real part of value to set to
     /// \param val_im imaginary part of value to set to
-    /// \param d #DataPoint to update
+    /// \param d #DataPointBase to update
     /// \param sym_index index of symmetrization to apply to
     /// \param sm StatusManager
-    void setValue(double val_re, double val_im, DataPoint& d, unsigned sym_index, StatusManager& sm) const;
+    void setValue(double val_re, double val_im, DataPointBase& d, unsigned sym_index, StatusManager& sm) const;
 
-    /// Get value from #DataPoint for particular symmetrization
-    /// \param d #DataPoint to get value from
+    /// Get value from #DataPointBase for particular symmetrization
+    /// \param d #DataPointBase to get value from
     /// \param sym_index index of symmetrization to grab from
     /// \return Value of CachedDataValue inside the data point
-    std::complex<double> value(const DataPoint& d, unsigned  sym_index) const
+    std::complex<double> value(const DataPointBase& d, unsigned  sym_index) const
     { return std::complex<double>(CachedDataValue::value(0, d, sym_index), CachedDataValue::value(1, d, sym_index)); }
 
 private:
@@ -342,7 +343,7 @@ private:
 };
 
 /// \class FourVectorCachedDataValue
-/// \brief Class for managing a four-vector cached value inside a #DataPoint
+/// \brief Class for managing a four-vector cached value inside a #DataPointBase
 /// \author Johannes Rauch, Daniel Greenwald
 /// \ingroup Data
 /// \ingroup Cache
@@ -356,19 +357,19 @@ public:
     /// \param vals set of shared pointers to CachedValues cached value depends on
     static std::shared_ptr<FourVectorCachedDataValue> create(DataAccessor* da, ParameterSet pars = {}, CachedDataValueSet vals = {});
 
-    /// Set value into #DataPoint for particular symmetrization, and
+    /// Set value into #DataPointBase for particular symmetrization, and
     /// update VariableStatus for symm. and partition index
     /// \param val Value to set to
-    /// \param d #DataPoint to update
+    /// \param d #DataPointBase to update
     /// \param sym_index index of symmetrization to apply to
     /// \param sm StatusManager
-    void setValue(FourVector<double> val, DataPoint& d, unsigned sym_index, StatusManager& sm) const;
+    void setValue(FourVector<double> val, DataPointBase& d, unsigned sym_index, StatusManager& sm) const;
 
-    /// Get value from #DataPoint for particular symmetrization
-    /// \param d #DataPoint to get value from
+    /// Get value from #DataPointBase for particular symmetrization
+    /// \param d #DataPointBase to get value from
     /// \param sym_index index of symmetrization to grab from
     /// \return Value of CachedDataValue inside the data point
-    FourVector<double> value(const DataPoint& d, unsigned  sym_index) const
+    FourVector<double> value(const DataPointBase& d, unsigned  sym_index) const
     {
         return FourVector<double>( { CachedDataValue::value(0, d, sym_index),
                                      CachedDataValue::value(1, d, sym_index),

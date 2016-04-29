@@ -21,6 +21,8 @@
 #ifndef yap_Particle_h
 #define yap_Particle_h
 
+#include "fwd/DataPointBase.h"
+
 #include "AmplitudeComponent.h"
 #include "Parameter.h"
 #include "QuantumNumbers.h"
@@ -33,7 +35,6 @@
 
 namespace yap {
 
-class DataPoint;
 class FinalStateParticle;
 class Model;
 class ParticleCombination;
@@ -61,11 +62,11 @@ public:
 
     /// Calculate complex amplitude
     /// must be overrided in derived classes
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param two_m 2 * the spin projection to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc,
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc,
                                            int two_m, StatusManager& sm) const = 0;
 
     /// Check consitency of object

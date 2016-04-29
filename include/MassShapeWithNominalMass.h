@@ -27,7 +27,6 @@
 
 namespace yap {
 
-class DataPoint;
 class ParticleCombination;
 
 /// \class MassShapeWithNominalMass

@@ -12,8 +12,8 @@ set(YAP_SOURCES
 	ClebschGordan.cxx
 	DataAccessor.cxx
 	DataPartition.cxx
-	DataPoint.cxx
-	DataSet.cxx
+	DataPointBase.cxx
+	DataSetBase.cxx
 	DecayChannel.cxx
 	DecayingParticle.cxx
 	FinalStateParticle.cxx

@@ -21,6 +21,8 @@
 #ifndef yap_SpinAmplitude_h
 #define yap_SpinAmplitude_h
 
+#include "fwd/DataPointBase.h"
+
 #include "MathUtilities.h"
 #include "StaticDataAccessor.h"
 
@@ -109,24 +111,24 @@ public:
     /// \param two_M 2 * spin projection of parent
     /// \param two_m1 2 * spin projection of first daughter
     /// \param two_m2 2 * spin projection of second daughter
-    /// \param d DataPoint to retrieve data from for calculation
+    /// \param d DataPointBase to retrieve data from for calculation
     /// \param pc ParticleCombination to calculate for
     virtual std::complex<double> calc(int two_M, int two_m1, int two_m2,
-                                      const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const = 0;
+                                      const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const = 0;
 
     /// Loops over particle combinations (pc) and all (M, m1, m2) combinations
     /// and call calc(M, m1, m2, d, pc) when necessary
-    /// \param d DataPoint to calculate into
+    /// \param d DataPointBase to calculate into
     /// \param sm StatusManager to update
-    void calculate(DataPoint& d, StatusManager& sm) const override;
+    void calculate(DataPointBase& d, StatusManager& sm) const override;
 
     /// \return precalculated complex amplitude
-    /// \param d DataPoint to retrieve value from
+    /// \param d DataPointBase to retrieve value from
     /// \param pc ParticleCombination to retrieve value for
     /// \param two_M 2 * spin projection of parent
     /// \param two_m1 2 * spin projection of first daughter
     /// \param two_m2 2 * spin projection of second daughter
-    std::complex<double> amplitude(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc,
+    std::complex<double> amplitude(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc,
                                    int two_M, int two_m1, int two_m2) const
     { return amplitude(two_M, two_m1, two_m2)->value(d, symmetrizationIndex(pc)); }
 

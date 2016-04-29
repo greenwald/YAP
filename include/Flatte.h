@@ -21,6 +21,8 @@
 #ifndef yap_Flatte_h
 #define yap_Flatte_h
 
+#include "fwd/DataPointBase.h"
+
 #include "CachedValue.h"
 #include "MassShapeWithNominalMass.h"
 
@@ -30,7 +32,6 @@
 namespace yap {
 
 class DataPartition;
-class DataPoint;
 class ParticleCombination;
 class StatusManager;
 
@@ -60,12 +61,12 @@ public:
     Flatte() : MassShapeWithNominalMass() {}
 
     /// Calculate complex amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const override;
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc, StatusManager& sm) const override;
 
-    /// Calculate complex amplitude for and store into each DataPoint in a DataPartition
+    /// Calculate complex amplitude for and store into each DataPointBase in a DataPartition
     /// \param D DataPartition to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     virtual void calculate(DataPartition& D, const std::shared_ptr<ParticleCombination>& pc) const override;

@@ -21,6 +21,8 @@
 #ifndef yap_Model_h
 #define yap_Model_h
 
+#include "fwd/DataPoint.h"
+
 #include "CoordinateSystem.h"
 #include "DataPartition.h"
 #include "DataSet.h"
@@ -36,7 +38,6 @@
 namespace yap {
 
 class DecayingParticle;
-class DataPoint;
 class FinalStateParticle;
 class FourMomenta;
 class HelicityAngles;

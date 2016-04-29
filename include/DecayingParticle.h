@@ -21,6 +21,8 @@
 #ifndef yap_DecayingParticle_h
 #define yap_DecayingParticle_h
 
+#include "fwd/DataPointBase.h"
+
 #include "DataAccessor.h"
 #include "DecayChannel.h"
 #include "DecayTree.h"
@@ -35,7 +37,6 @@
 namespace yap {
 
 class BlattWeisskopf;
-class DataPoint;
 class FinalStateParticle;
 class Model;
 class ParticleCombination;
@@ -71,11 +72,11 @@ public:
     { return std::shared_ptr<DecayingParticle>(new DecayingParticle(q, mass, name, radialSize)); }
 
     /// Calculate complex amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param two_m 2 * the spin projection to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc, int two_m, StatusManager& sm) const override;
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc, int two_m, StatusManager& sm) const override;
 
     /// Check consistency of object
     virtual bool consistent() const override;

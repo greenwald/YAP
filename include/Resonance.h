@@ -21,6 +21,8 @@
 #ifndef yap_Resonance_h
 #define yap_Resonance_h
 
+#include "fwd/DataPointBase.h"
+
 #include "DecayingParticle.h"
 
 #include <complex>
@@ -29,7 +31,6 @@
 
 namespace yap {
 
-class DataPoint;
 class MassShape;
 class ParticleCombination;
 class QuantumNumbers;
@@ -59,11 +60,11 @@ public:
     { return std::shared_ptr<Resonance>(new Resonance(q, mass, name, radialSize, massShape)); }
 
     /// Calculate complex amplitude
-    /// \param d DataPoint to calculate with
+    /// \param d DataPointBase to calculate with
     /// \param pc (shared_ptr to) ParticleCombination to calculate for
     /// \param two_m 2 * the spin projection to calculate for
     /// \param sm StatusManager to update
-    virtual std::complex<double> amplitude(DataPoint& d, const std::shared_ptr<ParticleCombination>& pc, int two_m, StatusManager& sm) const override;
+    virtual std::complex<double> amplitude(DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc, int two_m, StatusManager& sm) const override;
 
     /// Check consistency of object
     virtual bool consistent() const override;

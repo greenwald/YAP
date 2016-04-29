@@ -21,7 +21,9 @@
 #ifndef yap_DataPartition_h
 #define yap_DataPartition_h
 
-#include "DataPoint.h"
+#include "fwd/DataPointBase.h"
+#include "fwd/DataSetBase.h"
+
 #include "StatusManager.h"
 
 #include <algorithm>
@@ -32,7 +34,6 @@
 namespace yap {
 
 class DataPartition;
-class DataSet;
 
 /// \class DataIterator
 /// \brief Class for iterating over a #DataPartition
@@ -47,11 +48,11 @@ public:
     DataIterator& operator++();
 
     /// dereference operator
-    DataPoint& operator*()
+    DataPointBase* operator*()
     { return *Iterator_; }
 
     /// dereference operator (const)
-    const DataPoint& operator*() const
+    const DataPointBase* operator*() const
     { return *Iterator_; }
 
     /// inequality operator
@@ -88,7 +89,7 @@ protected:
 
 
 /// \class DataPartition
-/// \brief Class defining a partition of the DataSet
+/// \brief Class defining a partition of the DataSetBase
 /// \author Johannes Rauch, Daniel Greenwald
 /// \ingroup Data
 class DataPartition : public StatusManager
@@ -157,11 +158,11 @@ protected:
     const DataIterator& setEnd(DataPointVector::iterator it)
     { End_ = DataIterator(*this, it); return End_; }
 
-    /// get non-const begin from DataSet
-    static DataPointVector::iterator begin(DataSet& ds);
+    /// get non-const begin from DataSetBase
+    static DataPointVector::iterator begin(DataSetBase& ds);
 
-    /// get non-const end from DataSet
-    static DataPointVector::iterator end(DataSet& ds);
+    /// get non-const end from DataSetBase
+    static DataPointVector::iterator end(DataSetBase& ds);
 
 private:
 
@@ -170,7 +171,7 @@ private:
 
     /// end DataIterator
     DataIterator End_;
-
+    
 };
 
 /// \typedef DataPartitionVector
@@ -192,15 +193,15 @@ public:
     DataPartitionBlock(const StatusManager& sm, DataPointVector::iterator begin, DataPointVector::iterator end)
         : DataPartition(sm, begin, end) {}
 
-    /// \return DataParitionVector covering DataSet as contiguous blocks
-    /// \param dataSet The dataSet
-    /// \param n number of partitions to divide the dataSet into
-    static DataPartitionVector create(DataSet& dataSet, unsigned n);
+    /// \return DataParitionVector covering DataSetBase as contiguous blocks
+    /// \param dataSetBase the DataSetBase
+    /// \param n number of partitions to divide dataSetBase into
+    static DataPartitionVector create(DataSetBase& dataSetBase, unsigned n);
 
-    /// \return DataParitionVector covering DataSet as contiguous blocks of specified size
-    /// \param dataSet The dataSet
-    /// \param s maximum size of partitions to divide the dataSet into
-    static DataPartitionVector createBySize(DataSet& dataSet, size_t s);
+    /// \return DataParitionVector covering DataSetBase as contiguous blocks of specified size
+    /// \param dataSetBase The dataSetBase
+    /// \param s maximum size of partitions to divide the dataSetBase into
+    static DataPartitionVector createBySize(DataSetBase& dataSetBase, size_t s);
 
 protected:
 
@@ -231,10 +232,10 @@ public:
     DataPartitionWeave(const StatusManager& sm, DataPointVector::iterator begin, DataPointVector::iterator end, unsigned spacing)
         : DataPartition(sm, begin, end), Spacing_(spacing) {}
 
-    /// \return DataParitionVector covering DataSet as a weave
-    /// \param dataSet The dataSet
-    /// \param n number of partitions to divide the dataSet into
-    static DataPartitionVector create(DataSet& dataSet, unsigned n);
+    /// \return DataParitionVector covering DataSetBase as a weave
+    /// \param dataSetBase The dataSetBase
+    /// \param n number of partitions to divide dataSetBase into
+    static DataPartitionVector create(DataSetBase& dataSetBase, unsigned n);
 
 protected:
 

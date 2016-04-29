@@ -30,7 +30,6 @@
 
 namespace yap {
 
-class DataPoint;
 class Model;
 
 /// \name DataAccessor

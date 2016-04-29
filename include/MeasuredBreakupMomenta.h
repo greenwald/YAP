@@ -21,6 +21,8 @@
 #ifndef yap_MeasuredBreakupMomenta_h
 #define yap_MeasuredBreakupMomenta_h
 
+#include "fwd/DataPointBase.h"
+
 #include "StaticDataAccessor.h"
 
 #include <memory>
@@ -46,20 +48,20 @@ public:
     MeasuredBreakupMomenta(Model* m);
 
     /// Calculate breakup momenta for all possible symmetrization indices
-    /// \param d DataPoint to caluclate into
+    /// \param d DataPointBase to caluclate into
     /// \param sm StatusManager to update
-    virtual void calculate(DataPoint& d, StatusManager& sm) const override;
+    virtual void calculate(DataPointBase& d, StatusManager& sm) const override;
 
     /// Access squared breakup momentum
-    /// \param d DataPoint to get data from
+    /// \param d DataPointBase to get data from
     /// \param pc ParticleCombination to return breakup momentum of
-    double q2(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const
+    double q2(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const
     { return Q2_->value(d, symmetrizationIndex(pc)); }
 
     /// Access breakup momentum
-    /// \param d DataPoint to get data from
+    /// \param d DataPointBase to get data from
     /// \param pc ParticleCombination to return breakup momentum of
-    double q(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const
+    double q(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const
     { return sqrt(q2(d, pc)); }
 
     /// Calculate breakup momentum from parent and daughter masses

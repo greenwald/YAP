@@ -21,6 +21,8 @@
 #ifndef yap_HelicityFormalism_h
 #define yap_HelicityFormalism_h
 
+#include "fwd/DataPointBase.h"
+
 #include "RequiresHelicityAngles.h"
 #include "SpinAmplitude.h"
 #include "SpinAmplitudeCache.h"
@@ -31,7 +33,6 @@
 
 namespace yap {
 
-class DataPoint;
 class ParticleCombination;
 
 /// \class HelicitySpinAmplitude
@@ -46,10 +47,10 @@ public:
     /// \param two_M 2 * spin projection of parent
     /// \param two_m1 2 * spin projection of first daughter
     /// \param two_m2 2 * spin projection of second daughter
-    /// \param d DataPoint to retrieve data from for calculation
+    /// \param d DataPointBase to retrieve data from for calculation
     /// \param pc ParticleCombination to calculate for
     virtual std::complex<double> calc(int two_M, int two_m1, int two_m2,
-                                      const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const override;
+                                      const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const override;
 
     /// \return "helicity formalism"
     virtual std::string formalism() const override

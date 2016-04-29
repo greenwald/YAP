@@ -21,6 +21,8 @@
 #ifndef yap_FourMomenta_
 #define yap_FourMomenta_
 
+#include "fwd/DataPointBase.h"
+
 #include "FourVector.h"
 #include "StaticDataAccessor.h"
 
@@ -30,7 +32,6 @@
 
 namespace yap {
 
-class DataPoint;
 class FourVectorCachedDataValue;
 class Model;
 class ParticleCombination;
@@ -51,36 +52,36 @@ public:
     bool consistent() const;
 
     /// Fill 4-momenta
-    /// \param d DataPoint to fill
+    /// \param d DataPointBase to fill
     /// \param sm StatusManager to update
-    virtual void calculate(DataPoint& d, StatusManager& sm) const override;
+    virtual void calculate(DataPointBase& d, StatusManager& sm) const override;
 
     /// \name Getters
     /// @{
 
     /// Access 4-momenta (const)
-    /// \param d DataPoint to get data from
+    /// \param d DataPointBase to get data from
     /// \param pc ParticleCombination to return 4-momentum of
-    FourVector<double> p(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const;
+    FourVector<double> p(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const;
 
     /// Access invariant mass squared
-    /// \param d DataPoint to get data from
+    /// \param d DataPointBase to get data from
     /// \param pc ParticleCombination to return squared mass of
-    double m2(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const
+    double m2(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const
     { return pow(m(d, pc), 2); }
 
     /// Access invariant mass
-    /// \param d DataPoint to get data from
+    /// \param d DataPointBase to get data from
     /// \param pc ParticleCombination to return mass of
-    double m(const DataPoint& d, const std::shared_ptr<ParticleCombination>& pc) const;
+    double m(const DataPointBase& d, const std::shared_ptr<ParticleCombination>& pc) const;
 
     /// \return initial-state four-momentum (const)
-    /// \param d DataPoint to get data from
-    const FourVector<double> initialStateMomentum(const DataPoint& d) const;
+    /// \param d DataPointBase to get data from
+    const FourVector<double> initialStateMomentum(const DataPointBase& d) const;
 
     /// \return vector of final-state four-momenta (const)
-    /// \param d DataPoint to get data from
-    const std::vector<FourVector<double> > finalStateMomenta(const DataPoint& d) const;
+    /// \param d DataPointBase to get data from
+    const std::vector<FourVector<double> > finalStateMomenta(const DataPointBase& d) const;
 
     /// \return masses
     std::shared_ptr<RealCachedDataValue> mass()
@@ -101,7 +102,7 @@ public:
     /// @}
 
     /// print all masses
-    std::ostream& printMasses(const DataPoint& d, std::ostream& os = std::cout) const;
+    std::ostream& printMasses(const DataPointBase& d, std::ostream& os = std::cout) const;
 
     virtual std::string data_accessor_type() const override
     {return "FourMomenta"; }
@@ -109,16 +110,16 @@ public:
     /// grant friend status to Model to call addParticleCombination
     friend class Model;
 
-    /// grant friend status to DataPoint to call setFourMomenta
-    friend class DataPoint;
+    /// grant friend status to DataPointBase to call setFourMomenta
+    friend class DataPointBase;
 
 protected:
 
     /// set final-state four-momenta
-    /// \param d DataPoint to set into
+    /// \param d DataPointBase to set into
     /// \param P Four-momenta to set
     /// \param sm StatusManager to be updated
-    void setFinalStateMomenta(DataPoint& d, const std::vector<FourVector<double> >& P, StatusManager& sm) const;
+    void setFinalStateMomenta(DataPointBase& d, const std::vector<FourVector<double> >& P, StatusManager& sm) const;
 
     /// looks for ISP when adding ParticleCombination's
     unsigned addParticleCombination(std::shared_ptr<ParticleCombination> pc) override;
