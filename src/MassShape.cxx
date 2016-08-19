@@ -72,14 +72,6 @@ void MassShape::setResonance(Resonance* r)
 }
 
 //-------------------------
-void MassShape::replaceResonanceMass(std::shared_ptr<RealParameter> m)
-{
-    if (!Resonance_)
-        throw exceptions::Exception("Resonance unset", "MassShape::replaceResonanceMass");
-    Resonance_->setMass(m);
-}
-
-//-------------------------
 const Model* MassShape::model() const
 {
     return Resonance_->model();

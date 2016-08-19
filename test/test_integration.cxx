@@ -102,7 +102,7 @@ TEST_CASE("integration")
     const unsigned nPoints = 1000;
 
     auto M = create_model();
-    auto data = generate_data(M, nPoints);
+    auto data = generate_data(*M, nPoints);
     auto partitions = yap::DataPartitionBlock::create(data, 4);
 
     double bruteForceIntegral = yap::sum_of_intensity(*M, partitions, 0) / nPoints;

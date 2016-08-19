@@ -42,6 +42,8 @@ int main()
     // create bat_fit object
     fit_fitFraction m("D3PI_frac_fit", d3pi(std::make_unique<yap::ZemachFormalism>()));
 
+    double D_mass = 1.86961;
+
     m.GetParameter("N_1").Fix(1);
 
     // find particles
@@ -70,11 +72,11 @@ int main()
     m.setPrior(free_amplitude(*m.model(), yap::to(sigma)),    new BCGaussianPrior(3.7, quad(0.3, 0.2)), new BCGaussianPrior(  -3., quad(4.,   2.)));
 
     // add shape parameters
-    m.addParameter("f_0_980_mass", f_0_980->mass(), 0.953 - 3 * 0.02, 0.953 + 3 * 0.02);
+    m.addParameter("f_0_980_mass", std::static_pointer_cast<yap::Flatte>(f_0_980->massShape())->mass(), 0.953 - 3 * 0.02, 0.953 + 3 * 0.02);
     m.GetParameters().Back().SetPrior(new BCGaussianPrior(0.953, 0.02));
     // m.addParameter("f_0_980_coupling", f_0_980_flatte->channels()[0].Coupling, 0.329 - 3 * 0.096, 0.329 + 3 * 0.096);
     // m.GetParameters().Back().SetPrior(new BCGaussianPrior(0.329, 0.096));
-    m.addParameter("f_0_1370_mass", f_0_1370->mass(), 1.259 - 3 * 0.055, 1.259 + 3 * 0.055);
+    m.addParameter("f_0_1370_mass", std::static_pointer_cast<yap::BreitWigner>(f_0_1370->massShape())->mass(), 1.259 - 3 * 0.055, 1.259 + 3 * 0.055);
     m.GetParameters().Back().SetPrior(new BCGaussianPrior(1.259, 0.055));
     m.addParameter("f_0_1370_width", std::dynamic_pointer_cast<yap::BreitWigner>(f_0_1370->massShape())->width(),
                    0.298 - 3 * 0.021, 0.298 + 3 * 0.021);
@@ -86,13 +88,13 @@ int main()
     m.GetParameters().Back().SetPrior(new BCGaussianPrior(-0.223, 0.028));
 
     // get FSP mass ranges
-    auto m2r = yap::squared(mass_range(m.axes(), m.isp(), m.model()->finalStateParticles()));
+    auto m2r = yap::squared(mass_range(D_mass, m.axes(), m.model()->finalStateParticles()));
 
     // generate integration data
     std::mt19937 g(0);
     std::generate_n(std::back_inserter(m.integralData()), 10000,
                     std::bind(yap::phsp<std::mt19937>, std::cref(*m.model()),
-                              m.isp()->mass()->value(), m.axes(), m2r, g,
+                              D_mass, m.axes(), m2r, g,
                               std::numeric_limits<unsigned>::max()));
     LOG(INFO) << "Created " << m.integralData().size() << " data points (" << (m.integralData().bytes() * 1.e-6) << " MB)";
     // partition integration data

@@ -23,7 +23,6 @@
 
 #include "fwd/MassRange.h"
 
-#include "fwd/DecayingParticle.h"
 #include "fwd/FinalStateParticle.h"
 #include "fwd/MassAxes.h"
 #include "fwd/ParticleCombination.h"
@@ -33,16 +32,16 @@
 namespace yap {
 
 /// \return mass range for particle combination inside decay of ISP to FSPs
+/// \param isp_mass initial-state mass
 /// \param pc shared_ptr to ParticleCombination to get mass range for
-/// \param ISP DecayingParticle to take initial mass from
-/// \param FSPs FinalStateParticles of the ISP to calculate with
-const MassRange mass_range(const std::shared_ptr<ParticleCombination>& pc, std::shared_ptr<DecayingParticle> ISP, const FinalStateParticleVector& FSPs);
+/// \param FSP FinalStateParticles of the ISP to calculate with
+const MassRange mass_range(double isp_mass, const std::shared_ptr<ParticleCombination>& pc, const FinalStateParticleVector& FSPs);
 
 /// \return mass range for MassAxes inside decay of ISP to FSPs
+/// \param isp_mass initial-state mass
 /// \param A MassAxes to get mass ranges for
-/// \param ISP DecayingParticle to take initial mass from
 /// \param FSPs FinalStateParticles of the ISP to calculate with
-const std::vector<MassRange> mass_range(const MassAxes& A, std::shared_ptr<DecayingParticle> ISP, const FinalStateParticleVector& FSPs);
+const std::vector<MassRange> mass_range(double isp_mass, const MassAxes& A, const FinalStateParticleVector& FSPs);
 
 /// \return squared masses of mass range
 const MassRange squared(MassRange mr);

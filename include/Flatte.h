@@ -49,7 +49,8 @@ class Flatte : public MassShapeWithNominalMass
 public:
 
     /// Constructor
-    Flatte() : MassShapeWithNominalMass() {}
+    /// \param m mass [GeV]
+    Flatte(double m = -1) : MassShapeWithNominalMass(m) {}
 
     /// Add FlatteChannel
     void add(FlatteChannel fc);
@@ -73,6 +74,9 @@ protected:
     /// \param si SymmetrizationIndec to calculate for
     virtual void calculateT(DataPartition& D, const std::shared_ptr<ParticleCombination>& pc, unsigned si) const override;
 
+private:
+
+    /// Flatte channels for width calculation
     std::vector<FlatteChannel> FlatteChannels_;
 
 };

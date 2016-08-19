@@ -23,8 +23,8 @@
 #include <limits>
 
 // -----------------------
-bat_gen::bat_gen(std::string name, std::unique_ptr<yap::Model> M, std::vector<std::vector<unsigned> > pcs)
-    : bat_yap_base(name, std::move(M))
+bat_gen::bat_gen(std::string name, std::unique_ptr<yap::Model> M, double initial_mass, std::vector<std::vector<unsigned> > pcs)
+: bat_yap_base(name, std::move(M)), InitialMass_(initial_mass)
 {
     for (auto& kv : model()->initialStateParticles()) {
 
@@ -41,7 +41,7 @@ bat_gen::bat_gen(std::string name, std::unique_ptr<yap::Model> M, std::vector<st
     }
 
     axes() = model()->massAxes(pcs);
-    auto m2r = yap::squared(yap::mass_range(axes(), isp(), model()->finalStateParticles()));
+    auto m2r = yap::squared(yap::mass_range(InitialMass_, axes(), model()->finalStateParticles()));
 
     for (size_t i = 0; i < axes().size(); ++i) {
         std::string axis_label = "m2_" + indices_string(*axes()[i]).substr(1, 2);
@@ -73,7 +73,7 @@ double bat_gen::LogLikelihood(const std::vector<double>&)
 double bat_gen::LogAPrioriProbability(const std::vector<double>& parameters)
 {
     // calculate four-momenta
-    auto P = model()->calculateFourMomenta(axes(), parameters, isp()->mass()->value());
+    auto P = calculate_four_momenta(InitialMass_, *model(), axes(), parameters);
 
     // if failed, outside phase space
     if (P.empty())

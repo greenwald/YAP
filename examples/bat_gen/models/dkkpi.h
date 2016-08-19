@@ -46,32 +46,32 @@ inline unique_ptr<Model> dkkpi(unique_ptr<SpinAmplitudeCache> SAC)
     // initial state particle
     auto D = F.decayingParticle(F.pdgCode("D+"), radialSize);
 
-    auto KK0 = Resonance::create(QuantumNumbers(0, 0), 1.1, "KK0", radialSize, make_shared<BreitWigner>(0.075));
+    auto KK0 = Resonance::create(QuantumNumbers(0, 0), "KK0", radialSize, make_shared<BreitWigner>(1.1, 0.075));
     KK0->addChannel(kPlus, kMinus);
     D->addChannel(KK0, piPlus);
     *free_amplitude(*D, to(KK0)) = polar(0.15, rad(39.));
     
-    auto KK1 = Resonance::create(QuantumNumbers(2, 0), 1.35, "KK1", radialSize, make_shared<BreitWigner>(0.125));
+    auto KK1 = Resonance::create(QuantumNumbers(2, 0), "KK1", radialSize, make_shared<BreitWigner>(1.35, 0.125));
     KK1->addChannel(kPlus, kMinus);
     D->addChannel(KK1, piPlus);
     *free_amplitude(*D, to(KK1)) = 1.;
     
-    auto KK2 = Resonance::create(QuantumNumbers(4, 0), 1.6, "KK2", radialSize, make_shared<BreitWigner>(0.100));
+    auto KK2 = Resonance::create(QuantumNumbers(4, 0), "KK2", radialSize, make_shared<BreitWigner>(1.6, 0.100));
     KK2->addChannel(kPlus, kMinus);
     D->addChannel(KK2, piPlus);
     *free_amplitude(*D, to(KK2)) = polar(10., rad(-12.));
     
-    auto piK0 = Resonance::create(QuantumNumbers(0, 0), 0.75, "piK0", radialSize, make_shared<BreitWigner>(0.085));
+    auto piK0 = Resonance::create(QuantumNumbers(0, 0), "piK0", radialSize, make_shared<BreitWigner>(0.75, 0.085));
     piK0->addChannel(piPlus, kMinus);
     D->addChannel(piK0, kPlus);
     *free_amplitude(*D, to(piK0)) = polar(0.23, rad(112.));
 
-    auto piK1 = Resonance::create(QuantumNumbers(2, 0), 1.00, "piK1", radialSize, make_shared<BreitWigner>(0.125));
+    auto piK1 = Resonance::create(QuantumNumbers(2, 0), "piK1", radialSize, make_shared<BreitWigner>(1.0, 0.125));
     piK1->addChannel(piPlus, kMinus);
     D->addChannel(piK1, kPlus);
     *free_amplitude(*D, to(piK1)) = polar(1.2, rad(-76.));
 
-    auto piK2 = Resonance::create(QuantumNumbers(4, 0), 1.25, "piK2", radialSize, make_shared<BreitWigner>(0.065));
+    auto piK2 = Resonance::create(QuantumNumbers(4, 0), "piK2", radialSize, make_shared<BreitWigner>(1.25, 0.065));
     piK2->addChannel(piPlus, kMinus);
     D->addChannel(piK2, kPlus);
     *free_amplitude(*D, to(piK2)) = polar(7.8, rad(56.));

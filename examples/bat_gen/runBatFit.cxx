@@ -52,19 +52,19 @@ int main()
     // auto m = d3pi_fit("D3PI_fit", std::make_unique<yap::ZemachFormalism>(), find_mass_axes(*t_pars));
     auto m = dkkpi_fit(model_name + "_fit", std::make_unique<yap::ZemachFormalism>(), find_mass_axes(*t_pars));
 
+    double D_mass = 1.86961;
+
     // load fit data and partition it
-    load_data(m.fitData(), *m.model(), m.axes(), m.isp()->mass()->value(), *t_mcmc, 10000, 5);
+    load_data(m.fitData(), *m.model(), m.axes(), D_mass, *t_mcmc, 10000, 5);
     // m.fitPartitions() = yap::DataPartitionBlock::create(m.fitData(), 2);
 
     // get FSP mass ranges
-    auto m2r = yap::squared(mass_range(m.axes(), m.isp(), m.model()->finalStateParticles()));
+    auto m2r = yap::squared(mass_range(D_mass, m.axes(), m.model()->finalStateParticles()));
 
     // generate integration data
     std::mt19937 g(0);
     std::generate_n(std::back_inserter(m.integralData()), 40000,
-                    std::bind(yap::phsp<std::mt19937>, std::cref(*m.model()),
-                              m.isp()->mass()->value(), m.axes(), m2r, g,
-                              std::numeric_limits<unsigned>::max()));
+                    std::bind(yap::phsp<std::mt19937>, std::cref(*m.model()), D_mass, m.axes(), m2r, g, std::numeric_limits<unsigned>::max()));
     LOG(INFO) << "Created " << m.integralData().size() << " data points (" << (m.integralData().bytes() * 1.e-6) << " MB)";
 
     // partition integration data

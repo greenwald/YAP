@@ -46,7 +46,8 @@ protected:
 
     /// Constructor
     /// see #create
-    FinalStateParticle(const QuantumNumbers& q, double m, std::string name);
+    FinalStateParticle(const QuantumNumbers& q, double m, std::string name)
+        : Particle(q, name), Model_(nullptr), Mass_(m) {}
 
 public:
 
@@ -56,6 +57,13 @@ public:
     /// \param name Name of particle
     static std::shared_ptr<FinalStateParticle> create(const QuantumNumbers& q, double m, std::string name)
     { return std::shared_ptr<FinalStateParticle>(new FinalStateParticle(q, m, name)); }
+
+    /// check mass is positive semi-definite
+    bool consistent() const;
+
+    /// Get mass [GeV]
+    double mass() const
+    { return Mass_; }
 
     /// \return owning Model
     const Model* model() const override
@@ -81,6 +89,9 @@ private:
 
     /// raw pointer to Model owning this final state particle
     Model* Model_;
+
+    /// Mass [GeV]
+    double Mass_;
 
 };
 

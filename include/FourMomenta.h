@@ -23,7 +23,9 @@
 
 #include "fwd/CachedValue.h"
 #include "fwd/DataPoint.h"
+#include "fwd/FinalStateParticle.h"
 #include "fwd/FourVector.h"
+#include "fwd/MassAxes.h"
 #include "fwd/Model.h"
 #include "fwd/ParticleCombination.h"
 #include "fwd/StatusManager.h"
@@ -137,6 +139,23 @@ private:
     std::shared_ptr<RealCachedValue> M_;
 
 };
+
+/// Calculate four-momenta for final-state particles for phase-space coordinate.
+/// \param initial_mass initial mass of decaying system
+/// \param FSPs Vector of final state particles
+/// \param axes phase-space axes
+/// \param squared_masses phase-space coordinate
+std::vector<FourVector<double> > calculate_four_momenta(double initial_mass, const FinalStateParticleVector& FPSs,
+                                                        const MassAxes& axes, const std::vector<double>& squared_masses);
+
+/// Calculate four-momenta for final-state particles for phase-space coordinate
+/// And apply rotation into model's coordinate system
+/// \param initial_mass initial mass of decaying system
+/// \param M model to get final state particles and coordinate system from
+/// \param axes phase-space axes
+/// \param squared_masses phase-space coordinate
+std::vector<FourVector<double> > calculate_four_momenta(double initial_mass, const Model& M,
+                                                        const MassAxes& axes, const std::vector<double>& squared_masses);
 
 }
 #endif

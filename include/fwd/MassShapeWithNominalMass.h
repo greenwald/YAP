@@ -22,9 +22,20 @@
 #ifndef yap_MassShapeWithNominalMassFwd_h
 #define yap_MassShapeWithNominalMassFwd_h
 
+#include "fwd/Parameter.h"
+#include "fwd/Particle.h"
+
+#include <memory>
+
 namespace yap {
 
 class MassShapeWithNominalMass;
+
+/// \return whether particle is a resonance and its mass shape inherits from MassShapeWithNominalMass
+const bool has_mass(const std::shared_ptr<Particle>& p);
+
+/// \return mass parameter
+RealParameter& mass_parameter(Particle& p);
 
 }
 

@@ -22,6 +22,8 @@
 #define yap_PHSP_h
 
 #include "fwd/FourVector.h"
+
+#include "FourMomenta.h"
 #include "MassRange.h"
 #include "Model.h"
 
@@ -50,7 +52,7 @@ const std::vector<FourVector<double> > phsp(const Model& M, double initial_mass,
     for (unsigned n = 0; n < max_attempts && P.empty(); ++n) {
         // generate random point in hypercube of mass ranges
         std::transform(R2.begin(), R2.end(), m2.begin(), [&](const MassRange & r2) {return r2[0] + (r2[1] - r2[0]) * uniform(g);});
-        P = M.calculateFourMomenta(A, m2, initial_mass);
+        P = calculate_four_momenta(initial_mass, M, A, m2);
     }
     return P;
 }

@@ -53,7 +53,7 @@ protected:
     /// \param q Quantum numbers of particle
     /// \param m Mass of particle
     /// \param name Name of particle
-    Particle(const QuantumNumbers& q, double m, std::string name);
+    Particle(const QuantumNumbers& q, std::string name);
 
 public:
 
@@ -66,10 +66,6 @@ public:
     /// const access QuantumNumbers object
     const QuantumNumbers& quantumNumbers() const
     { return QuantumNumbers_; }
-
-    /// Get mass [GeV]
-    std::shared_ptr<RealParameter> mass() const
-    { return Mass_; }
 
     /// Get name (const)
     const std::string& name() const
@@ -93,9 +89,6 @@ public:
 
 protected:
 
-    /// set mass parameter
-    void setMass(std::shared_ptr<RealParameter> m);
-
     /// add ParticleCombination to ParticleCombinations_
     virtual void addParticleCombination(const std::shared_ptr<ParticleCombination>& pc) = 0;
 
@@ -109,9 +102,6 @@ private:
 
     /// Quantum numbers of particle
     QuantumNumbers QuantumNumbers_;
-
-    /// Mass [GeV]
-    std::shared_ptr<RealParameter> Mass_;
 
     /// Name of particle
     std::string Name_;
@@ -128,7 +118,8 @@ const SpinVector spins(const ParticleVector& v);
 const bool decays_to_full_final_state(const Particle& p);
 
 /// convert to string
-std::string to_string(const Particle& p);
+inline std::string to_string(const Particle& p)
+{ return p.name() + "(" + to_string(p.quantumNumbers()) + ")"; }
 
 /// convert to string
 inline std::string to_string(const ParticleVector& p)

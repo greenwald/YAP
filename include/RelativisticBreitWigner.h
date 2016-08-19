@@ -53,9 +53,10 @@ class RelativisticBreitWigner :
 public:
 
     /// Constructor
-    /// \param width Width of resonance [GeV]
-    RelativisticBreitWigner(double w = -1) :
-        BreitWigner(w), RequiresMeasuredBreakupMomenta(true) {}
+    /// \param m Mass of resonance [GeV]
+    /// \param w Width of resonance [GeV]
+    RelativisticBreitWigner(double m = -1, double w = -1) :
+    BreitWigner(m, w), RequiresMeasuredBreakupMomenta(true) {}
 
     /// Check if a DecayChannel is valid for this MassShape; will throw if invalid.
     /// Cheks that decay is to two spin-zero particles

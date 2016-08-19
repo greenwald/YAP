@@ -93,9 +93,6 @@ protected:
     /// Set raw pointer to owning Resonance.
     virtual void setResonance(Resonance* r);
 
-    /// replace resonance's mass
-    void replaceResonanceMass(std::shared_ptr<RealParameter> m);
-
     /// Give MassShape chance to perform operations based on the
     /// addition of a DecayChannel to its Resonance
     virtual void addDecayChannel(std::shared_ptr<DecayChannel> c)

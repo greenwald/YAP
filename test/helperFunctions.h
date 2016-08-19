@@ -56,18 +56,21 @@ inline std::shared_ptr<yap::Model> create_model()
 }
 
 //-------------------------
-inline yap::DataSet generate_data(std::shared_ptr<yap::Model> M, unsigned nPoints)
+inline yap::DataSet generate_data(yap::Model& M, unsigned nPoints)
 {
-    auto isp = M->initialStateParticles().begin()->first;
-    auto A = M->massAxes();
-    auto m2r = yap::squared(yap::mass_range(A, isp, M->finalStateParticles()));
+    yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
+    
+    auto isp_mass = factory[M.initialStateParticles().begin()->first->name()].Mass;
 
-    yap::DataSet data(M->createDataSet());
+    auto A = M.massAxes();
+    auto m2r = yap::squared(yap::mass_range(isp_mass, A, M.finalStateParticles()));
+
+    yap::DataSet data(M.createDataSet());
 
     std::mt19937 g(0);
     // fill data set with nPoints points
     std::generate_n(std::back_inserter(data), nPoints,
-                    std::bind(yap::phsp<std::mt19937>, std::cref(*M), isp->mass()->value(), A, m2r, g, std::numeric_limits<unsigned>::max()));
+                    std::bind(yap::phsp<std::mt19937>, std::cref(M), isp_mass, A, m2r, g, std::numeric_limits<unsigned>::max()));
 
     return data;
 }

@@ -56,7 +56,7 @@ inline unique_ptr<Model> d3pi(unique_ptr<SpinAmplitudeCache> SAC)
 
     // rho
     /* auto rho = F.resonance(113, radialSize, make_shared<RelativisticBreitWigner>()); */
-    auto rho = Resonance::create(F.quantumNumbers(113), 775.49e-3, "rho", radialSize, make_shared<RelativisticBreitWigner>(149.4e-3));
+    auto rho = Resonance::create(F.quantumNumbers(113), "rho", radialSize, make_shared<RelativisticBreitWigner>(775.49e-3, 149.4e-3));
     rho->addChannel(piPlus, piMinus);
     D->addChannel(rho, piPlus);
 
@@ -66,15 +66,15 @@ inline unique_ptr<Model> d3pi(unique_ptr<SpinAmplitudeCache> SAC)
     D->addChannel(f_2, piPlus);
 
     // f_0(980)
-    auto f_0_980_flatte = make_shared<Flatte>();
+    auto f_0_980_flatte = make_shared<Flatte>(0.965);
     f_0_980_flatte->add(FlatteChannel(0.406, *piPlus, *piMinus));
     f_0_980_flatte->add(FlatteChannel(0.406 * 2, *F.fsp(321), *F.fsp(-321))); // K+K-
-    auto f_0_980 = Resonance::create(QuantumNumbers(0, 0), 0.965, "f_0_980", radialSize, f_0_980_flatte);
+    auto f_0_980 = Resonance::create(QuantumNumbers(0, 0), "f_0_980", radialSize, f_0_980_flatte);
     f_0_980->addChannel(piPlus, piMinus);
     D->addChannel(f_0_980, piPlus);
 
     // f_0(1370)
-    auto f_0_1370 = Resonance::create(F.quantumNumbers("f_0"), 1.350, "f_0_1370", radialSize, make_unique<RelativisticBreitWigner>(0.265));
+    auto f_0_1370 = Resonance::create(F["f_0"], "f_0_1370", radialSize, make_unique<RelativisticBreitWigner>(1.350, 0.265));
     f_0_1370->addChannel(piPlus, piMinus);
     D->addChannel(f_0_1370, piPlus);
 
@@ -115,9 +115,9 @@ inline bat_fit d3pi_fit(string name, unique_ptr<SpinAmplitudeCache> SAC, vector<
     // m.setPrior(D->freeAmplitudes(f_0_1500, piPlus)[0], 0.5, 2., -50, -30);
     // m.setPrior(D->freeAmplitudes(sigma,    piPlus)[0], 3.,  5., -10, 10);
 
-    m.addParameter("rho_mass", rho->mass(), 0.5, 1.2);
+    m.addParameter("rho_mass", static_pointer_cast<BreitWigner>(rho->massShape())->mass(), 0.5, 1.2);
     m.GetParameters().Back().SetPriorConstant();
-    m.addParameter("rho_width", static_pointer_cast<RelativisticBreitWigner>(rho->massShape())->width(), 0.1, 0.2);
+    m.addParameter("rho_width", static_pointer_cast<BreitWigner>(rho->massShape())->width(), 0.1, 0.2);
     m.GetParameters().Back().SetPriorConstant();
     // m.addParameter("rho_radialSize", rho->radialSize(), 1, 5);
     // m.GetParameters().Back().SetPriorConstant();

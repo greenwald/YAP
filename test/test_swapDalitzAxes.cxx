@@ -8,6 +8,7 @@
 #include <DecayTree.h>
 #include <Filters.h>
 #include <FinalStateParticle.h>
+#include <FourMomenta.h>
 #include <FourVector.h>
 #include <FreeAmplitude.h>
 #include <logging.h>
@@ -46,11 +47,11 @@ TEST_CASE( "swapDalitzAxes" )
         for (double m2_bc = m2_bc_range[0]; m2_bc <= m2_bc_range[1]; m2_bc += (m2_bc_range[1] - m2_bc_range[0]) / N) {
 
             // calc 3rd inv mass square
-            double m2_ac = pow(F.decayingParticle(PDGs[0], 3.)->mass()->value(), 2)
-                           + pow(F.fsp(PDGs[1])->mass()->value(), 2)
-                           + pow(F.fsp(PDGs[2])->mass()->value(), 2)
-                           + pow(F.fsp(PDGs[3])->mass()->value(), 2)
-                           - (m2_ab + m2_bc);
+            double m2_ac = pow(F[PDGs[0]].Mass, 2)
+                + pow(F[PDGs[1]].Mass, 2)
+                + pow(F[PDGs[2]].Mass, 2)
+                + pow(F[PDGs[3]].Mass, 2)
+                - (m2_ab + m2_bc);
 
             if (m2_ac < 0.) {
                 //std::cout << "m2_ac < 0.\n";
@@ -79,17 +80,17 @@ TEST_CASE( "swapDalitzAxes" )
                     // initial state particle
                     auto D = F.decayingParticle(PDGs[0], 3.);
 
-                    auto piK0 = yap::Resonance::create(yap::QuantumNumbers(0, 0), 0.75, "piK0", 3., std::make_shared<yap::BreitWigner>(0.025));
+                    auto piK0 = yap::Resonance::create(yap::QuantumNumbers(0, 0), "piK0", 3., std::make_shared<yap::BreitWigner>(0.750, 0.025));
                     piK0->addChannel(piPlus, kMinus);
                     D->addChannel(piK0, kPlus);
                     *free_amplitude(*D, yap::to(piK0)) = 0.5 * yap::Complex_1;
 
-                    auto piK1 = yap::Resonance::create(yap::QuantumNumbers(2, 0), 1.00, "piK1", 3., std::make_shared<yap::BreitWigner>(0.025));
+                    auto piK1 = yap::Resonance::create(yap::QuantumNumbers(2, 0), "piK1", 3., std::make_shared<yap::BreitWigner>(1.000, 0.025));
                     piK1->addChannel(piPlus, kMinus);
                     D->addChannel(piK1, kPlus);
                     *free_amplitude(*D, yap::to(piK1)) = yap::Complex_1;
 
-                    auto piK2 = yap::Resonance::create(yap::QuantumNumbers(4, 0), 1.25, "piK2", 3., std::make_shared<yap::BreitWigner>(0.025));
+                    auto piK2 = yap::Resonance::create(yap::QuantumNumbers(4, 0), "piK2", 3., std::make_shared<yap::BreitWigner>(1.250, 0.025));
                     piK2->addChannel(piPlus, kMinus);
                     D->addChannel(piK2, kPlus);
                     *free_amplitude(*D, yap::to(piK2)) = 30. * yap::Complex_1;
@@ -131,7 +132,7 @@ TEST_CASE( "swapDalitzAxes" )
                     }
 
                     // calculate four-momenta
-                    auto P = M->calculateFourMomenta(A, squared_masses, D->mass()->value());
+                    auto P = calculate_four_momenta(F[PDGs[0]].Mass, *M, A, squared_masses);
 
                     // if failed, outside phase space
                     if (P.empty()) {

@@ -54,17 +54,17 @@ yap::MassAxes populate_model(yap::Model& M, const yap::ParticleFactory& F, const
     auto D = F.decayingParticle(F.pdgCode("D+"), 3.);
 
     // create resonances
-    auto piK0 = yap::Resonance::create(yap::QuantumNumbers(0, 0), 0.75, "piK0", 3., std::make_shared<yap::BreitWigner>(0.025));
+    auto piK0 = yap::Resonance::create(yap::QuantumNumbers(0, 0), "piK0", 3., std::make_shared<yap::BreitWigner>(0.750, 0.025));
     piK0->addChannel(piPlus, kMinus);
     D->addChannel(piK0, kPlus);
     *free_amplitude(*D, yap::to(piK0)) = 0.5 * yap::Complex_1;
 
-    auto piK1 = yap::Resonance::create(yap::QuantumNumbers(2, 0), 1.00, "piK1", 3., std::make_shared<yap::BreitWigner>(0.025));
+    auto piK1 = yap::Resonance::create(yap::QuantumNumbers(2, 0), "piK1", 3., std::make_shared<yap::BreitWigner>(1.000, 0.025));
     piK1->addChannel(piPlus, kMinus);
     D->addChannel(piK1, kPlus);
     *free_amplitude(*D, yap::to(piK1)) = yap::Complex_1;
 
-    auto piK2 = yap::Resonance::create(yap::QuantumNumbers(4, 0), 1.25, "piK2", 3., std::make_shared<yap::BreitWigner>(0.025));
+    auto piK2 = yap::Resonance::create(yap::QuantumNumbers(4, 0), "piK2", 3., std::make_shared<yap::BreitWigner>(1.250, 0.025));
     piK2->addChannel(piPlus, kMinus);
     D->addChannel(piK2, kPlus);
     *free_amplitude(*D, yap::to(piK2)) = yap::Complex_1;
@@ -74,7 +74,7 @@ yap::MassAxes populate_model(yap::Model& M, const yap::ParticleFactory& F, const
     return M.massAxes({{i_piPlus, i_kMinus}, {i_kMinus, i_kPlus}});
 }
 
-std::complex<double> calculate_model(yap::Model& M, const yap::MassAxes& A, std::vector<double> m2, yap::DataSet& data)
+std::complex<double> calculate_model(double isp_mass, yap::Model& M, const yap::MassAxes& A, std::vector<double> m2, yap::DataSet& data)
 {
     auto ISPs = full_final_state_isp(M);
     if (ISPs.empty())
@@ -83,7 +83,7 @@ std::complex<double> calculate_model(yap::Model& M, const yap::MassAxes& A, std:
     auto isp = ISPs[0];
 
     // calculate four-momenta
-    auto P = M.calculateFourMomenta(A, m2, isp->mass()->value());
+    auto P = calculate_four_momenta(isp_mass, M, A, m2);
 
     // if failed, outside phase space
     if (P.empty())
@@ -107,6 +107,8 @@ TEST_CASE( "swapFinalStates" )
     //yap::plainLogs(el::Level::Debug);
 
     auto F = yap::read_pdl_file((std::string)::getenv("YAPDIR") + "/data/evt.pdl");
+
+    auto D_mass = F["D+"].Mass;
 
     // create models
     std::vector<std::unique_ptr<yap::Model> > Z;     // Zemach
@@ -134,10 +136,8 @@ TEST_CASE( "swapFinalStates" )
     } while (std::next_permutation(FSP.begin(), FSP.end()));
 
     // get piK and KK mass ranges
-    auto ISPs = full_final_state_isp(*Z[0]);
-    auto isp = ISPs[0];
-    auto m2_piK_range = yap::squared(yap::mass_range(mZ[0][0], isp, Z[0]->finalStateParticles()));
-    auto m2_KK_range  = yap::squared(yap::mass_range(mZ[0][1], isp, Z[0]->finalStateParticles()));
+    auto m2_piK_range = yap::squared(yap::mass_range(D_mass, mZ[0][0], Z[0]->finalStateParticles()));
+    auto m2_KK_range  = yap::squared(yap::mass_range(D_mass, mZ[0][1], Z[0]->finalStateParticles()));
 
     const unsigned N = 20;
     // loop over phase space
@@ -149,10 +149,10 @@ TEST_CASE( "swapFinalStates" )
 
             for (size_t i = 0; i < Z.size(); ++i) {
                 FDEBUG("Calculate Zemach for FinalState combination " << i);
-                amps_Z[i] = calculate_model(*Z[i], mZ[i], {m2_piK, m2_KK}, dZ[i]);
+                amps_Z[i] = calculate_model(D_mass, *Z[i], mZ[i], {m2_piK, m2_KK}, dZ[i]);
 
                 FDEBUG("Calculate Helicity for FinalState combination " << i);
-                amps_H[i] = calculate_model(*H[i], mH[i], {m2_piK, m2_KK}, dH[i]);
+                amps_H[i] = calculate_model(D_mass, *H[i], mH[i], {m2_piK, m2_KK}, dH[i]);
             }
 
 

@@ -45,8 +45,9 @@ class BreitWigner : public MassShapeWithNominalMass
 public:
 
     /// Constructor
+    /// \param mass Mass of resonance [GeV]
     /// \param width Width of resonance [GeV]
-    BreitWigner(double w = -1);
+    BreitWigner(double mass = -1, double w = -1);
 
     /// Set parameters from ParticleTableEntry
     /// \param entry ParticleTableEntry containing information to create mass shape object
@@ -72,7 +73,8 @@ protected:
 
 private:
 
-    std::shared_ptr<RealParameter> Width_; ///< [GeV]
+    /// Width [GeV]
+    std::shared_ptr<RealParameter> Width_;
 
 };
 

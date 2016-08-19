@@ -86,6 +86,8 @@ TEST_CASE( "HelicityAngles" )
 
     yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
 
+    double D_mass = factory["D+"].Mass;
+
     // initial state particle
     auto D = factory.decayingParticle(factory.pdgCode("D+"), radialSize);
 
@@ -108,7 +110,7 @@ TEST_CASE( "HelicityAngles" )
     // choose default Dalitz axes
     auto A = M.massAxes();
     // get mass^2 ranges
-    auto m2r = yap::squared(yap::mass_range(A, D, M.finalStateParticles()));
+    auto m2r = yap::squared(yap::mass_range(D_mass, A, M.finalStateParticles()));
 
     REQUIRE( M.consistent() );
 
@@ -121,7 +123,7 @@ TEST_CASE( "HelicityAngles" )
     for (unsigned int iEvt = 0; iEvt < 100; ++iEvt) {
 
         // generate random phase space point (with 100 attempts before failing)
-        auto momenta = yap::phsp(M, D->mass()->value(), A, m2r, g, 100);
+        auto momenta = yap::phsp(M, D_mass, A, m2r, g, 100);
         if (momenta.empty())
             continue;
 
@@ -134,7 +136,7 @@ TEST_CASE( "HelicityAngles" )
         std::map<const std::shared_ptr<yap::ParticleCombination>, std::array<double, 2> > phi_theta;
 
         for (auto& pc : D->particleCombinations()) {
-            REQUIRE( M.fourMomenta()->m(dp, pc) == Approx(D->mass()->value()) );
+            REQUIRE( M.fourMomenta()->m(dp, pc) == Approx(D_mass) );
 
             calculate_helicity_angles(M, phi_theta, pc, momenta); // YAP
         }

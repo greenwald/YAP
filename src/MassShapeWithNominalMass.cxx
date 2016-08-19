@@ -12,26 +12,36 @@
 namespace yap {
 
 //-------------------------
-std::shared_ptr<RealParameter> MassShapeWithNominalMass::mass()
+MassShapeWithNominalMass::MassShapeWithNominalMass(double m) :
+    MassShape(),
+    Mass_(std::make_shared<RealParameter>(m))
 {
-    if (!resonance())
-        throw exceptions::ResonanceUnset("MassShapeWithNominalMass::mass");
-    return resonance()->mass();
+    addParameter(Mass_);
 }
 
 //-------------------------
 void MassShapeWithNominalMass::setParameters(const ParticleTableEntry& entry)
 {
-    try {
-        mass()->setValue(entry.Mass);
-    } catch (const exceptions::ResonanceUnset&) { /* ignore */ }
+    if (Mass_->value() < 0)
+        *Mass_ = entry.Mass;
 }
 
 //-------------------------
-void MassShapeWithNominalMass::setResonance(Resonance* r)
+const bool has_mass(const std::shared_ptr<Particle>& p)
 {
-    MassShape::setResonance(r);
-    addParameter(mass());
+    return is_resonance(p) and
+        std::dynamic_pointer_cast<MassShapeWithNominalMass>(std::static_pointer_cast<Resonance>(p)->massShape()) != nullptr;
+}
+
+//-------------------------
+RealParameter& mass_parameter(Particle& p)
+{
+    if (!has_mass(p.shared_from_this()))
+        throw exceptions::Exception("Particle has no mass parameter", "mass_parameter");
+    auto m = std::static_pointer_cast<MassShapeWithNominalMass>(static_cast<Resonance*>(&p)->massShape())->mass();
+    if (!m)
+        throw exceptions::Exception("Particle's accessible mass parameter is nullptr", "mass_parameter");
+    return *m;
 }
 
 }

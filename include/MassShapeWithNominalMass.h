@@ -21,6 +21,9 @@
 #ifndef yap_MassShapeWithNominalMass_h
 #define yap_MassShapeWithNominalMass_h
 
+#include "fwd/MassShapeWithNominalMass.h"
+
+#include "fwd/Parameter.h"
 #include "fwd/ParticleFactory.h"
 
 #include "MassShape.h"
@@ -38,23 +41,25 @@ class MassShapeWithNominalMass : public MassShape
 public:
 
     /// Constructor
-    MassShapeWithNominalMass() : MassShape() {}
+    /// \param m Mass [GeV]
+    MassShapeWithNominalMass(double m = -1);
 
     /// Set parameters from ParticleTableEntry
     /// \param entry ParticleTableEntry containing information to create mass shape object
     virtual void setParameters(const ParticleTableEntry& entry) override;
 
     /// Get mass
-    std::shared_ptr<RealParameter> mass();
+    std::shared_ptr<RealParameter> mass()
+    { return Mass_; }
 
     /// Get mass (const)
     const std::shared_ptr<RealParameter> mass() const
-    { return const_cast<MassShapeWithNominalMass*>(this)->mass(); }
+    { return Mass_; }
 
-protected:
-
-    /// also add mass as parameter
-    virtual void setResonance(Resonance* r) override;
+private:
+    
+    /// Mass [GeV]
+    std::shared_ptr<RealParameter> Mass_;
 
 };
 

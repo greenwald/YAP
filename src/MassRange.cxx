@@ -24,42 +24,34 @@ const FinalStateParticleVector::value_type& fsp_with_index(const FinalStateParti
 }
 
 //-------------------------
-const MassRange mass_range(const std::shared_ptr<ParticleCombination>& pc, std::shared_ptr<DecayingParticle> ISP, const FinalStateParticleVector& FSPs)
+const MassRange mass_range(double isp_mass, const std::shared_ptr<ParticleCombination>& pc, const FinalStateParticleVector& FSPs)
 {
-    // get list of PCs of ISP that decay to FSPs
-    ParticleCombinationVector isp_pcs;
-    isp_pcs.reserve(ISP->particleCombinations().size());
-    std::copy_if(ISP->particleCombinations().begin(), ISP->particleCombinations().end(),
-                 std::back_inserter(isp_pcs), std::bind(valid_final_state, std::placeholders::_1, FSPs));
-    if (isp_pcs.empty())
-        throw exceptions::Exception("FSPs not a final state of ISP", "mass_range");
+    if (isp_mass < 0)
+        throw exceptions::Exception("isp_mass is negative", "mass_range");
 
-    // pc must be a subset of one of these PCs
-    auto it = std::find_if(isp_pcs.begin(), isp_pcs.end(), [&](const std::shared_ptr<ParticleCombination>& isp) {return contains(isp->indices(), pc->indices());});
-    if (it == isp_pcs.end())
-        throw exceptions::Exception("pc does not match ISP and FPSs", "mass_range");
+    if (std::any_of(pc->indices().begin(), pc->indices().end(), [&](unsigned i){return i >= FSPs.size();}))
+        throw exceptions::Exception("pc contains index beyond size of FSP", "mass_range");
 
-    std::array<double, 2> m = {0, ISP->mass()->value()};
+    MassRange m = {0, isp_mass};
 
-    for (const auto i : (*it)->indices()) {
-        // get fsp
-        auto fsp = fsp_with_index(FSPs, i);
+    for (size_t i = 0; i < FSPs.size(); ++i) {
         if (std::find(pc->indices().begin(), pc->indices().end(), i) != pc->indices().end())
             // add mass to low end
-            m[0] += fsp->mass()->value();
+            m[0] += FSPs[i]->mass();
         else
             // subtract mass from high end
-            m[1] -= fsp->mass()->value();
+            m[1] -= FSPs[i]->mass();
     }
+
     return m;
 }
 
 //-------------------------
-const std::vector<MassRange> mass_range(const MassAxes& A, std::shared_ptr<DecayingParticle> ISP, const FinalStateParticleVector& FSPs)
+const std::vector<MassRange> mass_range(double isp_mass, const MassAxes& A, const FinalStateParticleVector& FSPs)
 {
     std::vector<MassRange> R;
     R.reserve(A.size());
-    std::transform(A.begin(), A.end(), std::back_inserter(R), [&](const MassAxes::value_type & a) {return mass_range(a, ISP, FSPs);});
+    std::transform(A.begin(), A.end(), std::back_inserter(R), [&](const MassAxes::value_type & a) {return mass_range(isp_mass, a, FSPs);});
     return R;
 }
 

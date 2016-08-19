@@ -48,7 +48,7 @@ protected:
 
     /// Constructor
     /// see #create
-    Resonance(const QuantumNumbers& q, double mass, std::string name, double radialSize, std::shared_ptr<MassShape> massShape);
+    Resonance(const QuantumNumbers& q, std::string name, double radialSize, std::shared_ptr<MassShape> massShape);
 
 public:
 
@@ -57,8 +57,8 @@ public:
     /// \param mass mass of resonance
     /// \param radialSize radial size of resonance
     /// \param massShape shared_ptr to MassShape of resonance
-    static std::shared_ptr<Resonance> create(const QuantumNumbers& q, double mass, std::string name, double radialSize, std::shared_ptr<MassShape> massShape)
-    { return std::shared_ptr<Resonance>(new Resonance(q, mass, name, radialSize, massShape)); }
+    static std::shared_ptr<Resonance> create(const QuantumNumbers& q, std::string name, double radialSize, std::shared_ptr<MassShape> massShape)
+    { return std::shared_ptr<Resonance>(new Resonance(q, name, radialSize, massShape)); }
 
     /// Check if a DecayChannel is valid for Resonance; will throw if invalid.
     /// checks with MassShape_

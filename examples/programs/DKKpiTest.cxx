@@ -30,6 +30,8 @@ int main( int argc, char** argv)
 
     yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
 
+    auto D_mass = factory["D+"].Mass;
+
     // create final state particles
     auto kPlus  = factory.fsp(+321);
     auto kMinus = factory.fsp(-321);
@@ -41,8 +43,7 @@ int main( int argc, char** argv)
     auto D = factory.decayingParticle(factory.pdgCode("D+"), radialSize);
 
     // create a phi
-    auto phi = yap::Resonance::create(factory.quantumNumbers("phi"), 1019.461e-3, "phi", radialSize, std::make_shared<yap::BreitWigner>());
-    std::static_pointer_cast<yap::BreitWigner>(phi->massShape())->width()->setValue(4.266e-3);
+    auto phi = factory.resonance(factory["phi"].PDG, radialSize, std::make_shared<yap::BreitWigner>());
     phi->addChannel(kPlus, kMinus);
 
     // Add channels to D
@@ -83,7 +84,7 @@ int main( int argc, char** argv)
     M.fourMomenta()->printMasses(data[0]);
 
     LOG(INFO) << "setting squared mass ...";
-    auto P = M.calculateFourMomenta(massAxes, m2, D->mass()->value());
+    auto P = calculate_four_momenta(D_mass, M, massAxes, m2);
     if (P.empty())
         LOG(INFO) << "... outside phase space";
     else {

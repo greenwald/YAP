@@ -17,32 +17,22 @@ PoleMass::PoleMass(std::complex<double> mass) :
     MassShape(),
     Mass_(std::make_shared<ComplexParameter>(mass))
 {
+    addParameter(Mass_);
 }
 
 //-------------------------
 void PoleMass::setParameters(const ParticleTableEntry& entry)
 {
-    auto m = mass()->value();
+    // copy current value
+    auto m = Mass_->value();
+
     if (real(m) < 0)
         m.real(entry.Mass);
+    
     if (imag(m) < 0 and !entry.MassShapeParameters.empty())
         m.imag(entry.MassShapeParameters[0] / 2.);
-    Mass_->setValue(m);
-}
 
-//-------------------------
-void PoleMass::setResonance(Resonance* r)
-{
-    MassShape::setResonance(r);
-
-    // set real component of mass from resonance, if yet unset
-    if (real(Mass_->value()) < 0)
-        Mass_->setValue(std::complex<double>(resonance()->mass()->value(), imag(Mass_->value())));
-
-    // replace resonance's mass with real component of pole mass
-    replaceResonanceMass(std::make_shared<RealComponentParameter>(Mass_));
-
-    addParameter(mass());
+    *Mass_ = m;
 }
 
 //-------------------------

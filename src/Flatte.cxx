@@ -40,8 +40,6 @@ void Flatte::add(FlatteChannel fc)
     FlatteChannels_.push_back(fc);
 
     addParameter(FlatteChannels_.back().Coupling);
-    for (const auto& p : FlatteChannels_.back().Particles)
-        addParameter(p->mass());
 }
 
 //-------------------------
@@ -100,7 +98,7 @@ void Flatte::calculateT(DataPartition& D, const std::shared_ptr<ParticleCombinat
         // calculate width term := sum of coupling * complex-breakup-momentum
         auto w = Complex_0;
         for (const auto& fc : FlatteChannels_)
-            w += fc.Coupling->value() * std::sqrt(std::complex<double>(squared_breakup_momentum(m2, fc.Particles[0]->mass()->value(), fc.Particles[1]->mass()->value())));
+            w += fc.Coupling->value() * std::sqrt(std::complex<double>(squared_breakup_momentum(m2, fc.Particles[0]->mass(), fc.Particles[1]->mass())));
 
         // T = 1 / (M^2 - m^2 - width-term)
         T()->setValue(1. / (M2 - m2 - Complex_i * 2. * w / sqrt(m2)), d, si, D);

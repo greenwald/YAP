@@ -4,6 +4,7 @@
 #include <Constants.h>
 #include <FinalStateParticle.h>
 #include <DecayingParticle.h>
+#include <FourMomenta.h>
 #include <FourVector.h>
 #include <HelicityFormalism.h>
 #include <logging.h>
@@ -128,18 +129,21 @@ bool valid_5d(const double m2_12, const double m2_14, const double m2_23,
 TEST_CASE( "FourMomentaCalculation" )
 {
 
+    // disable logs in text
+    yap::disableLogs(el::Level::Global);
+
+    // load particle factory
+    yap::ParticleFactory factory = yap::read_pdl_file("../data/evt.pdl");
+    
+    // create final state particles
+    auto piPlus = factory.fsp(211);
+    auto piMinus = factory.fsp(-211);
+    auto KPlus = factory.fsp(321);
+    auto KMinus = factory.fsp(-321);
+    
+    double D_mass = factory["D+"].Mass;
+
     SECTION("3 final state particles") {
-
-        // disable debug logs in test
-        yap::disableLogs(el::Level::Debug);
-        //yap::plainLogs(el::Level::Debug);
-
-        // load particle factory
-        yap::ParticleFactory factory = yap::read_pdl_file("../data/evt.pdl");
-
-        // create final state particles
-        auto piPlus = factory.fsp(211);
-        auto KMinus = factory.fsp(-321);
 
         // create model and set initial and final state
         yap::Model M(std::make_unique<yap::ZemachFormalism>());
@@ -158,7 +162,7 @@ TEST_CASE( "FourMomentaCalculation" )
 
         // choose default Dalitz coordinates
         auto A = M.massAxes();
-        auto m2r = yap::squared(yap::mass_range(A, D, M.finalStateParticles()));
+        auto m2r = yap::squared(yap::mass_range(D_mass, A, M.finalStateParticles()));
 
         const unsigned N = 50;
 
@@ -167,11 +171,11 @@ TEST_CASE( "FourMomentaCalculation" )
         while (m2.back() <= m2r.back()[1]) {
 
             // calculate final state momenta
-            auto P = M.calculateFourMomenta(A, m2, D->mass()->value());
+            auto P = calculate_four_momenta(D_mass, M, A, m2);
 
             //-------------------------
             // check phase space
-            double m_isp = D->mass()->value();
+            double m_isp = D_mass;
             // find a, b, and c such that mass axes are (ab) (bc)
             double m_a = 0;
             double m_b = 0;
@@ -179,11 +183,11 @@ TEST_CASE( "FourMomentaCalculation" )
             for (unsigned i = 0; i < M.finalStateParticles().size(); ++i) {
                 if (std::find(A[0]->indices().begin(), A[0]->indices().end(), i) != A[0]->indices().end()) {
                     if (std::find(A[1]->indices().begin(), A[1]->indices().end(), i) == A[1]->indices().end())
-                        m_a = M.finalStateParticles()[i]->mass()->value();
+                        m_a = M.finalStateParticles()[i]->mass();
                     else
-                        m_b = M.finalStateParticles()[i]->mass()->value();
+                        m_b = M.finalStateParticles()[i]->mass();
                 } else
-                    m_c = M.finalStateParticles()[i]->mass()->value();
+                    m_c = M.finalStateParticles()[i]->mass();
             }
             // check constraints on m2[0]
             bool inPhaseSpace = m2[0] >= pow(m_a + m_b, 2) and m2[0] <= pow(m_isp - m_c, 2);
@@ -204,7 +208,7 @@ TEST_CASE( "FourMomentaCalculation" )
                 //-------------------------
                 // check fsp masses
                 for (size_t i = 0; i < P.size(); ++i)
-                    REQUIRE( abs(P[i]) == Approx(M.finalStateParticles()[i]->mass()->value()) );
+                    REQUIRE( abs(P[i]) == Approx(M.finalStateParticles()[i]->mass()) );
 
                 //-------------------------
                 // check isp mass
@@ -232,18 +236,6 @@ TEST_CASE( "FourMomentaCalculation" )
 
     SECTION("4 final state particles") {
 
-        // disable logs in text
-        yap::disableLogs(el::Level::Global);
-
-        // load particle factory
-        yap::ParticleFactory factory = yap::read_pdl_file("../data/evt.pdl");
-
-        // create final state particles
-        auto piPlus = factory.fsp(211);
-        auto piMinus = factory.fsp(-211);
-        auto KPlus = factory.fsp(321);
-        auto KMinus = factory.fsp(-321);
-
         // create model and set initial and final state
         yap::Model M(std::make_unique<yap::HelicityFormalism>());
         M.setFinalState(piPlus, piMinus, KPlus, KMinus);
@@ -264,7 +256,7 @@ TEST_CASE( "FourMomentaCalculation" )
         auto A = M.massAxes();
 
         // get mass^2 ranges
-        auto m2r = mass_range(A, D, M.finalStateParticles());
+        auto m2r = mass_range(D_mass, A, M.finalStateParticles());
         // enlarge the ranges
         std::transform(m2r.begin(), m2r.end(), m2r.begin(), [](yap::MassRange mr) {mr[0] *= 0.999; mr[1] *= 1.001; return mr;});
 
@@ -277,16 +269,16 @@ TEST_CASE( "FourMomentaCalculation" )
         while (m2.back() <= m2r.back()[1]) {
 
             // calculate final state momenta
-            auto P = M.calculateFourMomenta(A, m2, D->mass()->value());
+            auto P = calculate_four_momenta(D_mass, M, A, m2);
 
             //-------------------------
             // check phase space
             bool inPhaseSpace = valid_5d(m2[0], m2[1], m2[2], m2[3], m2[4],
-                                         D->mass()->value(),
-                                         M.finalStateParticles()[0]->mass()->value(),
-                                         M.finalStateParticles()[1]->mass()->value(),
-                                         M.finalStateParticles()[2]->mass()->value(),
-                                         M.finalStateParticles()[3]->mass()->value());
+                                         D_mass,
+                                         M.finalStateParticles()[0]->mass(),
+                                         M.finalStateParticles()[1]->mass(),
+                                         M.finalStateParticles()[2]->mass(),
+                                         M.finalStateParticles()[3]->mass());
 
             /// \todo Sometimes this requirement fails, propably for numerical reasons
             /// So we count the number of mismatches instead and require them to be small
@@ -299,13 +291,13 @@ TEST_CASE( "FourMomentaCalculation" )
                 //-------------------------
                 // check fsp masses
                 for (size_t i = 0; i < P.size(); ++i)
-                    REQUIRE( abs(P[i]) == Approx(M.finalStateParticles()[i]->mass()->value()) );
+                    REQUIRE( abs(P[i]) == Approx(M.finalStateParticles()[i]->mass()) );
 
                 //-------------------------
                 // check isp mass
                 // isp
                 auto p_isp = std::accumulate(P.begin(), P.end(), yap::FourVector_0);
-                REQUIRE( abs(p_isp) == Approx(D->mass()->value()) );
+                REQUIRE( abs(p_isp) == Approx(D_mass) );
 
                 // check Dalitz axes
                 for (size_t i = 0; i < A.size(); ++i) {

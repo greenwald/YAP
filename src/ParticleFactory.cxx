@@ -39,23 +39,23 @@ bool ParticleTableEntry::consistent() const
 //-------------------------
 std::shared_ptr<FinalStateParticle> ParticleFactory::fsp(int PDG) const
 {
-    const auto& p = particleTableEntry(PDG);
+    const auto& p = (*this)[PDG];
     return FinalStateParticle::create(p, p.Mass, p.Name);
 }
 
 //-------------------------
 std::shared_ptr<DecayingParticle> ParticleFactory::decayingParticle(int PDG, double radialSize) const
 {
-    const auto& p = particleTableEntry(PDG);
-    return DecayingParticle::create(p, p.Mass, p.Name, radialSize);
+    const auto& p = (*this)[PDG];
+    return DecayingParticle::create(p, p.Name, radialSize);
 }
 
 //-------------------------
 std::shared_ptr<Resonance> ParticleFactory::resonance(int PDG, double radialSize, std::shared_ptr<MassShape> massShape) const
 {
-    const auto& p = particleTableEntry(PDG);
+    const auto& p = (*this)[PDG];
     massShape->setParameters(p);
-    return Resonance::create(p, p.Mass, p.Name, radialSize, std::move(massShape));
+    return Resonance::create(p, p.Name, radialSize, std::move(massShape));
 }
 
 //-------------------------
@@ -68,11 +68,11 @@ ParticleFactory& ParticleFactory::operator+=(const ParticleFactory& rhs)
 }
 
 //-------------------------
-const ParticleTableEntry& ParticleFactory::particleTableEntry(int PDG) const
+const ParticleTableEntry& ParticleFactory::operator[](int PDG) const
 {
     if (ParticleTable_.count(PDG) == 0)
-        throw exceptions::Exception("ParticleFactory::particleTableEntry : No particle table entry for PDG " + std::to_string(PDG),
-                                    "ParticleFactory::particleTableEntry");
+        throw exceptions::Exception("No particle table entry for PDG " + std::to_string(PDG),
+                                    "ParticleFactory::operator[]");
     return ParticleTable_.at(PDG);
 }
 

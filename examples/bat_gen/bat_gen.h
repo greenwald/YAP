@@ -16,6 +16,7 @@ class bat_gen : public bat_yap_base
 public:
 
     bat_gen(std::string name, std::unique_ptr<yap::Model> M,
+            double initial_mass,
             std::vector<std::vector<unsigned> > pcs = {});
 
     void MCMCUserInitialize() override;
@@ -25,6 +26,9 @@ public:
     double LogAPrioriProbability(const std::vector<double>& parameters) override;
 
 private:
+
+    /// mass of isp
+    double InitialMass_;
 
     std::vector<yap::DataSet> Data_;
 

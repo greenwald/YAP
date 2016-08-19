@@ -46,6 +46,8 @@ TEST_CASE( "HelicityAngles_boostRotate" )
 
     yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
 
+    double D_mass = factory["D+"].Mass;
+
     // initial state particle
     auto D = factory.decayingParticle(factory.pdgCode("D+"), radialSize);
 
@@ -68,7 +70,7 @@ TEST_CASE( "HelicityAngles_boostRotate" )
     // choose default Dalitz coordinates
     auto A = M.massAxes();
     // get mass^2 ranges
-    auto m2r = yap::squared(yap::mass_range(A, D, M.finalStateParticles()));
+    auto m2r = yap::squared(yap::mass_range(D_mass, A, M.finalStateParticles()));
 
     // create DataSet
     auto data = M.createDataSet();
@@ -84,7 +86,7 @@ TEST_CASE( "HelicityAngles_boostRotate" )
         std::map<std::shared_ptr<yap::ParticleCombination>, std::vector<double>> resultingThetas;
 
         // generate random phase space point (with 100 attempts before failing)
-        auto momenta = yap::phsp(M, D->mass()->value(), A, m2r, g, 100);
+        auto momenta = yap::phsp(M, D_mass, A, m2r, g, 100);
         if (momenta.empty())
             continue;
 

@@ -30,13 +30,13 @@ int main()
     yap::plainLogs(el::Level::Info);
 
     std::vector<bat_gen*> test_models = {
-        // new bat_gen("D3PI_PHSP", d3pi_phsp(std::make_unique<yap::ZemachFormalism>()))
-        // new bat_gen("D3PI", d3pi(std::make_unique<yap::ZemachFormalism>()))
-        new bat_gen("DKSPIPI_Zemach", D_K0pi0pi0(std::make_unique<yap::ZemachFormalism>()))
-        // new bat_gen("DKSPIPI_Helicity", D_K0pi0pi0(std::make_unique<yap::HelicityFormalism>()))
-        // new bat_gen("DKKPI", dkkpi(std::make_unique<yap::ZemachFormalism>()))
-        // new bat_gen("DKKPI", dkkpi(std::make_unique<yap::HelicityFormalism>()))
-        // new bat_gen("D4PI", d4pi())
+        // new bat_gen("D3PI_PHSP", d3pi_phsp(std::make_unique<yap::ZemachFormalism>()), 1.86961)
+        // new bat_gen("D3PI", d3pi(std::make_unique<yap::ZemachFormalism>()), 1.86961)
+        // new bat_gen("DKSPIPI_Zemach", D_K0pi0pi0(std::make_unique<yap::ZemachFormalism>()), 1.86961)
+        // new bat_gen("DKSPIPI_Helicity", D_K0pi0pi0(std::make_unique<yap::HelicityFormalism>()), 1.86961)
+        new bat_gen("DKKPI", dkkpi(std::make_unique<yap::ZemachFormalism>()), 1.86961)
+        // new bat_gen("DKKPI", dkkpi(std::make_unique<yap::HelicityFormalism>()), 1.86961)
+        // new bat_gen("D4PI", d4pi(), 1.86961)
     };
 
     for (bat_gen* m : test_models) {
