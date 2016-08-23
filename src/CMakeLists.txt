@@ -41,10 +41,12 @@ set(YAP_SOURCES
 	RecalculableDataAccessor.cxx
 	RelativisticBreitWigner.cxx
 	Resonance.cxx
+  Spin.cxx
 	SpinAmplitude.cxx
   SpinAmplitudeCache.cxx
   StaticDataAccessor.cxx
 	StatusManager.cxx
+  UnitSpinAmplitude.cxx
 	WignerD.cxx
 	ZemachFormalism.cxx
 )

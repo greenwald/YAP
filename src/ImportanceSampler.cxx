@@ -8,8 +8,6 @@
 #include "Model.h"
 #include "ModelIntegral.h"
 
-#include "logging.h"
-
 #include <future>
 #include <vector>
 

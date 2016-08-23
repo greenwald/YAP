@@ -32,6 +32,131 @@
 
 namespace yap {
 
+namespace spin_literals {
+    constexpr Spin operator "" _spin(unsigned long long j);
+    constexpr Spin operator "" _halfspin(unsigned long long two_j);
+}
+
+/// \class SpinProjection
+/// \brief Stores a spinProjection
+class SpinProjection
+{
+public:
+    constexpr SpinProjection(const Spin& S);
+
+protected:
+    
+    /// double constructor
+    constexpr explicit SpinProjection(double j) : Value_(j) {}
+
+public:
+
+    /// cast to double
+    constexpr explicit operator double() const
+    { return Value_; }
+
+    friend constexpr SpinProjection operator-(const SpinProjection& S)
+    { return SpinProjection(-static_cast<double>(S)); }
+
+    friend constexpr SpinProjection operator*(int lhs, const SpinProjection& rhs)
+    { return SpinProjection(lhs * static_cast<double>(rhs)); }
+
+    SpinProjection& operator+=(const SpinProjection& rhs)
+    { Value_ += rhs.Value_; return *this; }
+
+    friend SpinProjection operator+(SpinProjection lhs, const SpinProjection& rhs)
+    { return lhs += rhs; }
+
+    /// pre-increment operator
+    virtual SpinProjection& operator++()
+    { using namespace spin_literals; return *static_cast<SpinProjection*>(&(*this += 1_spin)); }
+
+    /// post-increment operator
+    SpinProjection operator++(int)
+    { SpinProjection temp(*this); operator++(); return temp; }
+
+    SpinProjection& operator-=(const SpinProjection& rhs)
+    { Value_ -= rhs.Value_; return *this; }
+
+    friend SpinProjection operator-(SpinProjection lhs, const SpinProjection& rhs)
+    { return lhs -= rhs; }
+
+    /// pre-increment operator
+    virtual SpinProjection& operator--()
+    { using namespace spin_literals; return *static_cast<SpinProjection*>(&(*this -= 1_spin)); }
+
+    /// post-increment operator
+    SpinProjection operator--(int)
+    { SpinProjection temp(*this); operator--(); return temp; }
+
+    /// equality
+    friend constexpr bool operator==(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ == B.Value_; }
+
+    /// inequality
+    friend constexpr bool operator!=(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ != B.Value_; }
+    
+    /// less than
+    friend constexpr bool operator<(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ < B.Value_; }
+
+    /// less than or equal
+    friend constexpr bool operator<=(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ <= B.Value_; }
+
+    /// greater than
+    friend constexpr bool operator>(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ > B.Value_; }
+
+    /// greater than or equal
+    friend constexpr bool operator>=(const SpinProjection& A, const SpinProjection& B)
+    { return A.Value_ >= B.Value_; }
+
+private:
+    
+    /// SpinProjection value
+    double Value_;
+
+};
+
+constexpr bool integer(const SpinProjection& S)
+{ return static_cast<double>(S) == floor(static_cast<double>(S)); }
+
+constexpr bool half_integer(const SpinProjection& S)
+{ return !integer(S); }
+
+inline std::string to_string(const SpinProjection& S)
+{
+    return integer(S) ?
+        std::to_string(static_cast<int>(static_cast<double>(S)))
+        :
+        std::to_string(static_cast<int>(2 * static_cast<double>(S))) + "/2";
+}
+
+class Spin : public SpinProjection
+{
+private:
+
+    /// double constructor
+    constexpr explicit Spin(unsigned int int j) : SpinProjection(0.5 * j) {}
+
+public:
+    using Spin::operator++;
+
+    /// pre-increment operator
+    virtual Spin& operator++() override
+    { using namespace spin_literals; return *static_cast<Spin*>(&(*this += 1_halfspin)); }
+
+    friend constexpr SpinProjection spin_literals::operator "" _spin(unsigned long long j)
+    { return SpinProjection(2 * j); }
+
+    friend constexpr SpinProjection spin_literals::operator "" _halfspin(unsigned long long two_j)
+    { return SpinProjection(two_j); }
+
+};
+
+
 /// convert 2*J to string (e.g. 1/2, 1, 3/2, etc.)
 inline std::string spin_to_string(int twoJ)
 { return is_even(twoJ) ? std::to_string(twoJ / 2) : std::to_string(twoJ) + "/2"; }

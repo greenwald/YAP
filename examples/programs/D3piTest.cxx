@@ -28,6 +28,8 @@
 #include "Resonance.h"
 #include "ZemachFormalism.h"
 
+#include "Spin.h"
+
 #include <memory>
 #include <random>
 #include <vector>
@@ -36,6 +38,21 @@ int main( int argc, char** argv)
 {
 
     yap::plainLogs(el::Level::Debug);
+
+    using namespace yap::spin_literals;
+
+    for (unsigned two_j = 0; two_j < 10; ++two_j) {
+        yap::Spin J = two_j * 1_halfspin;
+        LOG(INFO) << two_j << " -> " << yap::to_string(J);
+    }
+
+    for (yap::Spin j = 0_spin; j < 5_spin; ++j)
+        LOG(INFO) << yap::to_string(j);
+
+    for (yap::SpinProjection m = -3_spin; m < 3_spin; ++m)
+        LOG(INFO) << yap::to_string(m);
+
+    return 0;
 
     // use common radial size for all resonances
     double radialSize = 3.; // [GeV^-1]

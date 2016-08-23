@@ -21,15 +21,22 @@
 #ifndef yap_SpinFwd_h
 #define yap_SpinFwd_h
 
+#include <string>
 #include <vector>
 
 namespace yap {
+
+class SpinBase;
+class Spin;
+class SpinProjection;
 
 /// \typedef SpinVector
 using SpinVector = std::vector<unsigned>;
 
 /// \typedef SpinProjectionVector
 using SpinProjectionVector = std::vector<int>;
+
+std::string spin_to_string(int twoJ);
 
 }
 

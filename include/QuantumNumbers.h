@@ -21,7 +21,7 @@
 #ifndef yap_QuantumNumbers_h
 #define yap_QuantumNumbers_h
 
-#include "Spin.h"
+#include "fwd/Spin.h"
 
 #include <ostream>
 #include <string>
