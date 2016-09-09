@@ -272,13 +272,7 @@ public:
 
     /// constructor (variadic)
     template <typename ... Others>
-    to(std::shared_ptr<Particle> A, Others ... others)
-        : filter_decay_channel(), filter_decaying_particle()
-    {
-        Daughters_ = {A, others...};
-        if (std::any_of(Daughters_.begin(), Daughters_.end(), std::logical_not<ParticleVector::value_type>()))
-            throw exceptions::Exception("nullptr daughter provided", "to::to");
-    }
+        to(std::shared_ptr<Particle> A, Others ... others) : to(ParticleVector{A, others...}) {}
 
     using filter_decay_channel::operator();
     using filter_decaying_particle::operator();
@@ -314,6 +308,38 @@ public:
 
     /// DecayChannel functor
     virtual const bool operator()(const DecayChannel& dc) const override;
+};
+
+/// Functor object for filtering by final state
+class final_state : public filter_decay_channel, public filter_decaying_particle
+{
+    /// constructor
+    /// \param daughters Daughter particles to check for
+    final_state(const FinalStateParticleVector& fspv)
+        : filter_decay_channel(), filter_decaying_particle(), FSP_(fspv)
+    {
+        if (std::any_of(FSP_.begin(), FSP_.end(), std::logical_not<FinalStateParticleVector::value_type>()))
+            throw exceptions::Exception("nullptr daughter provided", "final_state::final_state");
+    }
+
+    /// constructor (variadic)
+    template <typename ... Others>
+    to(std::shared_ptr<FinalStateParticle> A, Others ... others) : final_state(FinalStateParticleVector{A, others...}) {}
+
+    using filter_decay_channel::operator();
+    using filter_decaying_particle::operator();
+
+    /// DecayChannel functor
+    virtual const bool operator()(const DecayChannel& dc) const override;
+
+    /// DecayingParticle functor
+    virtual const bool operator()(const DecayingParticle& dp) const override;
+
+protected:
+
+    /// Particle content to check equality to
+    FinalStateParticleVector FSP_;
+
 };
 
 /// \class l_equals

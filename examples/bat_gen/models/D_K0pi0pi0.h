@@ -137,6 +137,9 @@ inline std::unique_ptr<yap::Model> D_K0pi0pi0(std::unique_ptr<yap::Model> M)
             throw std::runtime_error("CLEO Model must be 1, 2, or 3");
     }
 
+    for (auto& fa : free_amplitudes(*M, from(D), std::not1(std::function<bool(const yap::FreeAmplitude&)>(to(f_0_980)))))
+        *fa = 0;
+
     return M;
 }
 
