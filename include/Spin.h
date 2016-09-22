@@ -40,16 +40,16 @@ inline std::string spin_to_string(int twoJ)
 inline std::string to_string(const SpinVector& two_j)
 {
     return std::accumulate(two_j.begin(), two_j.end(), std::string(""),
-                           [](const std::string & s, const SpinVector::value_type & j)
-    {return s + " + " + spin_to_string(j);}).erase(0, 3);
+                           [](const std::string& s, const SpinVector::value_type& j)
+                           {return s + " + " + spin_to_string(j);}).erase(0, 3);
 }
 
 /// convert SpinVector to string
 inline std::string to_string(const SpinProjectionVector& two_m)
 {
     return std::accumulate(two_m.begin(), two_m.end(), std::string(""),
-                           [](const std::string & s, const SpinProjectionVector::value_type & m)
-    {return s + " + " + spin_to_string(m);}).erase(0, 3);
+                           [](const std::string& s, const SpinProjectionVector::value_type& m)
+                           {return s + " + " + spin_to_string(m);}).erase(0, 3);
 }
 
 /// \return whether three spins fulfill the triangle relationship
@@ -69,42 +69,21 @@ constexpr bool conserves(unsigned two_J, unsigned two_j1, unsigned two_j2, int l
 {
     // check that the spins are consistent, and that the triangle requirements for (Jlj) and (j1j2j) can be met simultaneously
     return is_even(two_J + two_j1 + two_j2)
-           and (std::min<int>(two_j1 + two_j2, two_J + 2 * l) >= std::max(std::abs((int)two_j1 - (int)two_j2), std::abs((int)two_J - 2 * l)));
+        and (std::min<int>(two_j1 + two_j2, two_J + 2 * l) >= std::max(std::abs((int)two_j1 - (int)two_j2), std::abs((int)two_J - 2 * l)));
 }
 
 /// \return vector of all spin projections, from -two_j to two_j
 /// \param two_j spin to make projections of
-inline const SpinProjectionVector projections(unsigned two_j)
-{
-    SpinProjectionVector spv;
-    spv.reserve(two_j + 1);
-    for (int two_m = -two_j; two_m <= (int)two_j; two_m += 2)
-        spv.push_back(two_m);
-    return spv;
-}
+const SpinProjectionVector projections(unsigned two_j);
 
 /// \return vector of all possible spin projection states of spins in two_J
 /// \param two_J SpinVector of spins to make projections of
-inline const std::vector<SpinProjectionVector> projections(const SpinVector& two_J)
-{
-    // initialize vector of spin projections to -two_j
-    std::vector<int> two_M;
-    two_M.reserve(two_J.size());
-    std::transform(two_J.begin(), two_J.end(), std::back_inserter(two_M),
-    [](const SpinVector::value_type & two_j) {return -two_j;});
+const std::vector<SpinProjectionVector> projections(const SpinVector& two_J);
 
-    std::vector<SpinProjectionVector> SPV;
-    // fill SPV with "odometer"-style looping
-    while (two_M.back() <= (int)two_J.back()) {
-        SPV.push_back(two_M);
-        two_M[0] += 2;
-        for (size_t i = 0; (i < two_M.size() - 1) and (two_M[i] > (int)two_J[i]); ++i) {
-            two_M[i] = -two_J[i];
-            two_M[i + 1] += 2;
-        }
-    }
-    return SPV;
-}
+/// \return vector of possible spins formed from the coupling of provided spins [|A-B| -> (A+B)]
+/// \param two_A 2 * first spin
+/// \param two_B 2 * second spin
+const SpinVector triangle(unsigned two_A, unsigned two_B);
 
 }
 

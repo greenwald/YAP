@@ -42,6 +42,7 @@ set(YAP_SOURCES
 	RecalculableDataAccessor.cxx
 	RelativisticBreitWigner.cxx
 	Resonance.cxx
+  Spin.cxx
 	SpinAmplitude.cxx
 	SpinAmplitudeCache.cxx
 	StaticDataAccessor.cxx
