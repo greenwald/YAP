@@ -1,0 +1,271 @@
+\documentclass[a4paper]{article}
+
+\usepackage[parfill]{parskip}
+\usepackage{braket}
+\usepackage{xparse}
+\usepackage{ifthen}
+
+\newcommand{\raisedminus}[3]{\raisebox{#1}{$#2{-}$}\hspace{#3}}
+\newcommand{\unaryminus}{%
+  \mathchoice{%
+    \raisedminus{0.25em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedminus{0.25em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedminus{0.1em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedminus{0.1em}{\scriptstyle}{-0.15em}%
+  }%
+}
+\newcommand{\raisedplus}[3]{\raisebox{#1}{$#2{+}$}\hspace{#3}}
+\newcommand{\unaryplus}{%
+  \mathchoice{%
+    \raisedplus{0.25em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedplus{0.25em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedplus{0.1em}{\scriptstyle}{-0.15em}%
+  }{%
+    \raisedplus{0.1em}{\scriptstyle}{-0.15em}%
+  }%
+}
+
+\newcommand{\decay}[2]{\ensuremath{#1\to#2}}
+
+\newcommand{\cg}[6]{\ensuremath{(#1,\,#2;\;#3,\,#4\;|\;#5\ifthenelse{\equal{#6}{}}{}{,\,#6})}}
+
+\begin{document}
+
+Two-body decay: \decay{P_0}{P_1P_2}. This
+introduces the subscript notation for labeling the particles: 0
+for the parent, 1 and 2 for the daughters.
+
+Each particle has spin $j_i$, spin projection $m_i$, helicity $\lambda_i$
+mass $\mu_i$, four-momentum $p_i$, Lorentz factor $\gamma_i$, and speed $\beta_i$.
+
+Since the $j_i$ are not variable in the following equations, we often
+exclude them from sub- and superscripts for brevity. The decay
+amplitude is:
+\begin{eqnarray*}
+  \mathcal{M}^{m_0}_{\lambda_1\lambda_2}(\phi,\theta) & \propto &
+  \braket{\phi\theta;\lambda_1\lambda_2|j_0m_0;j_1\lambda_1;j_2\lambda_2}\braket{j_0m_0;j_1\lambda_1;j_2\lambda_2|\mathcal{M}|j_0m_0}\\
+  & \propto & \underbrace{D^{j_0*}_{m_0\Delta \lambda}(\phi,\theta,0)}_{\textrm{Wigner function}}
+  F^{j_0m_0}_{\lambda_1\lambda_2},
+\end{eqnarray*}
+with $\Delta\lambda \equiv \lambda_1 - \lambda_2$. $F$ is the helicity-coupling amplitude,
+\[
+F^{j_0m_0}_{\lambda_1\lambda_2} \propto \braket{j_0m_0;j_1\lambda_1;j_2\lambda_2|\mathcal{M}|j_0m_0}
+\]
+
+Assuming parity conservation:
+\[
+F^{j_0m_0}_{\lambda_1\lambda_2} = \eta_0\eta_1\eta_2(-)^{j_0-j_1-j_2} \cdot F^{j_0m_0}_{\unaryminus\lambda_1\unaryminus\lambda_2}
+\]
+
+In the non-relativistic limit:
+\[
+F^{j_0m_0}_{\lambda_1\lambda_2} = \sum_{\ell S} \left(\frac{2\ell+1}{2j_0+1}\right)^{\!\!\frac{1}{2}}
+(\ell0;S\Delta \lambda | j_0 m_0) (j_1\lambda_1;j_2\unaryminus\lambda_2|S\Delta\lambda)
+G^{j_0}_{\ell S},
+\]
+where $G$ is the $\ell S$-coupling amplitude---$\ell$, the total orbital
+angular momentum; $S$, the total spin angular momentum.
+
+
+\section{Wave functions}
+
+Let us start with the wave functions for spin-one particles: $j_i \equiv 1, \forall i$.
+In the parent ($P_0$) rest frame, the momenta are
+\begin{eqnarray*}
+  p_0 & = & \gamma_0\mu_0(1, \beta_0\hat{z}) = (\mu_0,\vec{0}),\\
+  p_1 & = & \gamma_1\mu_1(1, \beta_1\hat{z}),\\
+  p_2 & = & \gamma_2\mu_2(1, \unaryminus\beta_2\hat{z}),\\
+\end{eqnarray*}
+with $\hat{z}$ a unit vector defining an arbitrary axis; naturally
+$\gamma_0 \equiv 1$ (and $\beta_0 \equiv 0$). And the wave functions, $\phi_i(\lambda_i)$ are
+\begin{eqnarray*}
+  \phi_i(\pm1) & = & \mp\frac{1}{\sqrt{2}}(0, \hat{x} \pm i\hat{y}),\\
+  \phi_0(0)    & = & \gamma_0(\beta_0,\hat{z}) = (0, \hat{z}),\\
+  \phi_1(0)    & = & \gamma_1(\beta_1,\hat{z}),\\
+  \phi_2(0)    & = & \gamma_2(\unaryminus\beta_2,\hat{z}),
+\end{eqnarray*}
+with $\hat{x}$ and $\hat{y}$ the unit vectors defining the
+right-handed coordinate system with $\hat{z}$
+
+The general wave function for a particle of spin $j$---a rank $j$
+tensor---can be written in terms of the wave functions for a spin-one
+particle:
+\begin{equation}\label{eqn:generic_wave_fn1}
+\Phi^{\alpha_1\alpha_2\dots\alpha_j}(\Lambda) =
+\sum_{\vec\lambda} C(\vec\lambda|j\Lambda)\cdot
+\phi^{\alpha_1}(\lambda_1)\phi^{\alpha_2}(\lambda_2)\cdots\phi^{\alpha_j}(\lambda_j),
+\end{equation}
+where
+\begin{equation}\label{eqn:coupling}
+C(\vec\lambda|j\Lambda) \equiv \prod_{k = 1}^{j}
+\cg{k{-}1}{\lambda_{0\dots k{-}1}}{1}{\lambda_k}{k}{}
+%(1\lambda_1;1\lambda_2|2\lambda_{12})
+%(2\lambda_{12};1\lambda_3|3\lambda_{123})
+%\cdots
+%(j{-}1 \lambda_{1\dots j{-}1}; 1\lambda_j | j\lambda_\phi);
+\end{equation}
+and
+\[
+\lambda_{0\dots n} \equiv \sum_{i=1}^{n} \lambda_i \textrm{ if } n \ge 1,\quad 0 \textrm{ if } n = 0.
+\]
+The sum in equation~(\ref{eqn:generic_wave_fn1}) is over all possible $\vec\lambda$.
+
+By the requirements of the Clebsch-Gordan coefficients:
+\[
+\Lambda = \lambda_{1\dots j} = \sum_{i=1}^{j} \lambda_i.
+\]
+
+Let $N_+$, $N_0$, and $N_-$ stand for the numbers of spin-one wave
+functions with positive helicity, null helicit, and negative helicity.
+Naturally
+\[
+j = N_+ + N_0 + N_-,
+\quad \textrm{and} \quad
+\Lambda = N_+ - N_-,
+\quad \textrm{and so} \quad
+2N_\pm +N_0 = j \pm \Lambda
+\]
+
+The ordering of the coupling in equation~(\ref{eqn:coupling}) is
+arbitrary, so we can order to place all negative helicities
+immediately after a positive one, then all remaining positive ones,
+and then all null ones.
+
+Thus we have
+\begin{eqnarray*}
+  C(\vec\lambda|j\Lambda)
+  & = &      \prod_{a=0}^{N_+-1} \cg{a}{a}{1}{1}{a+1}{a+1}\\
+  & \times & \prod_{b=0}^{N_0-1} \cg{N_++b}{N_+}{1}{0}{N_++b+1}{N_+}\\
+  & \times & \prod_{c=0}^{N_--1} \cg{N_0+N_++c}{N_+-c}{1}{-1}{N_0+N_++c+1}{N_+-c-1}
+  %   & = &      \prod_{a=0}^{N_-1}\cg{2a}{0}{1}{1}{2a+1}{1}\cg{2a+1}{1}{1}{-1}{2a+2}{0}\\
+  %   & \times & \prod_{b=0}^{\lambda_\phi-1}\cg{2N_-{+}b}{b}{1}{1}{2N_-{+}b{+}1}{b+1}\\
+  %   & \times & \prod_{c=0}^{N_0-1}\cg{j-N_0{+}c}{\lambda_\phi}{1}{0}{j{-}N_0{+}c{+}1}{\lambda_\phi}.
+  % 0+-
+  %   & = &      \prod_{a=0}^{N_0-1}\cg{a}{0}{1}{0}{a+1}{0}\\
+  %   & \times & \prod_{b=0}^{N_+-1}\cg{N_0{+}b}{b}{1}{1}{N_0{+}b{+}1}{b{+}1}\\
+  %   & \times & \prod_{c=0}^{N_--1}\cg{N_0{+}N_+{+}c}{N_+-c}{1}{-1}{N_0{+}N_+{+}c{+}1}{N_+-c-1}.
+  % +-0
+  %   & = &      \prod_{a=0}^{N_+-1}\cg{a}{a}{1}{1}{a+1}{a+1}\\
+  %   & \times & \prod_{b=0}^{N_--1}\cg{N_+{+}b}{N_+-b}{1}{-1}{N_+{+}b{+}1}{N_+-b}\\
+  %   & \times & \prod_{c=0}^{N_0-1}\cg{j{-}N_0{+}c}{\lambda_\phi}{1}{0}{j{-}N_0{+}c{+}1}{\lambda_\phi}.
+\end{eqnarray*}
+We can use the relations,
+\begin{eqnarray*}
+  \cg{j}{m}{1}{\pm1}{j+1}{m\pm1} & = & \left[\frac{(j\pm m+1)(j\pm m+2)}{(2j+1)(2j+2)}\right]^{\!\!\frac{1}{2}}\\
+  \cg{j}{m}{1}{0}{j+1}{m}   & = & \left[\frac{(j-m+1)(j+m+1)}{(2j+1)(j+1)}\right]^{\!\!\frac{1}{2}}\\
+\end{eqnarray*}
+And\dots
+\begin{eqnarray*}
+  C(\vec\lambda|j\Lambda)^2
+  & = &      \prod_{b=0}^{N_0-1} \frac{(b+1)(2N_++b+1)}{(2N_++2b+1)(N_++b+1)}\\
+  & \times & \prod_{c=0}^{N_--1} \frac{(N_0+2c+1)(N_0+2c+2)}{(2N_0+2N_++2c+1)(2N_0+2N_++2c+2)}\\
+  & = & 2^{N_0} \frac{(2N_-+N_0)!(2N_++N_0)!}{(2j)!}\\
+  & = & 2^{N_0} \frac{(j-\Lambda)!(j+\Lambda)!}{(2j)!}
+\end{eqnarray*}
+
+So the generic wave function is
+\[
+\Phi^{\alpha_1\dots\alpha_j}(\Lambda) =
+\left[\frac{(j-\Lambda)(j+\Lambda)}{(2j)!}\right]^{\!\!\frac{1}{2}}
+\sum_{\vec\lambda}\left(2^{\frac{N_0(\vec\lambda)}{2}}\prod_{i=1}^{j}\phi^{\alpha_i}(\lambda_i)\right)
+\]
+
+\section{$\ell S$-coupling amplitude}
+
+For the given decay from a particle of spin $j_0$ to particles of
+spins $j_1$ and $j_2$, we have
+\[
+F_{\lambda_1\lambda_2} =
+\sum_{\ell S}
+\cg{j_1}{\lambda_1}{j_2}{-\lambda_2}{S}{\lambda_1{-}\lambda_2}
+\cdot g_{\ell S} \cdot A_{\ell S}(j_1,j_2,\lambda_1{-}\lambda_2) \cdot r^\ell,
+\]
+where $g_{\ell S}$ is a parameter to be measured; $A_{\ell S}$, the covariant
+decay amplitude; and $r$ is the unit-free breakup momentum (normalized
+by a radial scale factor).
+\[
+A_{\ell S}(j_1,j_2,\lambda_1{-}\lambda_2) =
+\left[
+  \psi^{S}({\lambda_1{-}\lambda_2), X^\ell(0), \Phi_0^*(\lambda_1{-}\lambda_2)
+\right],
+\]
+where $[\dots]$ denotes a contraction of the contained elements,
+additionally with $p_0$ if $j_0+j_1+j_2+\ell$ is even.
+
+$\psi^S$ is the wave function for the daughter states in a state of
+definite total intrinsic spin $S$:
+\[
+\psi^{S}_{\alpha_1\dots\alpha_{j_1};\beta_1\dots\beta_{j_2}} =
+\sum_{\lambda_1\lambda_2}
+\cg{j_1}{\lambda_1}{j_2}{-\lambda_2}{S}{\lambda_1{-}\lambda_2}
+\cdot
+\Phi^{(1)}_{\alpha_1\dots\alpha_{j_1}}(\lambda_1)
+\cdot
+\Phi^{(2)}_{\beta_1\dots\beta_{j_2}}(\lambda_2)
+\]
+
+And $X^\ell$ is the wave function for the state of total orbital
+angular momentum $\ell$:
+\[
+X^\ell_{a_1\dots a_\ell}(0) =
+\frac{\ell!}{\sqrt{(2\ell)!}}
+\sum_{\vec\lambda} 2^{\frac{N_0(\vec\lambda)}{2}}
+\prod_{i=1}^{\ell}\chi_{a_i}(\lambda_i),
+\]
+with
+\[
+\chi(0) = \hat{z} \quad \textrm{and} \quad \chi(\pm1) = \mp\frac{1}{\sqrt{2}}(\hat{x}\pm i\hat{y})
+\]
+and all time components zero (hence the latin script for the tensor indices).
+
+\section{Chung 2008}
+
+The result from Chung 2008 is:
+\[
+A_{\ell S}(\lambda_1\lambda_2) =
+N_{j_0\ell}\  C_\ell\ 
+\cg{\ell}{0}{S}{\lambda_1{-}\lambda_2}{j_0}{}\ 
+\cg{j_1}{\lambda_1}{j_2}{-\lambda_2}{S}{}
+\ 
+\mu_0^n\ r^\ell\ f^{j_1}_{\lambda_1}(\gamma_1)\ f^{j_2}_{\lambda_2}(\gamma_2),
+\]
+with
+\[
+N_{j_0\ell} \equiv \left(\frac{2\ell+1}{2j_0+1}\right)^{\!\!\frac{1}{2}},
+\quad
+C_\ell = \left(\ell! \left(\frac{2^\ell}{(2\ell)!}\right)^{\!\!\frac{1}{2}}\right),
+\quad
+n = (j_0 + j_1 + j_2 + \ell) \bmod 2,
+\]
+and
+\[
+f^j_\lambda(\gamma) =
+\frac{(j+\lambda)!(j-\lambda)!}{(2j)!}
+\sum_{N_0 = \nu}^{j-\lambda} \frac{j!\ (2\gamma)^{N_0}}{N_0!(\frac{j-N_0+\lambda}{2})!(\frac{j-N_0-\lambda}{2})!},
+\quad \textrm{and}\quad
+\nu\equiv (j+\lambda)\bmod 2,
+\]
+with the summation over $N_0$ summing over like parities~(0,~2,~4,~\dots; or 1,~3,~5,~\dots).
+
+% For the state of total intrinsic spin $S$ and projection $m_S$, we
+% have the wave function
+% \[
+% \chi_{\alpha_1\dots\alpha_{j_1}\beta_1\dots\beta_{j_2}}(m_S) =
+% \sum_{\lambda_1\lambda_2}
+% \cg{j_1}{\lambda_1}{j_2}{\lambda_2}{S}{m_S}
+% \phi^{(1)}_{\alpha_1\dots\alpha_{j_1}}(\lambda_1)\phi^{(2)}_{\beta_1\dots\beta_{j_2}}(\lambda_2)
+% \]
+% 
+% The invariant amplitude for a pure spin $S$ state is
+% \[
+% A^S_{m_S}(\lambda_1\lambda_2) =
+% \cg{j_1}{\lambda_1}{j_2}{-\lambda_2}{S}{\lambda_1{-}\lambda_2}
+% \underbrace{[\chi^*(m_S)\otimes]}_{f_{\lambda_1}(\gamma_1)}
+% \]
+ 
+\end{document}
