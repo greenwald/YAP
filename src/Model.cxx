@@ -455,35 +455,4 @@ void Model::setParameterFlagsToUnchanged()
         d->setParameterFlagsToUnchanged();
 }
 
-//-------------------------
-void Model::printDataAccessors(bool printParticleCombinations) const
-{
-    // header
-    std::cout << "DataAccessors of \n"
-              << "index \tnSymIndices \taddress  \tname";
-
-    if (printParticleCombinations)
-        std::cout << "\t\tparticleCombinations";
-
-    std::cout << std::endl;
-
-    for (const auto& d : DataAccessors_) {
-        std::cout << d->index() << "  \t" << d->nSymmetrizationIndices() << "  \t\t" << d << "  \t(" << typeid(*d).name() << ")  \t";
-        if (dynamic_cast<const BlattWeisskopf*>(d))
-            std::cout << dynamic_cast<const BlattWeisskopf&>(*d).decayingParticle()->name() << "\t";
-        if (dynamic_cast<const SpinAmplitude*>(d))
-            std::cout << "J = " << spin_to_string(dynamic_cast<const SpinAmplitude&>(*d).initialTwoJ());
-
-        if (printParticleCombinations) {
-            std::cout << " \t";
-
-            for (const auto& pc_i : d->symmetrizationIndices())
-                std::cout << *pc_i.first << ":" << pc_i.second << ";  ";
-        }
-
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-
 }

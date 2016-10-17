@@ -29,9 +29,10 @@
 #include "fwd/ParticleCombination.h"
 #include "fwd/QuantumNumbers.h"
 
-#include "Particle.h"
+#include "DecayingState.h"
 
 #include <memory>
+#include <string>
 
 namespace yap {
 
@@ -44,13 +45,14 @@ namespace yap {
 /// daughters in channel c denoted D1, D2; and amplitude A_c):\n
 /// A_c = a_c * Blatt-Weisskopf(P->D1+D2) * SpinAmplitude(P->D1+D2) * A(D1->xx) * A(D2->xx)\n
 /// with free amplitude a_c.
-class DecayingParticle : public Particle
+class DecayingParticle : public DecayingState
 {
 protected:
 
     /// Constructor
     /// see #create
-    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radialSize);
+    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radial_size)
+        : DecayingState(name, q, radial_size) {}
 
 public:
 
@@ -99,10 +101,6 @@ public:
     const DecayChannelVector& channels() const
     { return Channels_;}
 
-    /// \return Radial size [GeV^-1]
-    std::shared_ptr<RealParameter> radialSize()
-    { return RadialSize_; }
-
     /// \return Blatt-Weisskopf factors
     const BlattWeisskopfMap& blattWeisskopfs() const
     { return BlattWeisskopfs_; }
@@ -124,12 +122,16 @@ public:
 
 protected:
 
+    using DecayingState::addParticleCombination;
+    
     /// add ParticleCombination to SymmetrizationIndices_ and BlattWeisskopfs_
     virtual void addParticleCombination(const ParticleCombination& c) override;
 
     /// prune ParticleCombinations_ to only contain ParticleCombination's tracing back up the ISP
     virtual void pruneParticleCombinations() override;
 
+    using DecayingState::registerWithModel;
+    
     /// register any necessary DataAccessor's with model
     virtual void registerWithModel() override;
 
@@ -140,7 +142,7 @@ protected:
 
     /// modify a DecayTree
     /// \param dt DecayTree to modify
-    virtual void modifyDecayTree(DecayTree& dt);
+    virtual void modifyDecayTree(DecayTree& dt) const;
 
 private:
 

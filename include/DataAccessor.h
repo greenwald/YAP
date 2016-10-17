@@ -135,6 +135,9 @@ private:
 /// remove expired elements of set
 void remove_expired(DataAccessorSet& S);
 
+/// \todo REMOVE
+std::string to_string(const DataAccessorSet& S, bool print_particle_combinations = true);
+
 }
 
 #endif

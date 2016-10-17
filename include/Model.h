@@ -206,9 +206,6 @@ public:
     /// Set VariableStatus'es of all Parameter's to unchanged, or leave as fixed
     void setParameterFlagsToUnchanged();
 
-    /// Print the list of DataAccessor's
-    void printDataAccessors(bool printParticleCombinations = true) const;
-
     /// grant friend status to DataAccessor to register itself with this
     friend class DataAccessor;
 

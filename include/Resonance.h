@@ -99,7 +99,7 @@ protected:
 
     /// modify a DecayTree
     /// \param dt DecayTree to modify
-    virtual void modifyDecayTree(DecayTree& dt) override;
+    virtual void modifyDecayTree(DecayTree& dt) const override;
 
 private:
 

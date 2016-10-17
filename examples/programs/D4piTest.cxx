@@ -28,8 +28,6 @@
 #include <SpinAmplitudeCache.h>
 #include <WignerD.h>
 
-#include <assert.h>
-#include <iostream>
 #include <memory>
 #include <random>
 #include <string>
@@ -106,25 +104,25 @@ int main( int argc, char** argv)
     // print stuff
 
     for (auto& isp : M.initialStateParticles()) {
-        std::cout << "\n" << isp.first->particleCombinations().size() << " " << *isp.first << " symmetrizations \n";
+        LOG(INFO) << "\n" << isp.first->particleCombinations().size() << " " << *isp.first << " symmetrizations";
         for (auto& pc : isp.first->particleCombinations())
-            std::cout << *pc << "\n";
-        std::cout << "\n";
+            LOG(INFO) << *pc;
+        LOG(INFO) << "\n";
     }
 
-    std::cout << "\nFour momenta symmetrizations with " << M.fourMomenta()->nSymmetrizationIndices() << " indices \n";
+    LOG(INFO) << "\nFour momenta symmetrizations with " << M.fourMomenta()->nSymmetrizationIndices() << " indices";
     for (auto& pc_i : M.fourMomenta()->symmetrizationIndices())
-        std::cout << *pc_i.first << ": " << pc_i.second << "\n";
+        LOG(INFO) << *pc_i.first << ": " << pc_i.second;
 
-    std::cout << "\nHelicity angles symmetrizations with " << M.helicityAngles()->nSymmetrizationIndices() << " indices \n";
+    LOG(INFO) << "\nHelicity angles symmetrizations with " << M.helicityAngles()->nSymmetrizationIndices() << " indices";
     for (auto& pc_i : M.helicityAngles()->symmetrizationIndices())
-        std::cout << *pc_i.first << ": " << pc_i.second << "\n";
+        LOG(INFO) << *pc_i.first << ": " << pc_i.second;
 
     D->printDecayChain();
-    std::cout << "\n";
+    LOG(INFO) << "";
 
-    std::cout << *M.spinAmplitudeCache() << std::endl;
-    M.printDataAccessors(false);
+    LOG(INFO) << *M.spinAmplitudeCache();
+    LOG(INFO) << "DataAccessors:\n" + to_string(M.dataAccessors(), false);
 
     LOG(INFO) << "create dataPoints";
 

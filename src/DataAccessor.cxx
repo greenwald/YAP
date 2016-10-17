@@ -1,11 +1,16 @@
 #include "DataAccessor.h"
 
+#include "BlattWeisskopf.h"
 #include "CachedValue.h"
+#include "DecayingState.h"
 #include "FourMomenta.h"
 #include "HelicityAngles.h"
 #include "logging.h"
 #include "Model.h"
 #include "RequiresHelicityAngles.h"
+
+#include <sstream>
+#include <string>
 
 namespace yap {
 
@@ -161,6 +166,46 @@ void remove_expired(DataAccessorSet& S)
         if (!*it) it = S.erase(it);
         else ++it;
 }
+
+//-------------------------
+// helper function
+std::string data_accessor_string(const DataAccessorSet::value_type& d, bool print_particle_combinations)
+{
+    if (!d)
+        return "(nullptr)";
+
+    std::ostringstream oss;
+    oss << d;
+    
+    std::string s = std::to_string(d->index())
+        + "  \t"   + std::to_string(d->nSymmetrizationIndices())
+        + "  \t\t" + oss.str()
+        + "  \t("  + typeid(*d).name() + ")  \t";
+
+    if (dynamic_cast<const BlattWeisskopf*>(d))
+        s += dynamic_cast<const BlattWeisskopf&>(*d).decayingState()->name() + "\t";
+    if (dynamic_cast<const SpinAmplitude*>(d))
+        s+= "J = " + spin_to_string(dynamic_cast<const SpinAmplitude&>(*d).initialTwoJ());
+
+    if (print_particle_combinations) {
+        s += " \t";
+        for (const auto& pc_i : d->symmetrizationIndices())
+            s += to_string(*pc_i.first) + ":" + std::to_string(pc_i.second) + ";  ";
+    }
+    return s;
+}
+//-------------------------
+std::string to_string(const DataAccessorSet& S, bool print_particle_combinations)
+{
+    // header
+    return std::string("index \tnSymIndices \taddress  \tname")
+        + (print_particle_combinations ? "\t\tParticleCombinations" : "")
+        + std::accumulate(S.begin(), S.end(), std::string(),
+                          [&](std::string& s, const DataAccessorSet::value_type& d)
+                          { return s += "\n" + data_accessor_string(d, print_particle_combinations); }
+                          ).erase(0, 1);
+}
+
 
 
 }

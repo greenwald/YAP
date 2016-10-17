@@ -23,7 +23,7 @@
 
 #include "fwd/DataPartition.h"
 #include "fwd/DataPoint.h"
-#include "fwd/DecayingParticle.h"
+#include "fwd/DecayingState.h"
 #include "fwd/CachedValue.h"
 #include "fwd/Model.h"
 #include "fwd/ParticleCombination.h"
@@ -47,8 +47,8 @@ public:
 
     /// Constructor
     /// \param L angular momentum of Blatt-Weisskopf barrier factor
-    /// \param dp raw pointer to owning DecayingParticle
-    BlattWeisskopf(unsigned L, DecayingParticle* dp);
+    /// \param dp owning DecayingState
+    BlattWeisskopf(unsigned L, const DecayingState& dp);
 
     /// \return angular momentum
     unsigned L() const
@@ -66,14 +66,15 @@ public:
     /// update the calculationStatus for a DataPartition
     virtual void updateCalculationStatus(StatusManager& D) const override;
 
-    /// \return raw pointer to Model through owning DecayingParticle
+    /// \return raw pointer to Model through owning DecayingState
     const Model* model() const override;
 
-    const DecayingParticle* decayingParticle() const
-    { return DecayingParticle_; }
+    const DecayingState* decayingState() const
+    { return DecayingState_; }
 
-    /// grant friend status to DecayingParticle to call addParticleCombination
-    friend class DecayingParticle;
+    /// grant friend status to DecayingState to call
+    /// addParticleCombination and registerWithModel
+    friend class DecayingState;
 
 protected:
 
@@ -82,8 +83,8 @@ protected:
 
 private:
 
-    /// raw pointer to owning DecayingParticle
-    DecayingParticle* DecayingParticle_;
+    /// raw pointer to owning DecayingState
+    const DecayingState* DecayingState_;
 
     /// angular momentum
     unsigned L_;

@@ -48,19 +48,16 @@ const double squared_barrier_factor(unsigned l, double z)
 }
 
 //-------------------------
-BlattWeisskopf::BlattWeisskopf(unsigned L, DecayingParticle* dp) :
+BlattWeisskopf::BlattWeisskopf(unsigned L, const DecayingState& ds) :
     RecalculableAmplitudeComponent(equal_down_by_orderless_content),
-    DecayingParticle_(dp),
+    DecayingState_(&ds),
     L_(L)
 {
-    if (!DecayingParticle_)
-        throw exceptions::Exception("DecayingParticle unset", "BlattWeisskopf::BlattWeisskopf");
-
     if (!model())
         throw exceptions::Exception("Model unset", "BlattWeisskopf::BlattWeisskopf");
 
     if (L_ > 0) {
-        addParameter(DecayingParticle_->radialSize());
+        addParameter(DecayingState_->radialSize());
         BarrierFactor_ = RealCachedValue::create(*this);
     }
 
@@ -89,7 +86,7 @@ void BlattWeisskopf::calculate(DataPartition& D) const
 
             DEBUG("calculate BlattWeisskopf");
 
-            double r2 = pow(DecayingParticle_->radialSize()->value(), 2);
+            double r2 = pow(DecayingState_->radialSize()->value(), 2);
 
             // calculate on all data points in D
             for (auto& d : D) {
@@ -114,7 +111,7 @@ void BlattWeisskopf::updateCalculationStatus(StatusManager& D) const
 //-------------------------
 const Model* BlattWeisskopf::model() const
 {
-    return DecayingParticle_->model();
+    return DecayingState_->model();
 }
 
 //-------------------------

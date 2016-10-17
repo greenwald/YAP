@@ -62,7 +62,7 @@ struct has_free_amplitude;
 struct has_decay_tree;
 struct has_decay_channel;
 
-struct parent_particle;
+struct parent_state;
 template <typename> class name_of;
 
 struct has_a_mass;
@@ -70,8 +70,8 @@ struct has_a_mass;
 /// \typedef functor to check particle name
 using is_named = check_attribute<name_of<identity> >;
 
-/// \typedef functor to return name of parent_particle
-using parent_name = name_of<parent_particle>;
+/// \typedef functor to return name of parent_state
+using parent_name = name_of<parent_state>;
 
 /// \typedef functor to compare by parent name
 template <typename C = std::less<std::string> >

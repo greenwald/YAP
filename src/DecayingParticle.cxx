@@ -18,21 +18,9 @@
 namespace yap {
 
 //-------------------------
- DecayingParticle::DecayingParticle(const std::string& name, const QuantumNumbers& q, double radialSize) :
-    Particle(name, q),
-    RadialSize_(std::make_shared<RealParameter>(radialSize))
-{
-}
-
-//-------------------------
 bool DecayingParticle::consistent() const
 {
-    bool C = Particle::consistent();
-
-    if (RadialSize_->value() <= 0.) {
-        FLOG(ERROR) << "Radial size not positive.";
-        C &= false;
-    }
+    bool C = DecayingState::consistent();
 
     if (Channels_.empty()) {
         FLOG(ERROR) << "no channels specified.";
@@ -87,7 +75,7 @@ std::shared_ptr<DecayChannel> DecayingParticle::addChannel(std::shared_ptr<Decay
     for (const auto& sa : Channels_.back()->spinAmplitudes()) {
         // if BW is not already stored for L, add it
         if (BlattWeisskopfs_.find(sa->L()) == BlattWeisskopfs_.end())
-            BlattWeisskopfs_.emplace(sa->L(), std::make_shared<BlattWeisskopf>(sa->L(), this));
+            BlattWeisskopfs_.emplace(sa->L(), std::make_shared<BlattWeisskopf>(sa->L(), *this));
     }
 
     // add particle combinations
@@ -202,8 +190,9 @@ const Model* DecayingParticle::model() const
 //-------------------------
 void DecayingParticle::registerWithModel()
 {
-    for (auto& kv : BlattWeisskopfs_)
-        kv.second->registerWithModel();
+    for (auto& l_bw : BlattWeisskopfs_)
+        if (l_bw.second)
+            registerWithModel(*l_bw.second);
 
     for (auto& c : Channels_)
         c->registerWithModel();
@@ -215,9 +204,10 @@ void DecayingParticle::addParticleCombination(const ParticleCombination& pc)
     Particle::addParticleCombination(pc);
 
     // add also to all BlattWeiskopf barrier factors
-    for (auto& kv : BlattWeisskopfs_)
-        if (pc.daughters().size() == 2)
-            kv.second->addParticleCombination(pc);
+    if (pc.daughters().size() == 2)
+        for (auto& l_bw : BlattWeisskopfs_)
+            if (l_bw.second)
+                addParticleCombination(*l_bw.second, pc);
 
     // add to DecayChannels,
     // if DecayChannel contains particle combination with same content (without checking parent)
@@ -293,7 +283,7 @@ void DecayingParticle::printDecayChainLevel(int level) const
 }
 
 //-------------------------
-void DecayingParticle::modifyDecayTree(DecayTree& dt)
+void DecayingParticle::modifyDecayTree(DecayTree& dt) const
 {
     if (!dt.freeAmplitude())
         throw exceptions::Exception("DecayTree has nullptr free amplitude", "DecayingParticle::modifyDecayTree");

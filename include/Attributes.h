@@ -26,7 +26,7 @@
 #include "fwd/BlattWeisskopf.h"
 #include "fwd/DecayChannel.h"
 #include "fwd/DecayTree.h"
-#include "fwd/DecayingParticle.h"
+#include "fwd/DecayingState.h"
 #include "fwd/FreeAmplitude.h"
 #include "fwd/MassShape.h"
 #include "fwd/Parameter.h"
@@ -219,26 +219,26 @@ struct has_decay_channel : public has_pointed_to_object<DecayChannel, Particle, 
 
 /// struct to access parent particle of an object
 /// \ingroup Attributes
-struct parent_particle : public attribute_of<std::shared_ptr<const DecayingParticle>,
+struct parent_state : public attribute_of<std::shared_ptr<const DecayingState>,
                                              DecayTree, FreeAmplitude, DecayChannel, BlattWeisskopf, MassShape>
 {
     /// \note functors inherited
     using attribute_of::operator();
 
     /// DecayTree& functor
-    virtual std::shared_ptr<const DecayingParticle> operator()(const DecayTree& dt) const override;
+    virtual std::shared_ptr<const DecayingState> operator()(const DecayTree& dt) const override;
 
     /// FreeAmplitude& functor
-    virtual std::shared_ptr<const DecayingParticle> operator()(const FreeAmplitude& fa) const override;
+    virtual std::shared_ptr<const DecayingState> operator()(const FreeAmplitude& fa) const override;
 
     /// DecayChannel& functor
-    virtual std::shared_ptr<const DecayingParticle> operator()(const DecayChannel& dc) const override;
+    virtual std::shared_ptr<const DecayingState> operator()(const DecayChannel& dc) const override;
 
     /// BlattWeisskopf& functor
-    virtual std::shared_ptr<const DecayingParticle> operator()(const BlattWeisskopf& bw) const override;
+    virtual std::shared_ptr<const DecayingState> operator()(const BlattWeisskopf& bw) const override;
 
     /// MassShape& functor
-    virtual std::shared_ptr<const DecayingParticle> operator()(const MassShape& m) const override;
+    virtual std::shared_ptr<const DecayingState> operator()(const MassShape& m) const override;
 };
 
 /// functor to get name of return value of attribute
@@ -290,7 +290,7 @@ struct mass_parameter : public attribute_of<const RealParameter&, MassShape, Par
 };
 
 /// functor to return whether object comes from a particular parent
-struct from : public has_pointed_to_object<DecayingParticle, Particle>
+struct from : public has_pointed_to_object<DecayingState, Particle>
 {
     /// \note constructors inherited
     using has_pointed_to_object::has_pointed_to_object;
@@ -304,10 +304,10 @@ struct from : public has_pointed_to_object<DecayingParticle, Particle>
     /// Generic functor
     template <typename U>
     const bool operator()(const U& u) const
-    { static parent_particle ParentOf_; return contains(ParentOf_(u).get()); }
+    { static parent_state ParentOf_; return contains(ParentOf_(u).get()); }
 
     /// checks if 
-    const bool contains(const DecayingParticle* const p) const;
+    const bool contains(const DecayingState* const p) const;
 };
 
 }

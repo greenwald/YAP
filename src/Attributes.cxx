@@ -218,43 +218,43 @@ const bool has_decay_channel::operator()(const DecayTree& dt) const
 }
     
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const DecayTree& dt) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const DecayTree& dt) const
 {
     if (!dt.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(DecayTree)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*dt.model(), has_decay_tree(dt)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(DecayTree)");
+    return std::static_pointer_cast<DecayingState>(particle(*dt.model(), has_decay_tree(dt)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const FreeAmplitude& fa) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const FreeAmplitude& fa) const
 {
     if (!fa.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(FreeAmplitude)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*fa.model(), has_free_amplitude(fa)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(FreeAmplitude)");
+    return std::static_pointer_cast<DecayingState>(particle(*fa.model(), has_free_amplitude(fa)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const DecayChannel& dc) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const DecayChannel& dc) const
 {
     if (!dc.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(DecayChannel)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*dc.model(), has_decay_channel(dc)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(DecayChannel)");
+    return std::static_pointer_cast<DecayingState>(particle(*dc.model(), has_decay_channel(dc)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const BlattWeisskopf& bw) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const BlattWeisskopf& bw) const
 {
-    if (!bw.decayingParticle())
+    if (!bw.decayingState())
         return nullptr;
-    return std::static_pointer_cast<const DecayingParticle>(bw.decayingParticle()->shared_from_this());
+    return std::static_pointer_cast<const DecayingState>(bw.decayingState()->shared_from_this());
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const MassShape& m) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const MassShape& m) const
 {
     if (!m.resonance())
         return nullptr;
-    return std::static_pointer_cast<DecayingParticle>(m.resonance()->shared_from_this());
+    return std::static_pointer_cast<DecayingState>(m.resonance()->shared_from_this());
 }
 
 //-------------------------
@@ -304,7 +304,7 @@ const bool from::operator()(const Particle& p) const
 }
 
 //-------------------------
-const bool from::contains(const DecayingParticle* const p) const
+const bool from::contains(const DecayingState* const p) const
 {        
     return std::find(objects().begin(), objects().end(), p) != objects().end();
 }
