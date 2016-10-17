@@ -145,6 +145,7 @@ inline std::string to_string(const Parameter<T>& P)
 { using std::to_string; return to_string(P.value()) + " (" + to_string(P.variableStatus()) + ")"; }
 
 /// \class RealParameter
+/// \brief Holds a real value
 /// \ingroup Parameters
 class RealParameter : public Parameter<double>
 {
@@ -159,13 +160,42 @@ public:
     using Parameter::setValue;
 
     /// Set value from vector
-    const VariableStatus setValue(const std::vector<double>& V)
+    virtual const VariableStatus setValue(const std::vector<double>& V) override
     { return setValue(V[0]); }
 
     using Parameter::operator=;
 };
 
+/// \class PositiveRealParameter
+/// \brief Holds a real value that must be greater than or equal to zero
+/// \ingroup Parameters
+class PositiveRealParameter : public RealParameter
+{
+public:
+
+    /// constructor
+    PositiveRealParameter(double t = 0) : RealParameter(t)
+    {
+        if (value() < 0)
+            throw exceptions::Exception("Value is negative", "PositiveRealParameter::PositiveRealParameter");
+    }
+
+    using RealParameter::setValue;
+
+    /// checks if value is positive
+    virtual const VariableStatus setValue(const double val) override
+    {
+        if (val < 0)
+            throw exceptions::Exception("Value is negative", "PositiveRealParameter::setValue");
+        return RealParameter::setValue(val);
+    }
+
+    using RealParameter::operator=;
+};
+
+
 /// \class ComplexParameter
+/// \brief Holds a complex value
 /// \ingroup Parameters
 class ComplexParameter : public Parameter<std::complex<double> >
 {
