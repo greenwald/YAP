@@ -67,16 +67,6 @@ private:
 
 };
 
-/// \return VariableStatus::changed if any element in range is changed; VariableStatus::unchanged otherwise
-template <typename IterType>
-constexpr VariableStatus variable_status(IterType first, IterType last)
-{
-    return std::any_of(first, last,
-                       [](const std::shared_ptr<ParameterBase>& p)
-                       {return p->variableStatus() == VariableStatus::changed;})
-        ? VariableStatus::changed : VariableStatus::unchanged;
-}
-
 /// \class Parameter
 /// \brief Template class holding also a value for a parameter
 /// \author Johannes Rauch, Daniel Greenwald
@@ -155,7 +145,8 @@ public:
     RealParameter(double t = 0) : Parameter(t) {}
 
     /// \return size = 1
-    const size_t size() const {return 1;}
+    const size_t size() const override
+    { return 1; }
 
     using Parameter::setValue;
 

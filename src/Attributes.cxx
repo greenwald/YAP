@@ -11,6 +11,7 @@
 #include "MassShapeWithNominalMass.h"
 #include "Model.h"
 #include "Particle.h"
+#include "RecalculableDataAccessor.h"
 #include "Resonance.h"
 #include "SpinAmplitude.h"
 #include "container_utils.h"
@@ -144,6 +145,24 @@ const bool is_not_fixed::operator()(const DecayTree& dt) const
         if (operator()(fa))
             return true;
     return false;
+}
+
+//-------------------------
+const VariableStatus variable_status::operator()(const ParameterBase& p) const
+{
+    return p.variableStatus();
+}
+
+//-------------------------
+const VariableStatus variable_status::operator()(const RecalculableDataAccessor& rda) const
+{
+    return operator()(rda.parameters());
+}
+
+//-------------------------
+const VariableStatus variable_status::operator()(const AmplitudeComponent& a) const
+{
+    return a.status();
 }
 
 //-------------------------

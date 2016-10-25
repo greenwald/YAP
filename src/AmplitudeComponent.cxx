@@ -1,5 +1,6 @@
 #include "AmplitudeComponent.h"
 
+#include "Attributes.h"
 #include "Parameter.h"
 #include "ParticleCombination.h"
 
@@ -20,7 +21,8 @@ const bool RecalculableAmplitudeComponent::validFor(const ParticleCombination& p
 //-------------------------
 const VariableStatus RecalculableAmplitudeComponent::status() const
 {
-    return variable_status(parameters().begin(), parameters().end());
+    static variable_status S;
+    return S(static_cast<const RecalculableDataAccessor&>(*this));
 }
 
 }

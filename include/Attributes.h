@@ -23,6 +23,7 @@
 
 #include "fwd/Attributes.h"
 
+#include "fwd/AmplitudeComponent.h"
 #include "fwd/BlattWeisskopf.h"
 #include "fwd/DecayChannel.h"
 #include "fwd/DecayTree.h"
@@ -31,11 +32,13 @@
 #include "fwd/MassShape.h"
 #include "fwd/Parameter.h"
 #include "fwd/Particle.h"
+#include "fwd/RecalculableDataAccessor.h"
 #include "fwd/SpinAmplitude.h"
 
 #include "AttributeUtilities.h"
 #include "Exceptions.h"
 #include "Particle.h"
+#include "VariableStatus.h"
 
 #include <functional>
 #include <memory>
@@ -119,6 +122,41 @@ struct is_not_fixed : attribute_of<const bool, ParameterBase, DecayTree>
 
     /// DecayTree& functor
     virtual const bool operator()(const DecayTree& dt) const override;
+};
+
+/// Functor to retrieve variable status
+struct variable_status : public attribute_of<const VariableStatus, ParameterBase, RecalculableDataAccessor, AmplitudeComponent>
+{
+    /// \note functors inherited
+    using attribute_of::operator();
+
+    /// ParameterBase& functor
+    virtual const VariableStatus operator()(const ParameterBase& p) const override;
+
+    /// RecalculableDataAccessor& functor
+    virtual const VariableStatus operator()(const RecalculableDataAccessor& rda) const override;
+
+    /// AmplitudeComponent& functor
+    virtual const VariableStatus operator()(const AmplitudeComponent& a) const override;
+    
+    /// Iterator functor
+    template <typename IterType>
+    const VariableStatus operator()(IterType first, IterType last) const
+    {
+        auto s = VariableStatus::fixed;
+        for (auto it = first; it != last and s != VariableStatus::changed; ++it)
+            s *= operator()(*it);
+        return s;
+    }
+
+    /// ParameterSet& functor
+    const VariableStatus operator()(const ParameterSet& ps) const
+    { return operator()(ps.begin(), ps.end()); }
+
+    /// ParameterVector& functor
+    const VariableStatus operator()(const ParameterVector& pv) const
+    { return operator()(pv.begin(), pv.end()); }
+        
 };
 
 /// Functor class to check if state is decayed to by argument

@@ -32,6 +32,19 @@ enum class VariableStatus : int {
     unchanged = +1,        ///< Variable is free but has not been changed
 };
 
+/// multiplication assignment
+inline VariableStatus& operator*=(VariableStatus& lhs, const VariableStatus& rhs)
+{
+    // if either are changed, set to changed
+    if (lhs == VariableStatus::changed or rhs == VariableStatus::changed)
+        lhs = VariableStatus::changed;
+    // else if either are unchanged, set to unchanged
+    else if (lhs == VariableStatus::unchanged or rhs == VariableStatus::unchanged)
+        lhs = VariableStatus::unchanged;
+    // else it stays fixed
+    return lhs;
+}
+
 inline std::string to_string(const VariableStatus& s)
 {
     switch (s) {

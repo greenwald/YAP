@@ -100,16 +100,19 @@ const std::complex<double> DecayTree::dataDependentAmplitude(const DataPoint& d,
 //-------------------------
 const VariableStatus DecayTree::dataDependentAmplitudeStatus() const
 {
-    // return `changed` if any amplitude component has changed
-    for (const auto& ac : AmplitudeComponents_)
-        if (ac->status() == VariableStatus::changed)
-            return VariableStatus::changed;
-    // return `changed` if any daughter has changed
+    static variable_status S;
+
+    // check components
+    auto s = S(AmplitudeComponents_.begin(), AmplitudeComponents_.end());
+    if (s == VariableStatus::changed)
+        return s;
+    
+    // check daughters
     for (const auto& d_dt : DaughterDecayTrees_)
-        if (d_dt.second->dataDependentAmplitudeStatus() == VariableStatus::changed)
-            return VariableStatus::changed;
-    // else unchanged
-    return VariableStatus::unchanged;
+        if ( (s *= d_dt.second->dataDependentAmplitudeStatus()) == VariableStatus::changed)
+            return s;
+    
+    return s;
 }
 
 //-------------------------
