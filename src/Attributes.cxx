@@ -16,6 +16,8 @@
 #include "SpinAmplitude.h"
 #include "container_utils.h"
 
+#include <numeric>
+
 namespace yap {
 
 //-------------------------
@@ -71,7 +73,27 @@ const int spin_projection::operator()(const DecayTree& dt) const
 {
     return dt.initialTwoM();
 }
-    
+
+//-------------------------
+const int charge::operator()(const QuantumNumbers& q) const
+{
+    return q.Q();
+}
+
+//-------------------------
+const int charge::operator()(const Particle& p) const
+{
+    return operator()(p.quantumNumbers());
+}
+
+//-------------------------
+const int charge::operator()(const DecayChannel& dc) const
+{
+    return std::accumulate(dc.daughters().begin(), dc.daughters().end(), 0,
+                           [&](int q, const ParticleVector::value_type& p)
+                           { return q += (*this)(p); });
+}
+
 //-------------------------
 const bool to::operator()(const DecayChannel& dc) const
 {
@@ -179,10 +201,9 @@ const bool has_free_amplitude::operator()(const Particle& p) const
 {
     if (!is_decaying_particle(p))
         return false;
-    for (const auto& m_dtv : dynamic_cast<const DecayingParticle&>(p).decayTrees())
-        for (const auto& dt : m_dtv.second)
-            if(std::find(objects().begin(), objects().end(), dt->freeAmplitude().get()) != objects().end())
-                return true;
+    for (const auto& dt : dynamic_cast<const DecayingParticle&>(p).decayTrees())
+        if(dt and std::find(objects().begin(), objects().end(), dt->freeAmplitude().get()) != objects().end())
+            return true;
     return false;
 }
 
@@ -191,10 +212,9 @@ const bool has_decay_tree::operator()(const Particle& p) const
 {
     if (!is_decaying_particle(p))
         return false;
-    for (const auto& m_dtv : dynamic_cast<const DecayingParticle&>(p).decayTrees())
-        for (const auto& dt : m_dtv.second)
-            if (std::find(objects().begin(), objects().end(), dt.get()) != objects().end())
-                return true;
+    for (const auto& dt : dynamic_cast<const DecayingParticle&>(p).decayTrees())
+        if (dt and std::find(objects().begin(), objects().end(), dt.get()) != objects().end())
+            return true;
     return false;
 }
 
@@ -235,7 +255,40 @@ const bool has_decay_channel::operator()(const DecayTree& dt) const
             return true;
     return false;
 }
-    
+
+//-------------------------
+const bool has_particle_combination::operator()(const ParticleCombinationSet& S) const
+{
+    for (const auto& pc : S)
+        if (std::find(objects().begin(), objects().end(), pc.get()) != objects().end())
+            return true;
+    return false;
+}
+
+//-------------------------
+const bool has_particle_combination::operator()(const DecayChannel& dc) const
+{
+    return operator()(dc.particleCombinations());
+}
+
+//-------------------------
+const bool has_particle_combination::operator()(const FreeAmplitude& fa) const
+{
+    return operator()(fa.decayChannel());
+}
+
+//-------------------------
+const bool has_particle_combination::operator()(const DecayTree& dt) const
+{
+    return operator()(dt.freeAmplitude());
+}
+
+//-------------------------
+const bool has_particle_combination::operator()(const Particle& p) const
+{
+    return operator()(p.particleCombinations());
+}
+
 //-------------------------
 std::shared_ptr<const DecayingState> parent_state::operator()(const DecayTree& dt) const
 {

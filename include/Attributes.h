@@ -31,7 +31,7 @@
 #include "fwd/FreeAmplitude.h"
 #include "fwd/MassShape.h"
 #include "fwd/Parameter.h"
-#include "fwd/Particle.h"
+#include "fwd/ParticleCombination.h"
 #include "fwd/RecalculableDataAccessor.h"
 #include "fwd/SpinAmplitude.h"
 
@@ -94,6 +94,23 @@ struct spin_projection : public attribute_of<const int, DecayTree>
 
     /// DecayTree& functor
     virtual const int operator()(const DecayTree& dt) const override;
+};
+
+/// Functor class to return charge of an argument
+/// \ingroup Attributes
+struct charge : public attribute_of<const int, QuantumNumbers, Particle, DecayChannel>
+{
+    /// \note functors inherited
+    using attribute_of::operator();
+    
+    /// QuantumNumbers& functor
+    virtual const int operator()(const QuantumNumbers& q) const override;
+
+    /// Particle& functor
+    virtual const int operator()(const Particle& p) const override;
+
+    /// DecayChannel& functor
+    virtual const int operator()(const DecayChannel& dc) const override;
 };
 
 /// Functor class to check whether argument is fixed
@@ -253,6 +270,32 @@ struct has_decay_channel : public has_pointed_to_object<DecayChannel, Particle, 
     /// DecayTree& functor
     /// checks all FreeAmplitudes in DecayTree
     virtual const bool operator()(const DecayTree& dt) const override;
+};
+
+/// Functor class to check whether argument has particular ParticleCombination
+/// \ingroup Attributes
+struct has_particle_combination : public has_pointed_to_object<ParticleCombination, DecayChannel, FreeAmplitude, DecayTree, Particle>
+{
+    /// \note constructors inherited
+    using has_pointed_to_object::has_pointed_to_object;
+
+    /// \note functors inherited
+    using has_pointed_to_object::operator();
+
+    /// DecayChannel& functor
+    virtual const bool operator()(const DecayChannel& dc) const override;
+
+    /// FreeAmplitude& functor
+    virtual const bool operator()(const FreeAmplitude& fa) const override;
+
+    /// DecayTree& functor
+    virtual const bool operator()(const DecayTree& dt) const override;
+
+    /// Particle& functor
+    virtual const bool operator()(const Particle& p) const override;
+
+    /// ParticleCombinationSet& functor
+    const bool operator()(const ParticleCombinationSet& S) const;
 };
 
 /// struct to access parent particle of an object

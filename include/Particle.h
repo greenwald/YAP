@@ -81,7 +81,8 @@ public:
 
     /// @}
 
-    /// grant friend status to DecayChannel to call addParticleCombination
+    /// grant friend status to DecayChannel to call
+    /// addParticleCombination and registerWithModel
     friend class DecayChannel;
 
 protected:

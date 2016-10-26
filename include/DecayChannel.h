@@ -23,6 +23,7 @@
 
 #include "fwd/DecayChannel.h"
 
+#include "fwd/DecayingState.h"
 #include "fwd/Model.h"
 #include "fwd/Particle.h"
 #include "fwd/ParticleCombination.h"
@@ -81,10 +82,10 @@ public:
     /// \param two_J, (twice) decaying particle's spin
     void addAllPossibleSpinAmplitudes(unsigned two_J);
 
-    /// grant friend status to DecayingParticle to call
+    /// grant friend status to DecayingState to call
     /// addParticleCombination, pruneParticleCombinations,
     /// and registerWithModel
-    friend class DecayingParticle;
+    friend class DecayingState;
 
 protected:
 
@@ -109,9 +110,6 @@ private:
     ParticleCombinationSet ParticleCombinations_;
 
 };
-
-/// \return total charge of decay channel
-const int charge(const DecayChannel& dc);
 
 /// convert to string
 std::string to_string(const DecayChannel& dc);

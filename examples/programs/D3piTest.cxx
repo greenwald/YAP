@@ -132,7 +132,7 @@ int main( int argc, char** argv)
 
     // LOG(INFO) << "\nHelicity angle symmetrizations with " << M.helicityAngles()->maxSymmetrizationIndex() + 1 << " indices";
 
-    D->printDecayChain();
+    yap::multiline(LOG(INFO), to_decay_string(*D));
     LOG(INFO) << "";
 
     LOG(INFO) << *M.spinAmplitudeCache();

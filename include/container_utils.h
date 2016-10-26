@@ -173,11 +173,11 @@ std::vector<std::vector<T> > combinations(const std::vector<T>& V, size_t n)
 
 /// \return vector of raw pointers inside members of vector of shared_ptr's
 template <typename T>
-std::vector<const T*> raw_pointers(const std::vector<std::shared_ptr<T> >& V)
+std::vector<const T*> raw_pointers(const std::vector<std::shared_ptr<const T> >& V)
 {
     std::vector<const T*> RP;
     RP.reserve(V.size());
-    std::transform(V.begin(), V.end(), std::back_inserter(RP), [](const std::shared_ptr<T>& t){return t.get();});
+    std::transform(V.begin(), V.end(), std::back_inserter(RP), [](const std::shared_ptr<const T>& t){return t.get();});
     return RP;
 }
 

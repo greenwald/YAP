@@ -5,6 +5,8 @@
 
 #include "easylogging++.h"
 
+#include <string>
+
 namespace yap {
 
 /**
@@ -75,6 +77,21 @@ inline void plainLogs(el::Level lvl)
 /// \def FLOG(x)
 /// Pretty logging output: prepends function name to x
 #define FLOG(x) LOG( x ) << std::string(ELPP_FUNC) + ": "
+
+/// multiline stream
+template <typename T>
+T& multiline(T& t, std::string s, std::string end_of_line = "")
+{
+    for (size_t p = 0; p < s.size() and p != std::string::npos; ++p) {
+        size_t p_n = s.find_first_of('\n', p);
+        if (p_n != std::string::npos)
+            t << s.substr(p, p_n - p) << end_of_line;
+        else
+            t << s.substr(p);
+        p = p_n;
+    }
+    return t;
+}
 
 }
 

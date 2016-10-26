@@ -1,8 +1,10 @@
 #include "ModelIntegral.h"
 
+#include "Attributes.h"
 #include "DecayingParticle.h"
 #include "DecayTreeVectorIntegral.h"
 #include "Exceptions.h"
+#include "Filter.h"
 #include "Model.h"
 #include "Parameter.h"
 
@@ -18,7 +20,7 @@ ModelIntegral::ModelIntegral(const Model& model)
         // for each spin projection
         for (const auto& m_b : isp_mix.second)
             // create new DecayTreeVectorIntegral
-            Integrals_.emplace(m_b.second, DecayTreeVectorIntegral(isp_mix.first->decayTrees().at(m_b.first)));
+            Integrals_.emplace(m_b.second, DecayTreeVectorIntegral(filter(isp_mix.first->decayTrees(), m_equals(m_b.first))));
 }
 
 //-------------------------

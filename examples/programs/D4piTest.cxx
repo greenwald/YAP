@@ -118,7 +118,7 @@ int main( int argc, char** argv)
     for (auto& pc_i : M.helicityAngles()->symmetrizationIndices())
         LOG(INFO) << *pc_i.first << ": " << pc_i.second;
 
-    D->printDecayChain();
+    yap::multiline(LOG(INFO), to_decay_string(*D));
     LOG(INFO) << "";
 
     LOG(INFO) << *M.spinAmplitudeCache();
@@ -165,10 +165,9 @@ int main( int argc, char** argv)
         // change amplitudes
         if (uniform(g) > 0.5)
             for (auto& isp_b : M.initialStateParticles())
-                for (auto& m_dtv : isp_b.first->decayTrees())
-                    for (auto& dt : m_dtv.second)
-                        if (dt->freeAmplitude()->variableStatus() != yap::VariableStatus::fixed and uniform(g) > 0.5)
-                            *dt->freeAmplitude() = uniform2(g) * dt->freeAmplitude()->value();
+                for (auto& dt : filter(isp_b.first->decayTrees(), yap::is_not_fixed()))
+                    if (uniform(g) > 0.5)
+                        *dt->freeAmplitude() = uniform2(g) * dt->freeAmplitude()->value();
 
         // change masses
         if (uniform(g) > 0.5)

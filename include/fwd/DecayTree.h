@@ -40,7 +40,7 @@ using DecayTreeSet = std::set<std::shared_ptr<DecayTree> >;
 
 /// \typedef DecayTreeVectorMap
 /// Map of spin projection (int) to DecayTreeVector
-using DecayTreeVectorMap = std::map<int, DecayTreeVector>;
+/* using DecayTreeVectorMap = std::map<int, DecayTreeVector>; */
 
 /// \return the highest free amplitude of a decay tree
 std::shared_ptr<FreeAmplitude> free_amplitude(const DecayTree& dt);

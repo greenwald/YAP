@@ -17,6 +17,7 @@
  */
 
 /// \file
+/// contains forward declarations only
 
 #ifndef yap_DecayingParticleFwd_h
 #define yap_DecayingParticleFwd_h
@@ -26,9 +27,6 @@
 namespace yap {
 
 class DecayingParticle;
-
-/// \return whether Particle is from DecayingParticle
-bool is_decaying_particle(const Particle& p);
 
 }
 

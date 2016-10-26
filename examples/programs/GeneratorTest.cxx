@@ -90,8 +90,7 @@ int main( int argc, char** argv)
     /*for (auto& pc : D->helicityAngles().particleCombinations())
         std::cout << std::string(*pc) << ": " << D->helicityAngles().symmetrizationIndex(pc) << "\n";*/
 
-    D->printDecayChain();
-    std::cout << "\n";
+    yap::multiline(LOG(INFO), to_decay_string(*D));
 
     D->printSpinAmplitudes();
     D->printDataAccessors(false);

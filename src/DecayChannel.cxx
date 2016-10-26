@@ -281,14 +281,6 @@ ParticleSet particles(const DecayChannel& dc)
 }
 
 //-------------------------
-const int charge(const DecayChannel& dc)
-{
-    return std::accumulate(dc.daughters().begin(), dc.daughters().end(), 0,
-                           [](int q, const ParticleVector::value_type& p)
-                           { return q += p->quantumNumbers().Q(); });
-}
-
-//-------------------------
 std::string to_string(const DecayChannel& dc)
 {
     return dc.daughters().empty() ? "[nothing]"

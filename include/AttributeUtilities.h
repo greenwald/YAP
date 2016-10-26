@@ -130,13 +130,13 @@ public:
         : has_pointed_to_object(std::vector<const T*>({t, others...})) {}
 
     /// Constructor
-    explicit has_pointed_to_object(const std::vector<std::shared_ptr<T> >& tv)
+    explicit has_pointed_to_object(const std::vector<std::shared_ptr<const T> >& tv)
         : attribute_of<const bool, U, V...>(), Objects_(raw_pointers(tv)) {}
 
     /// Constructor
     template <typename ... Others>
-    explicit has_pointed_to_object(const std::shared_ptr<T>& t, Others ... others)
-        : has_pointed_to_object(std::vector<std::shared_ptr<T> >({t, others...})) {}
+    explicit has_pointed_to_object(const std::shared_ptr<const T>& t, Others ... others)
+        : has_pointed_to_object(std::vector<std::shared_ptr<const T> >({t, others...})) {}
 
     /// Constructor
     template <typename ... Others>

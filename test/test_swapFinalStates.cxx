@@ -96,7 +96,7 @@ std::complex<double> calculate_model(double isp_mass, yap::Model& M, const yap::
 
     // return amplitude
     M.calculate(data);
-    return amplitude(isp->decayTrees().at(0), data[0]);
+    return amplitude(isp->decayTrees(), data[0]);
 }
 
 TEST_CASE( "swapFinalStates" )

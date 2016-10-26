@@ -38,6 +38,7 @@
 #include <complex>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -98,8 +99,8 @@ public:
     /// grant friend status to DecayChannel to call addDataAccessor
     friend class DecayChannel;
 
-    /// grant friend status to DecayingParticle to call addDataAccessor
-    friend class DecayingParticle;
+    /// grant friend status to DecayingState to call setDaughterDecayTree
+    friend class DecayingState;
 
     /// grant friend status to Resonance to call addDataAccessor
     friend class Resonance;
@@ -139,9 +140,17 @@ std::string to_string(const DecayTree& dt, std::string offset = "");
 /// convert to (mutliline string)
 std::string to_string(const DecayTreeVector& dtv);
 
+/* /// convert to (mutliline string) */
+/* std::string to_string(const DecayTreeVectorMap& dtvm); */
+
 /// equality operator
 inline bool operator==(const DecayTree& lhs, const DecayTree& rhs)
-{ return lhs.freeAmplitude() == rhs.freeAmplitude() and lhs.daughterDecayTrees() == rhs.daughterDecayTrees(); }
+{
+    return lhs.freeAmplitude() == rhs.freeAmplitude()
+    and lhs.initialTwoM() == rhs.initialTwoM()
+    and lhs.finalTwoM() == rhs.finalTwoM()
+    and lhs.daughterDecayTrees() == rhs.daughterDecayTrees();
+}
 
 /// \return Depth of DecayTree
 unsigned depth(const DecayTree& DT);
@@ -162,13 +171,38 @@ inline const std::complex<double> amplitude(const DecayTree& dt, const DataPoint
 /// \return sum of amplitudes of decay trees in a vector
 /// \param dtv DecayTreeVector to sum over
 /// \param d DataPoint to evaluate on
-const std::complex<double> amplitude(const DecayTreeVector& dtv, const DataPoint& d);
+inline const std::complex<double> amplitude(const DecayTreeVector& dtv, const DataPoint& d)
+{
+    return std::accumulate(dtv.begin(), dtv.end(), std::complex<double>(0),
+                           [&d](std::complex<double>& a, const DecayTreeVector::value_type& dt)
+                           {return a += amplitude(*dt, d);});
+}
+
+/// \return sum of amplitudes of decay trees in a vector passing predicate
+/// \param dtv DecayTreeVector to sum over
+/// \param d DataPoint to evaluate on
+/// \param p UnaryPredicate to check on DecayTrees
+template <typename UnaryPredicate>
+const std::complex<double> amplitude(const DecayTreeVector& dtv, const DataPoint& d, const UnaryPredicate& p)
+{
+    return std::accumulate(dtv.begin(), dtv.end(), std::complex<double>(0),
+                           [&](std::complex<double>& a, const DecayTreeVector::value_type& dt)
+                           {return p(dt) ? a += amplitude(*dt, d) : a;});
+}
 
 /// \return square of sum of amplitudes of decay trees in a vector
 /// \param dtv DecayTreeVector to sum over
 /// \param d DataPoint to evaluate on
 inline const double intensity(const DecayTreeVector& dtv, const DataPoint& d)
 { return norm(amplitude(dtv, d)); }
+
+/// \return square of sum of amplitudes of decay trees in a vector passing predicate
+/// \param dtv DecayTreeVector to sum over
+/// \param d DataPoint to evaluate on
+/// \param p UnaryPredicate to check on DecayTrees
+template <typename UnaryPredicate>
+inline const double intensity(const DecayTreeVector& dtv, const DataPoint& d, const UnaryPredicate& p)
+{ return norm(amplitude(dtv, d, p)); }
 
 /// \return set of all free amplitudes in a DecayTree
 FreeAmplitudeSet free_amplitudes(const DecayTree& DT);

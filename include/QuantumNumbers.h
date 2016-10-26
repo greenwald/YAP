@@ -76,7 +76,7 @@ public:
     constexpr int G() const
     { return G_; }
 
-    /// \return Electric intge
+    /// \return Electric charge
     constexpr int Q() const
     { return Q_; }
 

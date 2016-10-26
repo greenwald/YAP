@@ -40,15 +40,6 @@ const Model* DecayTree::model() const
 }
 
 //-------------------------
-const std::complex<double> amplitude(const DecayTreeVector& dtv, const DataPoint& d)
-{
-    std::complex<double> A = 0;
-    for (const auto& dt : dtv)
-        A += amplitude(*dt, d);
-    return A;
-}
-
-//-------------------------
 FreeAmplitudeSet free_amplitudes(const DecayTree& DT)
 {
     FreeAmplitudeSet S = {DT.freeAmplitude()};
@@ -183,6 +174,14 @@ std::string to_string(const DecayTreeVector& dtv)
                            [](std::string& s, const DecayTreeVector::value_type& dt)
                            { return s += "\n" + to_string(*dt); }).erase(0, 1);
 }
+
+// //-------------------------
+// std::string to_string(const DecayTreeVectorMap& m_dtv_map)
+// {
+//     return std::accumulate(m_dtv_map.begin(), m_dtv_map.end(), std::string(),
+//                            [](std::string & s, const DecayTreeVectorMap::value_type & m_dtv)
+//                            { return s += to_string(m_dtv.second); });
+// }
 
 //-------------------------
 std::shared_ptr<FreeAmplitude> free_amplitude(const DecayTree& dt)

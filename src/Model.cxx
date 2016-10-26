@@ -1,5 +1,6 @@
 #include "Model.h"
 
+#include "Attributes.h"
 #include "BlattWeisskopf.h"
 #include "CalculationStatus.h"
 #include "CompensatedSum.h"
@@ -62,7 +63,7 @@ const double intensity(const InitialStateParticleMap::value_type& isp_mix, const
     return std::accumulate(isp_mix.second.begin(), isp_mix.second.end(), 0.,
                            [&](double& I, const AdmixtureMap::value_type& m_b)
                            // += admixture factory * intensity of decay tree for spin projection
-                           { return I += m_b.second->value() * intensity(isp_mix.first->decayTrees().at(m_b.first), d);});
+                           { return I += m_b.second->value() * intensity(isp_mix.first->decayTrees(), d, m_equals(m_b.first));});
 }
 
 //-------------------------
@@ -210,13 +211,12 @@ void Model::setFinalStateMomenta(DataPoint& d, const std::vector<FourVector<doub
 }
 
 //-------------------------
-AdmixtureMap admixture_map(const DecayTreeVectorMap& dtvm)
+AdmixtureMap admixture_map(const DecayTreeVector& dtv)
 {
     AdmixtureMap M;
-    // create new (spin projection -> real parameter) entry for each in dtvm
-    std::transform(dtvm.begin(), dtvm.end(), std::inserter(M, M.end()),
-                   [](const DecayTreeVectorMap::value_type& v)
-                   {return AdmixtureMap::value_type(v.first, std::make_shared<RealParameter>(1.));});
+    for (const auto& dt : dtv)
+        if (M.find(dt->initialTwoM()) == M.end())
+            M.emplace(dt->initialTwoM(), std::make_shared<RealParameter>(1.));
     return M;
 }
 
