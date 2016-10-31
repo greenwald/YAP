@@ -98,11 +98,8 @@ public:
     /// grant friend status to DecayChannel to call addDataAccessor
     friend class DecayChannel;
 
-    /// grant friend status to DecayingParticle to call addDataAccessor
-    friend class DecayingParticle;
-
-    /// grant friend status to Resonance to call addDataAccessor
-    friend class Resonance;
+    /// grant friend status to DecayingState to call addDataAccessor
+    friend class DecayingState;
 
 protected:
 

@@ -17,6 +17,7 @@ set(YAP_SOURCES
 	DecayTree.cxx
 	DecayTreeVectorIntegral.cxx
 	DecayingParticle.cxx
+  DecayingState.cxx
 	FinalStateParticle.cxx
 	Flatte.cxx
 	FourMomenta.cxx

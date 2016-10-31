@@ -122,7 +122,7 @@ TEST_CASE( "swapDalitzAxes" )
                     data.push_back(P);
 
                     M->calculate(data);
-                    resultingAmplitudes[i] = amplitude(M->initialStateParticles().begin()->first->decayTrees().at(0), data[0]);
+                    resultingAmplitudes[i] = amplitude(M->initialStates().begin()->first->decayTrees().at(0), data[0]);
                     //std::cout<<resultingAmplitudes[i]<<"   ";
                 }
 

@@ -3,7 +3,6 @@
 #include "AmplitudeComponent.h"
 #include "Attributes.h"
 #include "DecayChannel.h"
-#include "DecayingParticle.h"
 #include "Exceptions.h"
 #include "FreeAmplitude.h"
 #include "Model.h"
@@ -150,15 +149,6 @@ void DecayTree::addAmplitudeComponent(const AmplitudeComponent& ac)
                                         "DecayTree::addAmplitudeComponent");
 
     AmplitudeComponents_.push_back(&ac);
-}
-
-//-------------------------
-std::shared_ptr<DecayingParticle> decayingParticle(const DecayTree& dt)
-{
-    if (!dt.model())
-        throw exceptions::Exception("model is nullptr", "decayingParticle(DecayTree)");
-
-    return std::static_pointer_cast<DecayingParticle>(particle(*dt.model(), has_decay_tree(dt)));
 }
 
 //-------------------------

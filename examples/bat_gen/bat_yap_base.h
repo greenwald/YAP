@@ -3,7 +3,7 @@
 
 #include <BAT/BCModel.h>
 
-#include <fwd/DecayingParticle.h>
+#include <fwd/DecayingState.h>
 #include <fwd/Model.h>
 #include <MassAxes.h>
 
@@ -25,7 +25,7 @@ public:
     unsigned likelihoodCalls() const
     { return std::accumulate(LikelihoodCalls_.begin(), LikelihoodCalls_.end(), 0); }
 
-    const std::shared_ptr<yap::DecayingParticle> isp() const
+    const std::shared_ptr<yap::DecayingState> isp() const
     { return ISP_; }
 
     const std::unique_ptr<yap::Model>& model() const
@@ -34,7 +34,7 @@ public:
     const yap::MassAxes& axes() const
     { return Axes_; }
 
-    std::shared_ptr<yap::DecayingParticle> isp()
+    std::shared_ptr<yap::DecayingState> isp()
     { return ISP_; }
 
     std::unique_ptr<yap::Model>& model()
@@ -54,7 +54,7 @@ protected:
 private:
     yap::MassAxes Axes_;
     std::unique_ptr<yap::Model> Model_;
-    std::shared_ptr<yap::DecayingParticle> ISP_;
+    std::shared_ptr<yap::DecayingState> ISP_;
 
     std::vector<unsigned> LikelihoodCalls_;
 

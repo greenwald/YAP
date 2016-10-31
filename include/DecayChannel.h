@@ -73,14 +73,14 @@ public:
 
     /// automatically create all possible spin amplitudes given initial spin J
     /// parity conservation is ignored if parity is set 0
-    /// \param two_J (twice) decaying particle's spin
-    /// \param eta decaying particle's parity (set to zero to ignore)
+    /// \param two_J (twice) decaying state's spin
+    /// \param p decaying state's parity (set to zero to ignore)
     void addAllPossibleSpinAmplitudes(unsigned two_J, int p = 0);
 
-    /// grant friend status to DecayingParticle to call
+    /// grant friend status to DecayingState to call
     /// addParticleCombination, pruneParticleCombinations,
     /// and registerWithModel
-    friend class DecayingParticle;
+    friend class DecayingState;
 
 protected:
 

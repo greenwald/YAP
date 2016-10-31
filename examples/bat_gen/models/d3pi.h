@@ -96,7 +96,7 @@ inline unique_ptr<Model> d3pi(unique_ptr<Model> M)
     sigma->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(sigma, piPlus);
 
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     // Add channels to D
     *free_amplitude(*M, to(rho))      = polar(1., 0.);

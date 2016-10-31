@@ -27,11 +27,11 @@
 bat_gen::bat_gen(std::string name, std::unique_ptr<yap::Model> M, double initial_mass, std::vector<std::vector<unsigned> > pcs)
 : bat_yap_base(name, std::move(M)), InitialMass_(initial_mass)
 {
-    for (auto& kv : model()->initialStateParticles()) {
+    for (auto& isp_mix : model()->initialStates()) {
 
-        std::cout << "Initial state particle " << to_string(*kv.first) << " with " << to_string(kv.second) << std::endl;
+        std::cout << "Initial state particle " << to_string(*isp_mix.first) << " with " << to_string(isp_mix.second) << std::endl;
 
-        for (const auto& m_dtv : kv.first->decayTrees())
+        for (const auto& m_dtv : isp_mix.first->decayTrees())
             for (const auto& dt : m_dtv.second)
                 if (dt->freeAmplitude()->variableStatus() != yap::VariableStatus::fixed)
                     std::cout << to_string(*dt->freeAmplitude())

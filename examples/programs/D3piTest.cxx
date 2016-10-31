@@ -10,6 +10,7 @@
 #include <FourMomenta.h>
 #include <FourVector.h>
 #include <FreeAmplitude.h>
+#include <Group.h>
 #include <HelicityAngles.h>
 #include <HelicityFormalism.h>
 #include <ImportanceSampler.h>
@@ -123,7 +124,7 @@ int main( int argc, char** argv)
     *free_amplitude(*D, yap::to(sigma))    = std::polar(3.7, yap::rad(-3.));
     // D->addWeakDecay(piPlus, piMinus, piPlus);
 
-    M.addInitialStateParticle(D);
+    M.addInitialState(D);
 
     // check consistency
     if (M.consistent())

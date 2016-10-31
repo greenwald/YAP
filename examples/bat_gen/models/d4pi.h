@@ -180,7 +180,7 @@ inline std::unique_ptr<Model> d4pi()
         *free_amplitude(*D, to(sigma,   piPlus, piMinus)) = std::polar(scale_sigma_pipi * 0.432, rad(254.));
     }
     
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     LOG(INFO) << "D Decay trees:";
     LOG(INFO) << to_string(D->decayTrees());
@@ -250,7 +250,7 @@ inline fit_fitFraction d4pi_fit_fitFraction()
     auto f_0   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0")));
     auto f_2   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_2")));
 
-    LOG(INFO) << m.model()->initialStateParticles().at(D).begin()->first;
+    LOG(INFO) << m.model()->initialStates().at(D).begin()->first;
 
     // set fit fractions to fit
     /// \todo does not yet work with more than one decayTree

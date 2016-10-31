@@ -50,7 +50,7 @@ int main( int argc, char** argv)
     // Add channels to D
     D->addWeakDecay(phi, piPlus);
 
-    M.addInitialStateParticle(D);
+    M.addInitialState(D);
 
     // check consistency
     if (M.consistent())

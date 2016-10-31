@@ -74,7 +74,7 @@ inline unique_ptr<Model> dkkpi(unique_ptr<Model> M)
     /* D->addWeakDecay(piK2, kPlus); */
     /* *free_amplitude(*D, to(piK2)) = polar(7.8, rad(56.)); */
     
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     return M;
 }

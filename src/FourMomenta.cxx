@@ -3,7 +3,6 @@
 #include "CachedValue.h"
 #include "CalculationStatus.h"
 #include "container_utils.h"
-#include "DecayingParticle.h"
 #include "Exceptions.h"
 #include "FinalStateParticle.h"
 #include "FourVector.h"

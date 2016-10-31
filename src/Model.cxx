@@ -1,5 +1,6 @@
 #include "Model.h"
 
+#include "Attributes.h"
 #include "BlattWeisskopf.h"
 #include "CalculationStatus.h"
 #include "CompensatedSum.h"
@@ -8,10 +9,13 @@
 #include "DataPoint.h"
 #include "DataSet.h"
 #include "DecayChannel.h"
-#include "DecayingParticle.h"
+#include "DecayingState.h"
 #include "DecayTree.h"
 #include "FinalStateParticle.h"
 #include "FourMomenta.h"
+#include "FreeAmplitude.h"
+#include "Group.h"
+#include "HelicityAngles.h"
 #include "logging.h"
 #include "MassAxes.h"
 #include "Parameter.h"
@@ -58,7 +62,7 @@ void Model::calculate(DataPartition& D) const
 }
 
 //-------------------------
-const double intensity(const InitialStateParticleMap::value_type& isp_mix, const DataPoint& d)
+const double intensity(const InitialStateMap::value_type& isp_mix, const DataPoint& d)
 {
     return std::accumulate(isp_mix.second.begin(), isp_mix.second.end(), 0.,
                            [&](double& I, const AdmixtureMap::value_type& m_b)
@@ -67,10 +71,10 @@ const double intensity(const InitialStateParticleMap::value_type& isp_mix, const
 }
 
 //-------------------------
-const double intensity(const InitialStateParticleMap& isp_map, const DataPoint& d)
+const double intensity(const InitialStateMap& isp_map, const DataPoint& d)
 {
     return std::accumulate(isp_map.begin(), isp_map.end(), 0.,
-                           [&](double& I, const InitialStateParticleMap::value_type& isp_mix)
+                           [&](double& I, const InitialStateMap::value_type& isp_mix)
                            { return I += intensity(isp_mix, d); });
 }
 
@@ -86,18 +90,18 @@ const double sum_of_logs_of_intensities(const Model& M, DataPartition& D, double
     if (ped == 0)
         return std::accumulate(D.begin(), D.end(), CompensatedSum<double>(0.),
                                [&](CompensatedSum<double>& l, const DataPoint& d)
-                               {return l += log(intensity(M.initialStateParticles(), d));});
+                               {return l += log(intensity(M.initialStates(), d));});
     // else
     return std::accumulate(D.begin(), D.end(), CompensatedSum<double>(0.),
                            [&](CompensatedSum<double>& l, const DataPoint& d)
-                           {return l += (log(intensity(M.initialStateParticles(), d)) - ped);});
+                           {return l += (log(intensity(M.initialStates(), d)) - ped);});
 }
 
 //-------------------------
 const double sum_of_log_intensity(const Model& M, DataPartition& D, double ped)
 {
-    if (M.initialStateParticles().empty())
-        throw exceptions::Exception("Model has no initialStateParticles", "sum_of_log_intensity");
+    if (M.initialStates().empty())
+        throw exceptions::Exception("Model has no initial states", "sum_of_log_intensity");
 
     return sum_of_logs_of_intensities(M, D, ped);
 }
@@ -117,8 +121,8 @@ const double sum_of_log_intensity(const Model& M, DataPartitionVector& DP, doubl
     if (DP.size() == 1)
         return sum_of_log_intensity(M, *DP[0], ped);
 
-    if (M.initialStateParticles().empty())
-        throw exceptions::Exception("Model has no InitialStateParticles", "sum_of_log_intensity");
+    if (M.initialStates().empty())
+        throw exceptions::Exception("Model has no InitialStates", "sum_of_log_intensity");
 
     std::vector<std::future<double> > partial_sums;
     partial_sums.reserve(DP.size());
@@ -144,7 +148,7 @@ bool Model::consistent() const
     for (const auto& da : dataAccessors())
         C &= da->consistent();
 
-    for (auto& p : initialStateParticles())
+    for (auto& p : initialStates())
         C &= p.first->consistent();
 
     return C;
@@ -217,33 +221,56 @@ AdmixtureMap admixture_map(const DecayTreeVectorMap& dtvm)
 }
 
 //-------------------------
-const InitialStateParticleMap::value_type& Model::addInitialStateParticle(std::shared_ptr<DecayingParticle> p)
+void Model::addInitialState(std::shared_ptr<DecayingState> p)
 {
     if (locked())
-        throw exceptions::Exception("Model is locked and cannot be modified.", "Model::addInitialStateParticle");
+        throw exceptions::Exception("Model is locked and cannot be modified.", "Model::addInitialState");
 
     if (!p)
-        throw exceptions::Exception("Initial-state particle empty", "Model::addInitialStateParticle");
-
+        throw exceptions::Exception("DecayingState is nullptr", "Model::addInitialState");
+    
     // add DataAccessors to model / set model pointers
     p->registerWithModel();
-
+    
     if (p->model() != this)
-        throw exceptions::Exception("Initial-state particle does not belong to this model", "Model::addInitialStateParticle");
+        throw exceptions::Exception("Initial state does not belong to this model", "Model::addInitialState");
 
-    auto res = InitialStateParticles_.emplace(p, admixture_map(p->decayTrees()));
+    auto res = InitialStates_.emplace(std::dynamic_pointer_cast<DecayingState>(p->shared_from_this()), admixture_map(p->decayTrees()));
 
     if (res.second) { // new element was inserted
         for (auto& pc : p->particleCombinations())
             addParticleCombination(*pc);
 
-    } else { // no new element was inserted
-        // check if insertion failed
-        if (res.first == InitialStateParticles_.end())
-            throw exceptions::Exception("Failed to insert initialStateParticle", "Model::addInitialStateParticle");
-    }
+    // no new element was inserted, check if insertion failed
+    } else if (res.first == InitialStates_.end())
+        throw exceptions::Exception("Failed to insert initial state", "Model::addInitialState");
+}
 
-    return *res.first;
+//-------------------------
+void Model::addInitialState(std::shared_ptr<DecayingState> p, double f)
+{
+    addInitialState(p);
+    // retrieve admixture map
+    auto it = InitialStates_.find(p);
+    if (it == InitialStates_.end())
+        throw exceptions::Exception("Initial state not found", "Model::addInitialState");
+    if (it->second.size() != 1)
+        throw exceptions::Exception("Several spin projections exist", "Model::addInitialState");
+    *(it->second.begin()->second) = f;
+}
+
+//-------------------------
+void fix_solitary_free_amplitudes(Model& m)
+{
+    // loop over sets of FreeAmplitudes grouped by parent state
+    for (const auto fas : group(free_amplitudes(m), by_parent_state<>()))
+        // if there is only one free amplitude for the decay of a state
+        if (fas.size() == 1) {
+            if (!*fas.begin())
+                throw exceptions::Exception("FreeAmplitude is nullptr", "fix_solitary_free_amplitudes");
+            // fix it
+            (*fas.begin())->variableStatus() = VariableStatus::fixed;
+        }
 }
 
 //-------------------------
@@ -251,8 +278,7 @@ std::string to_string(const AdmixtureMap& mix)
 {
     return std::accumulate(mix.begin(), mix.end(), std::string(),
                            [](std::string& s, const AdmixtureMap::value_type& m_b)
-                           { return s += "; b(m = " + std::to_string(m_b.first) + ") = " + to_string(*m_b.second); }
-        ).erase(0, 2);
+                           {return s += "; b(m = " + std::to_string(m_b.first) + ") = " + to_string(*m_b.second);}).erase(0, 2);
 }
 
 //-------------------------
@@ -264,16 +290,16 @@ size_t all_fixed(const AdmixtureMap& mix)
 }
 
 //-------------------------
-std::vector<std::shared_ptr<DecayingParticle> > full_final_state_isp(const Model& M)
+std::vector<std::shared_ptr<DecayingState> > full_final_state_isp(const Model& M)
 {
-    std::vector<std::shared_ptr<DecayingParticle> > isps;
-    isps.reserve(M.initialStateParticles().size());
+    std::vector<std::shared_ptr<DecayingState> > isps;
+    isps.reserve(M.initialStates().size());
     // collect first those particles for whom all admixture factors are fixed
-    for (const auto& isp_am : M.initialStateParticles())
+    for (const auto& isp_am : M.initialStates())
         if (decays_to_full_final_state(*isp_am.first) and all_fixed(isp_am.second))
             isps.push_back(isp_am.first);
     // then collect the rest
-    for (const auto& isp_am : M.initialStateParticles())
+    for (const auto& isp_am : M.initialStates())
         if (decays_to_full_final_state(*isp_am.first) and !all_fixed(isp_am.second))
             isps.push_back(isp_am.first);
     return isps;
@@ -296,15 +322,16 @@ void Model::lock()
         return;
 
     // prune initial state particles
-    // and fix their amplitudes if necessary
-    for (auto& isp_mix : InitialStateParticles_) {
+    for (auto& isp_mix : InitialStates_)
         isp_mix.first->pruneParticleCombinations();
-        isp_mix.first->fixSolitaryFreeAmplitudes();
-    }
+
+    // fix any amplitudes that are the only for a particular
+    // particle's decay
+    fix_solitary_free_amplitudes(*this);
 
     // if only one ISP with only one spin projection, fix it's admixture
-    if (InitialStateParticles_.size() == 1 and InitialStateParticles_.begin()->second.size() == 1)
-        InitialStateParticles_.begin()->second.begin()->second->variableStatus() = VariableStatus::fixed;
+    if (InitialStates_.size() == 1 and InitialStates_.begin()->second.size() == 1)
+        InitialStates_.begin()->second.begin()->second->variableStatus() = VariableStatus::fixed;
 
     // remove expired elements of DataAccessors_
     remove_expired(DataAccessors_);
@@ -419,8 +446,8 @@ DataSet Model::createDataSet(size_t n)
 FreeAmplitudeSet free_amplitudes(const Model& M)
 {
     FreeAmplitudeSet S;
-    for (const auto& dp_am : M.initialStateParticles()) {
-        auto s = free_amplitudes(*dp_am.first);
+    for (const auto& ds_am : M.initialStates()) {
+        auto s = free_amplitudes(*ds_am.first);
         S.insert(s.begin(), s.end());
     }
     return S;
@@ -430,8 +457,8 @@ FreeAmplitudeSet free_amplitudes(const Model& M)
 ParticleSet particles(const Model& M)
 {
     ParticleSet S;
-    for (const auto& dp_am : M.initialStateParticles()) {
-        auto s = particles(*dp_am.first);
+    for (const auto& ds_am : M.initialStates()) {
+        auto s = particles(*ds_am.first);
         S.insert(s.begin(), s.end());
     }
     return S;

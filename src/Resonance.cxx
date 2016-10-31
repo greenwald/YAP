@@ -66,7 +66,7 @@ void Resonance::addParticleCombination(const ParticleCombination& pc)
 void Resonance::modifyDecayTree(DecayTree& dt)
 {
     DecayingParticle::modifyDecayTree(dt);
-    dt.addAmplitudeComponent(*MassShape_);
+    addAmplitudeComponent(dt, *MassShape_);
 }
 
 }

@@ -53,7 +53,7 @@ inline std::shared_ptr<yap::Model> d4pi()
     D->addWeakDecay(rho, rho);
     D->addWeakDecay(a_1, piMinus);
 
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     return M;
 }
@@ -96,7 +96,7 @@ inline std::shared_ptr<yap::Model> dkkp(int pdg_D, std::vector<int> fsps)
         }
     }
 
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     return M;
 }
@@ -129,7 +129,7 @@ std::shared_ptr<yap::Model> d3pi()
     // Add channels to D
     D->addWeakDecay(rho, piPlus);
 
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
 
     return M;
 }
@@ -139,7 +139,7 @@ inline yap::DataSet generate_data(yap::Model& M, unsigned nPoints)
 {
     yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
     
-    auto isp_mass = factory[M.initialStateParticles().begin()->first->name()].mass();
+    auto isp_mass = factory[M.initialStates().begin()->first->name()].mass();
 
     auto A = M.massAxes();
     auto m2r = yap::squared(yap::mass_range(isp_mass, A, M.finalStateParticles()));

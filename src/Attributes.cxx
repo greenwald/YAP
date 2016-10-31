@@ -3,7 +3,7 @@
 #include "BlattWeisskopf.h"
 #include "DecayChannel.h"
 #include "DecayTree.h"
-#include "DecayingParticle.h"
+#include "DecayingState.h"
 #include "Filter.h"
 #include "FinalStateParticle.h"
 #include "FreeAmplitude.h"
@@ -97,9 +97,9 @@ const bool to::operator()(const DecayTree& dt) const
 //-------------------------
 const bool to::operator()(const Particle& p) const
 {
-    if (!is_decaying_particle(p))
+    if (!is_decaying_state(p))
         return false;
-    for (const auto& dc : static_cast<const DecayingParticle*>(&p)->channels())
+    for (const auto& dc : static_cast<const DecayingState*>(&p)->channels())
         if (operator()(dc))
             return true;
     return false;
@@ -158,9 +158,9 @@ const bool has_free_amplitude::operator()(const DecayTree& dt) const
 //-------------------------
 const bool has_free_amplitude::operator()(const Particle& p) const
 {
-    if (!is_decaying_particle(p))
+    if (!is_decaying_state(p))
         return false;
-    for (const auto& m_dtv : dynamic_cast<const DecayingParticle&>(p).decayTrees())
+    for (const auto& m_dtv : dynamic_cast<const DecayingState&>(p).decayTrees())
         for (const auto& dt : m_dtv.second)
             if(std::find(objects().begin(), objects().end(), dt->freeAmplitude().get()) != objects().end())
                 return true;
@@ -170,9 +170,9 @@ const bool has_free_amplitude::operator()(const Particle& p) const
 //-------------------------
 const bool has_decay_tree::operator()(const Particle& p) const
 {
-    if (!is_decaying_particle(p))
+    if (!is_decaying_state(p))
         return false;
-    for (const auto& m_dtv : dynamic_cast<const DecayingParticle&>(p).decayTrees())
+    for (const auto& m_dtv : dynamic_cast<const DecayingState&>(p).decayTrees())
         for (const auto& dt : m_dtv.second)
             if (std::find(objects().begin(), objects().end(), dt.get()) != objects().end())
                 return true;
@@ -194,9 +194,9 @@ const bool has_decay_tree::operator()(const DecayTree& dt) const
 //-------------------------
 const bool has_decay_channel::operator()(const Particle& p) const
 {
-    if (!is_decaying_particle(p))
+    if (!is_decaying_state(p))
         return false;
-    for (const auto& dc : dynamic_cast<const DecayingParticle&>(p).channels())
+    for (const auto& dc : dynamic_cast<const DecayingState&>(p).channels())
         if (std::find(objects().begin(), objects().end(), dc.get()) != objects().end())
             return true;
     return false;
@@ -218,43 +218,43 @@ const bool has_decay_channel::operator()(const DecayTree& dt) const
 }
     
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const DecayTree& dt) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const DecayTree& dt) const
 {
     if (!dt.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(DecayTree)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*dt.model(), has_decay_tree(dt)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(DecayTree)");
+    return std::static_pointer_cast<DecayingState>(particle(*dt.model(), has_decay_tree(dt)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const FreeAmplitude& fa) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const FreeAmplitude& fa) const
 {
     if (!fa.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(FreeAmplitude)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*fa.model(), has_free_amplitude(fa)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(FreeAmplitude)");
+    return std::static_pointer_cast<DecayingState>(particle(*fa.model(), has_free_amplitude(fa)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const DecayChannel& dc) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const DecayChannel& dc) const
 {
     if (!dc.model())
-        throw exceptions::Exception("model is nullptr", "parent_particle::operator()(DecayChannel)");
-    return std::static_pointer_cast<DecayingParticle>(particle(*dc.model(), has_decay_channel(dc)));
+        throw exceptions::Exception("model is nullptr", "parent_state::operator()(DecayChannel)");
+    return std::static_pointer_cast<DecayingState>(particle(*dc.model(), has_decay_channel(dc)));
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const BlattWeisskopf& bw) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const BlattWeisskopf& bw) const
 {
-    if (!bw.decayingParticle())
+    if (!bw.decayingState())
         return nullptr;
-    return std::static_pointer_cast<const DecayingParticle>(bw.decayingParticle()->shared_from_this());
+    return std::static_pointer_cast<const DecayingState>(bw.decayingState()->shared_from_this());
 }
 
 //-------------------------
-std::shared_ptr<const DecayingParticle> parent_particle::operator()(const MassShape& m) const
+std::shared_ptr<const DecayingState> parent_state::operator()(const MassShape& m) const
 {
     if (!m.resonance())
         return nullptr;
-    return std::static_pointer_cast<DecayingParticle>(m.resonance()->shared_from_this());
+    return std::static_pointer_cast<DecayingState>(m.resonance()->shared_from_this());
 }
 
 //-------------------------
@@ -295,14 +295,14 @@ const bool from::operator()(const Particle& p) const
         throw exceptions::Exception("model is nullptr", "from::operator()(Particle)");
     auto parents = particles(*p.model(), to(p));
     for (const auto& P : parents)
-        if (std::dynamic_pointer_cast<DecayingParticle>(P)
-            and contains(dynamic_cast<DecayingParticle*>(P.get())))
+        if (std::dynamic_pointer_cast<DecayingState>(P)
+            and contains(dynamic_cast<DecayingState*>(P.get())))
             return true;
     return false;
 }
 
 //-------------------------
-const bool from::contains(const DecayingParticle* const p) const
+const bool from::contains(const DecayingState* const p) const
 {        
     return std::find(objects().begin(), objects().end(), p) != objects().end();
 }

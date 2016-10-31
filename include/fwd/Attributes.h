@@ -22,8 +22,10 @@
 #define yap__AttributesFwd_h
 
 #include "fwd/AttributeUtilities.h"
+#include "fwd/DecayingState.h"
 
 #include <functional>
+#include <memory>
 
 namespace yap {
 
@@ -62,7 +64,7 @@ struct has_free_amplitude;
 struct has_decay_tree;
 struct has_decay_channel;
 
-struct parent_particle;
+struct parent_state;
 template <typename> class name_of;
 
 struct has_a_mass;
@@ -70,8 +72,12 @@ struct has_a_mass;
 /// functor to check particle name
 using is_named = check_attribute<name_of<identity> >;
 
-/// functor to return name of parent_particle
-using parent_name = name_of<parent_particle>;
+/// functor to return name of parent_state
+using parent_name = name_of<parent_state>;
+
+/// functor to compare by parent name
+template <typename C = std::owner_less<std::shared_ptr<const DecayingState> > >
+using by_parent_state = compare_by<parent_state, C>;
 
 /// functor to compare by parent name
 template <typename C = std::less<std::string> >

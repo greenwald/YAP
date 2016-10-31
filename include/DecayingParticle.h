@@ -23,37 +23,28 @@
 
 #include "fwd/DecayingParticle.h"
 
-#include "fwd/BlattWeisskopf.h"
 #include "fwd/DecayChannel.h"
-#include "fwd/DecayTree.h"
-#include "fwd/FreeAmplitude.h"
-#include "fwd/Model.h"
-#include "fwd/ParticleCombination.h"
+#include "fwd/Particle.h"
 #include "fwd/QuantumNumbers.h"
 
 #include "AttributeUtilities.h"
-#include "Particle.h"
+#include "DecayingState.h"
 
 #include <memory>
 
 namespace yap {
 
-/// Class for a particle that will decay
+/// A DecayingState with one or more possible DecayChannels
 /// \author Johannes Rauch, Daniel Greenwald
 /// \ingroup Particle
-///
-/// The amplitude function returns a sum over the amplitudes of all
-/// #DecayChannel's for the decay of the particle (denoted P, with
-/// daughters in channel c denoted D1, D2; and amplitude A_c):\n
-/// A_c = a_c * Blatt-Weisskopf(P->D1+D2) * SpinAmplitude(P->D1+D2) * A(D1->xx) * A(D2->xx)\n
-/// with free amplitude a_c.
-class DecayingParticle : public Particle
+class DecayingParticle : public DecayingState
 {
 protected:
 
     /// Constructor
     /// see #create
-    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radialSize);
+    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radialSize)
+        : DecayingState(name, q, radialSize) {}
 
 public:
 
@@ -64,22 +55,7 @@ public:
     static std::shared_ptr<DecayingParticle> create(const std::string& name, const QuantumNumbers& q, double radialSize)
     { return std::shared_ptr<DecayingParticle>(new DecayingParticle(name, q, radialSize)); }
 
-    /// \return DecayTrees
-    /// map key is spin projection
-    const DecayTreeVectorMap& decayTrees() const
-    { return DecayTrees_; }
-
-    /// Check consistency of object
-    virtual bool consistent() const override;
-
     /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// \param c unique_ptr to DecayChannel, should be constructed in function call, or use std::move(c)
-    /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically
-    /// \return shared_ptr to DecayChannel that has been added
-    virtual std::shared_ptr<DecayChannel> addDecayChannel(std::shared_ptr<DecayChannel> c, bool conserve_parity = false);
-
-    /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// Parity is _not_ converved
     /// \param daughters ParticleVector of daughters to create DecayChannel object from
     /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically
     /// \return shared_ptr to DecayChannel that has been added
@@ -103,7 +79,7 @@ public:
     { ParticleVector V{A, B, other_daughters...}; return addWeakDecay(V); }
 
     /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// Parity _is_ conserved
+    /// Parity _is_ converved
     /// \param A shared_ptr to a daughter
     /// \param B shared_ptr to a daughter
     /// \param other_daughters... other daughters
@@ -112,122 +88,11 @@ public:
     std::shared_ptr<DecayChannel> addStrongDecay(std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
     { ParticleVector V{A, B, other_daughters...}; return addStrongDecay(V); }
 
-    /// \name Getters
-    /// @{
-
-    /// \return channels
-    const DecayChannelVector& channels() const
-    { return Channels_;}
-
-    /// \return Radial size [GeV^-1]
-    std::shared_ptr<RealParameter> radialSize()
-    { return RadialSize_; }
-
-    /// \return Blatt-Weisskopf factors
-    const BlattWeisskopfMap& blattWeisskopfs() const
-    { return BlattWeisskopfs_; }
-
-    /// @}
-
-    /// \return raw pointer to Model through first DecayChannel
-    const Model* model() const override;
-
-    /// grant friend status to Model to call fixSolitaryFreeAmplitudes()
-    friend Model;
-
-    /// grant friend status to DecayChannel to call registerWithModel()
-    friend DecayChannel;
-
-protected:
-
-    /// add ParticleCombination to SymmetrizationIndices_ and BlattWeisskopfs_
-    virtual void addParticleCombination(const ParticleCombination& c) override;
-
-    /// prune ParticleCombinations_ to only contain ParticleCombination's tracing back up the ISP
-    virtual void pruneParticleCombinations() override;
-
-    /// register any necessary DataAccessor's with model
-    virtual void registerWithModel() override;
-
-    /// if only one decay channel is available, fix its free amplitude to the current value
-    void fixSolitaryFreeAmplitudes();
-
-    /// modify a DecayTree
-    /// \param dt DecayTree to modify
-    virtual void modifyDecayTree(DecayTree& dt);
-
-private:
-
-    /// vector of decay channel objects
-    DecayChannelVector Channels_;
-
-    /// map of Blatt-Weisskopf barrier factors, key = angular momentum
-    BlattWeisskopfMap BlattWeisskopfs_;
-
-    /// Radial size parameter [GeV^-1]
-    std::shared_ptr<RealParameter> RadialSize_;
-
-    /// Map of spin projection to DecayTreeVector
-    DecayTreeVectorMap DecayTrees_;
-
 };
 
 /// checks if something inherits from DecayingParticle
 extern const is_of_type<DecayingParticle> is_decaying_particle;
  
-/// convert to (multiline) string
-std::string to_decay_string(const DecayingParticle& dp, unsigned level = 0);
- 
-/// convert to (multiline) string
-std::string to_string(const DecayTreeVectorMap& m_dtv_map);
-
-/// \return Set of all decay trees in provided DecayingParticle
-/// \todo Have it recursively travel down DecayChannels?
-DecayTreeSet decay_trees(const DecayingParticle& dp);
-
-/// \return DecayTreeSet for decays passing provided predicates
-/// \param p last predicate to apply in filtering DecayTree's
-/// \param P... predicates to apply in filtering DecayTree's
-template <typename Last, typename ... Predicates>
-DecayTreeSet decay_trees(const DecayingParticle& dp, Last p, Predicates ... P)
-{ return filter(decay_trees(dp), p, P...); }
-
-/// \return lone DecayTree passing provided predicates
-/// \param p last predicate to apply in filtering DecayTree's
-/// \param P... predicates to apply in filtering DecayTree's
-/// throws if no unique DecayTree is found
-template <typename Last, typename ... Predicates>
-DecayTreeSet::value_type decay_tree(const DecayingParticle& dp, Last p, Predicates ... P)
-{ return lone_elt(filter(decay_trees(dp), p, P...)); }
-
-/// \return all the free amplitudes under a decaying particle
-FreeAmplitudeSet free_amplitudes(const DecayingParticle& dp);
-
-/// \return free amplitude in a model from decay trees evaluating to true
-template <typename Last, typename ... UnaryPredicates>
-FreeAmplitudeSet free_amplitudes(const DecayingParticle& dp, Last p, UnaryPredicates ... P)
-{ return filter(free_amplitudes(dp), p, P...); }
-
-/// \return lone free amplitude in a model from decay trees evaluating to true
-/// throws if no unique free amplitude is found
-template <typename Last, typename ... UnaryPredicates>
-FreeAmplitudeSet::value_type free_amplitude(const DecayingParticle& dp, Last p, UnaryPredicates ... P)
-{ return lone_elt(free_amplitudes(dp, p, P...)); }
-
-/// \return set of all particles below given DecayingParticle, including itself
-ParticleSet particles(DecayingParticle& dp);
-
-/// \return DecayChannel's of DecayingParticle matching predicates
-template <typename Last, typename ... UnaryPredicates>
-DecayChannelSet decay_channels(const DecayingParticle& dp, Last p, UnaryPredicates ... P)
-{ return filter(DecayChannelSet(dp.channels().begin(), dp.channels().end()), p, P...); }
-
-/// \return lone DecayChannel of DecayingParticle matching predicates
-/// throws if no unique DecayChannel is found
-template <typename Last, typename ... UnaryPredicates>
-DecayChannelSet::value_type decay_channel(const DecayingParticle& dp, Last p, UnaryPredicates ... P)
-{ return lone_elt(decay_channels(dp, p, P...)); }
-
 }
 
 #endif

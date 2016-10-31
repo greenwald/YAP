@@ -2,7 +2,7 @@
 
 #include "container_utils.h"
 #include "Attributes.h"
-#include "DecayingParticle.h"
+#include "DecayingState.h"
 #include "Exceptions.h"
 #include "FinalStateParticle.h"
 #include "logging.h"
@@ -272,11 +272,11 @@ ParticleSet particles(const DecayChannel& dc)
     for (const auto& d : dc.daughters()) {
         if (is_final_state_particle(*d))
             S.insert(d);
-        else if (is_decaying_particle(*d)) {
-            auto s = particles(*std::static_pointer_cast<DecayingParticle>(d));
+        else if (is_decaying_state(*d)) {
+            auto s = particles(static_cast<const DecayingState&>(*d));
             S.insert(s.begin(), s.end());
         } else
-            throw exceptions::Exception("neither final-state particle nor decaying particle", "find_particles");
+            throw exceptions::Exception("neither final-state particle nor decaying state", "find_particles");
     }
     return S;
 }

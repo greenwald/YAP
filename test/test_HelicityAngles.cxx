@@ -122,7 +122,7 @@ TEST_CASE( "HelicityAngles" )
 
         yap::ParticleCombinationMap<yap::spherical_angles<double> > hel_angles;
 
-        for (auto& pc : M->initialStateParticles().begin()->first->particleCombinations()) {
+        for (auto& pc : M->initialStates().begin()->first->particleCombinations()) {
             REQUIRE( M->fourMomenta()->m(dp, pc) == Approx(D_mass) );
 
             calculate_helicity_angles(*M, hel_angles, pc, momenta); // YAP

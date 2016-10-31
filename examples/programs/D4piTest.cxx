@@ -94,11 +94,8 @@ int main( int argc, char** argv)
     //yap::Resonance* f_0_980 = F.resonanceBreitWigner(9000221, radialSize);
     //F.createChannel(f_0_980, piPlus, piMinus, 0);
 
-    // InitialStateParticles
-    M.addInitialStateParticle(D);
-    // add other background particles
-    M.addInitialStateParticle(a_1);
-    M.addInitialStateParticle(rho);
+    // Initial States
+    M.addInitialState(D, a_1, rho);
 
     // check consistency
     if (M.consistent())
@@ -110,7 +107,7 @@ int main( int argc, char** argv)
 
     // print stuff
 
-    for (auto& isp : M.initialStateParticles()) {
+    for (auto& isp : M.initialStates()) {
         FLOG(INFO) << "";
         FLOG(INFO) << isp.first->particleCombinations().size() << " " << *isp.first << " symmetrizations";
         for (auto& pc : isp.first->particleCombinations())
@@ -167,7 +164,7 @@ int main( int argc, char** argv)
 
         // change amplitudes
         if (uniform(g) > 0.5)
-            for (auto& isp_b : M.initialStateParticles())
+            for (auto& isp_b : M.initialStates())
                 for (auto& m_dtv : isp_b.first->decayTrees())
                     for (auto& dt : m_dtv.second)
                         if (dt->freeAmplitude()->variableStatus() != yap::VariableStatus::fixed and uniform(g) > 0.5)
@@ -239,7 +236,7 @@ int main( int argc, char** argv)
         for (const auto& fa : sort(fav, yap::compare_by<yap::is_fixed>(), yap::by_parent_name<>()))
             LOG(INFO) << yap::to_string(*fa);
     }
-    
+
     FLOG(INFO) << "alright! \n";
 
     return 0;

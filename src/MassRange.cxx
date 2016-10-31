@@ -1,7 +1,6 @@
 #include "MassRange.h"
 
 #include "container_utils.h"
-#include "DecayingParticle.h"
 #include "Exceptions.h"
 #include "FinalStateParticle.h"
 #include "MassAxes.h"

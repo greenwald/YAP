@@ -89,7 +89,7 @@ inline std::unique_ptr<yap::Model> D_K0pi0pi0(std::unique_ptr<yap::Model> M)
     Kstar_1680->addStrongDecay(Kshort, piZero);
     D->addWeakDecay(Kstar_1680, piZero);
 
-    M->addInitialStateParticle(D);
+    M->addInitialState(D);
    
     // change switch argument to choose between different CLEO models
     switch (1) {

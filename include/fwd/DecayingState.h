@@ -17,27 +17,14 @@
  */
 
 /// \file
+/// contains forward declarations only
 
-#ifndef yap_ModelFwd_h
-#define yap_ModelFwd_h
-
-#include "fwd/DecayingState.h"
-#include "fwd/Parameter.h"
-
-#include <map>
-#include <memory>
+#ifndef yap_DecayingStateFwd_h
+#define yap_DecayingStateFwd_h
 
 namespace yap {
 
-class Model;
-
-/// \typedef 
-/// maps spin projection (int) to admixture factor
-using AdmixtureMap = std::map<int, std::shared_ptr<RealParameter> >;
-
-/// \typedef InitialStateMap
-/// maps ISP to AdmixtureMap = one free real parameter per spin projection of ISP
-using InitialStateMap = std::map<std::shared_ptr<DecayingState>, AdmixtureMap>;
+class DecayingState;
 
 }
 

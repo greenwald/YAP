@@ -25,7 +25,7 @@
 #include "fwd/DataPartition.h"
 #include "fwd/DataPoint.h"
 #include "fwd/DataSet.h"
-#include "fwd/DecayingParticle.h"
+#include "fwd/DecayingState.h"
 #include "fwd/FinalStateParticle.h"
 #include "fwd/FourMomenta.h"
 #include "fwd/FourVector.h"
@@ -132,9 +132,9 @@ public:
     const FinalStateParticleVector& finalStateParticles() const
     { return FinalStateParticles_; }
 
-    /// \return InitialStateParticles_
-    const InitialStateParticleMap& initialStateParticles() const
-    { return InitialStateParticles_; }
+    /// \return InitialStates_
+    const InitialStateMap& initialStates() const
+    { return InitialStates_; }
 
     /// \return set of DataAccessors
     const DataAccessorSet& dataAccessors() const
@@ -161,12 +161,19 @@ public:
     void setFinalState(Types ... FSPs)
     { FinalStateParticleVector V{FSPs...}; setFinalState(V); }
 
-    /// add an initial state particle
-    /// The first particle added that decays to the full final state will become THE initial state particle,
-    /// which can be retrieved by calling #initialStateParticle,
-    /// and its amplitude will be fixed
-    const InitialStateParticleMap::value_type& addInitialStateParticle(std::shared_ptr<DecayingParticle> bg);
+    /// add an initial state 
+    void addInitialState(std::shared_ptr<DecayingState> p);
 
+    /// add an initial state and set its admixture factor
+    /// \param p initial satte
+    /// \param f admixture factor
+    void addInitialState(std::shared_ptr<DecayingState> p, double f);
+
+    /// add initial states
+    template <typename ... Types>
+        void addInitialState(std::shared_ptr<DecayingState> a, std::shared_ptr<DecayingState> b, Types ... C)
+    { addInitialState(a); addInitialState(b, C...); }
+    
     /// set four momenta of data point
     /// \param P vector of FourVectors of final-state momenta
     /// \param sm StatusManager to update
@@ -206,8 +213,8 @@ public:
     /// grant friend status to DataAccessor to register itself with this
     friend class StaticDataAccessor;
 
-    /// grant friend status to DecayingParticle to call addParticleCombination
-    friend class DecayingParticle;
+    /// grant friend status to DecayingState to call addParticleCombination
+    friend class DecayingState;
 
 protected:
 
@@ -242,7 +249,7 @@ private:
 
     /// pointers to initial particles
     /// they will be summed in incoherently
-    InitialStateParticleMap InitialStateParticles_;
+    InitialStateMap InitialStates_;
 
     /// vector of final state particles
     FinalStateParticleVector FinalStateParticles_;
@@ -261,16 +268,16 @@ std::string to_string(const AdmixtureMap& mix);
 /// \return whether a particle decays to its model's full final state
 const bool decays_to_full_final_state(const Particle& p);
 
-/// \return vector of shared_ptr to DecayingParticles inside Model
+/// \return vector of shared_ptr to DecayingStates inside Model
 /// that decay to its full final state, sorted such that the first
 /// entries have fixed prefactors
-std::vector<std::shared_ptr<DecayingParticle> > full_final_state_isp(const Model& M);
+std::vector<std::shared_ptr<DecayingState> > full_final_state_isp(const Model& M);
 
 /// \return intensity for all spin projections of an ISP
-const double intensity(const InitialStateParticleMap::value_type& isp_mix, const DataPoint& d);
+const double intensity(const InitialStateMap::value_type& isp_mix, const DataPoint& d);
 
 /// \return intensity for a data point evaluated over isp_map
-const double intensity(const InitialStateParticleMap& isp_map, const DataPoint& d);
+const double intensity(const InitialStateMap& isp_map, const DataPoint& d);
 
 /// \return The sum of the logs of squared amplitudes evaluated over the data partition
 /// \param M Model to evaluate
@@ -310,6 +317,10 @@ ParticleSet particles(const Model& M, Last p, UnaryPredicates ... P)
 template <typename Last, typename ... UnaryPredicates>
 ParticleSet::value_type particle(const Model& M, Last p, UnaryPredicates ... P)
 { return lone_elt(filter(particles(M), p, P...)); }
+
+/// Fix all FreeAmplitude's in a model that parameterize the only
+/// possible decay of their parent state.
+void fix_solitary_free_amplitudes(Model& m);
 
 }
 

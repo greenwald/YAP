@@ -1,6 +1,6 @@
 #include "ModelIntegral.h"
 
-#include "DecayingParticle.h"
+#include "DecayingState.h"
 #include "DecayTreeVectorIntegral.h"
 #include "Exceptions.h"
 #include "Model.h"
@@ -14,7 +14,7 @@ namespace yap {
 ModelIntegral::ModelIntegral(const Model& model)
 {
     // for each initial state particle
-    for (const auto& isp_mix : model.initialStateParticles())
+    for (const auto& isp_mix : model.initialStates())
         // for each spin projection
         for (const auto& m_b : isp_mix.second)
             // create new DecayTreeVectorIntegral
