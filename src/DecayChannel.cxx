@@ -189,23 +189,6 @@ void DecayChannel::pruneParticleCombinations()
 }
 
 //-------------------------
-void DecayChannel::addAllPossibleSpinAmplitudes(unsigned two_J, int p)
-{
-    auto two_j = spins(Daughters_);
-    p *= parity(Daughters_);
-
-    // create spin amplitudes
-    // loop over possible S: |j1-j2| <= S <= (j1+j2)
-    for (unsigned two_S = std::abs<int>(two_j[0] - two_j[1]); two_S <= two_j[0] + two_j[1]; two_S += 2)
-        // loop over possible L: |J-s| <= L <= (J+s)
-        for (unsigned L = std::abs<int>(two_J - two_S) / 2; L <= (two_J + two_S) / 2; ++L)
-            // check parity conservation (also fulfilled if parity = 0)
-            if (p * pow_negative_one(L) >= 0)
-                // add SpinAmplitude retrieved from cache
-                addSpinAmplitude(const_cast<Model*>(static_cast<const DecayChannel*>(this)->model())->spinAmplitudeCache()->spinAmplitude(two_J, two_j, L, two_S));
-}
-
-//-------------------------
 const Model* DecayChannel::model() const
 {
     return Daughters_[0]->model();

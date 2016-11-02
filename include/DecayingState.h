@@ -101,6 +101,12 @@ public:
     
 protected:
 
+    /// automatically create all possible spin amplitudes given initial spin J
+    /// parity conservation is ignored if parity is set 0
+    /// \param dc DecayChannel to add to
+    /// \param conserve_parity whether to conserve parity
+    virtual void addAllPossibleSpinAmplitudes(DecayChannel& dc, bool conserve_parity) const;
+
     /// Add a DecayChannel and set its parent to this DecayingState.
     /// \param c unique_ptr to DecayChannel, should be constructed in function call, or use std::move(c)
     /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically

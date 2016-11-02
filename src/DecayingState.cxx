@@ -54,6 +54,24 @@ bool DecayingState::consistent() const
 }
 
 //-------------------------
+void DecayingState::addAllPossibleSpinAmplitudes(DecayChannel& dc, bool conserve_parity) const
+{
+    auto two_j = spins(dc.daughters());
+    auto p = (conserve_parity) ? quantumNumbers().P() * parity(dc.daughters()) : 0;
+
+    // create spin amplitudes
+    // loop over possible S: |j1-j2| <= S <= (j1+j2)
+    for (unsigned two_S = std::abs<int>(two_j[0] - two_j[1]); two_S <= two_j[0] + two_j[1]; two_S += 2)
+        // loop over possible L: |J-s| <= L <= (J+s)
+        for (unsigned L = std::abs<int>(quantumNumbers().twoJ() - two_S) / 2; L <= (quantumNumbers().twoJ() + two_S) / 2; ++L)
+            // check parity conservation (also fulfilled if parity = 0)
+            if (p * pow_negative_one(L) >= 0)
+                // add SpinAmplitude retrieved from cache
+                dc.addSpinAmplitude(const_cast<Model*>(model())->spinAmplitudeCache()->spinAmplitude(quantumNumbers().twoJ(), two_j, L, two_S));
+}
+
+
+//-------------------------
 std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<DecayChannel> c, bool conserve_parity)
 {
     if (!c)
@@ -77,7 +95,7 @@ std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<Dec
 
     // if spin amplitudes haven't been added by hand, add all possible
     if (Channels_.back()->spinAmplitudes().empty())
-        Channels_.back()->addAllPossibleSpinAmplitudes(quantumNumbers().twoJ(), (conserve_parity ? quantumNumbers().P() : 0));
+        addAllPossibleSpinAmplitudes(*Channels_.back(), conserve_parity);
     
     // create necessary BlattWeisskopf objects
     for (const auto& sa : Channels_.back()->spinAmplitudes()) {
