@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <numeric>
 #include <string>
 
@@ -105,6 +106,10 @@ inline const std::vector<SpinProjectionVector> projections(const SpinVector& two
     }
     return SPV;
 }
+
+/// \return whether all spins are zero
+inline const bool all_zero(const SpinVector& two_J)
+{ return std::all_of(two_J.begin(), two_J.end(), std::bind(std::equal_to<SpinVector::value_type>(), std::placeholders::_1, 0)); }
 
 }
 

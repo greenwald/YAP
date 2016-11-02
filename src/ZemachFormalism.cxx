@@ -69,10 +69,10 @@ ZemachSpinAmplitude::ZemachSpinAmplitude(Model& m, unsigned two_J, const SpinVec
         throw exceptions::Exception("only supporting integer spins", "ZemachSpinAmplitude::ZemachSpinAmplitude");
 
     if (initialTwoJ() != 0) {
-        if (std::any_of(finalTwoJ().begin(), finalTwoJ().end(), [](const SpinVector::value_type & j) {return j != 0;}))
-        throw exceptions::Exception("Zemach not valid for " + spin_to_string(initialTwoJ())
-                                    + " -> " + to_string(finalTwoJ()),
-                                    "ZemachSpinAmplitude::ZemachSpinAmplitude");
+        if (!all_zero(finalTwoJ()))
+            throw exceptions::Exception("Zemach not valid for " + spin_to_string(initialTwoJ())
+                                        + " -> " + to_string(finalTwoJ()),
+                                        "ZemachSpinAmplitude::ZemachSpinAmplitude");
         if (2 * L() != initialTwoJ() and twoS() != 0)
             throw exceptions::Exception("Zemach not valid for " + spin_to_string(initialTwoJ())
                                         + " -> " + to_string(finalTwoJ())

@@ -33,8 +33,7 @@ DecayChannel::DecayChannel(const ParticleVector& daughters) :
         throw exceptions::Exception("Empty daughter", "DecayChannel::DecayChannel");
 
     // if more than two daughters, check all are spin 0
-    if (Daughters_.size() > 2 and
-        std::any_of(Daughters_.begin(), Daughters_.end(), [](const ParticleVector::value_type & d) {return d->quantumNumbers().twoJ() != 0;}))
+    if (Daughters_.size() > 2 and !all_zero(spins(Daughters_)))
         throw exceptions::Exception("Attempted to create nonresonant decay with spinfull daughters---use DecayingParticle without mass shape instead.", "DecayChannel::DecayChannel");
 
     // check that (first daughter's) Model is not nullptr

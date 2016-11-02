@@ -12,7 +12,7 @@ UnitSpinAmplitude::UnitSpinAmplitude(Model& m, unsigned two_J, const SpinVector&
     SpinAmplitude(m, two_J, two_j, l, two_s, equal_always)
 {
     // check if all spins are 0 for non-res decays
-    if (two_j.size() > 2 and (two_J != 0 or l != 0 or two_s != 0 or std::any_of(two_j.begin(), two_j.end(), [](unsigned j){return j != 0;})))
+    if (two_j.size() > 2 and (two_J != 0 or l != 0 or two_s != 0 or !all_zero(two_j)))
         throw exceptions::Exception("More than 2 daughters, but not all spins are 0", "UnitSpinAmplitude::UnitSpinAmplitude");
     
     // for 2 daughters, loop over all possibilities
