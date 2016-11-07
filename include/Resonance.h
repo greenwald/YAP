@@ -68,7 +68,7 @@ public:
     /// \param c unique_ptr to DecayChannel, should be constructed in function call, or use std::move(c)
     /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically
     /// \return shared_ptr to DecayChannel that has been added
-    virtual std::shared_ptr<DecayChannel> addDecayChannel(std::shared_ptr<DecayChannel> c, bool conserve_parity = false) override;
+    virtual void addDecayChannel(std::shared_ptr<DecayChannel> c) override;
 
     /// Check consistency of object
     virtual bool consistent() const override;

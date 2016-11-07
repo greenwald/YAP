@@ -4,9 +4,9 @@
 #include "container_utils.h"
 #include "DecayChannel.h"
 #include "DecayTree.h"
+#include "Filter.h"
 #include "FreeAmplitude.h"
 #include "logging.h"
-#include "Model.h"
 #include "Parameter.h"
 #include "SpinAmplitude.h"
 #include "VariableStatus.h"
@@ -54,36 +54,18 @@ bool DecayingState::consistent() const
 }
 
 //-------------------------
-void DecayingState::addAllPossibleSpinAmplitudes(DecayChannel& dc, bool conserve_parity) const
-{
-    auto two_j = spins(dc.daughters());
-    auto p = (conserve_parity) ? quantumNumbers().P() * parity(dc.daughters()) : 0;
-
-    // create spin amplitudes
-    // loop over possible S: |j1-j2| <= S <= (j1+j2)
-    for (unsigned two_S = std::abs<int>(two_j[0] - two_j[1]); two_S <= two_j[0] + two_j[1]; two_S += 2)
-        // loop over possible L: |J-s| <= L <= (J+s)
-        for (unsigned L = std::abs<int>(quantumNumbers().twoJ() - two_S) / 2; L <= (quantumNumbers().twoJ() + two_S) / 2; ++L)
-            // check parity conservation (also fulfilled if parity = 0)
-            if (p * pow_negative_one(L) >= 0)
-                // add SpinAmplitude retrieved from cache
-                dc.addSpinAmplitude(const_cast<Model*>(model())->spinAmplitudeCache()->spinAmplitude(quantumNumbers().twoJ(), two_j, L, two_S));
-}
-
-
-//-------------------------
-std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<DecayChannel> c, bool conserve_parity)
+void DecayingState::addDecayChannel(std::shared_ptr<DecayChannel> c)
 {
     if (!c)
-        throw exceptions::Exception("DecayChannel empty", "DecayingState::addChannel");
+        throw exceptions::Exception("DecayChannel empty", "DecayingState::addDecayChannel");
 
     if (c->particleCombinations().empty())
         throw exceptions::Exception(std::string("DecayChannel has no ParticleCombinations - ") + to_string(*c),
-                                    "DecayingState::addChannel");
+                                    "DecayingState::addDecayChannel");
 
     // check ISP
     if (!Channels_.empty() and c->model() != model())
-        throw exceptions::Exception("Model mismatch", "DecayingState::addChannel");
+        throw exceptions::Exception("Model mismatch", "DecayingState::addDecayChannel");
 
     // check charge
     if (charge(c->daughters()) != quantumNumbers().Q())
@@ -91,12 +73,12 @@ std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<Dec
                                     + std::to_string(charge(c->daughters())) + " != " + std::to_string(quantumNumbers().Q()) + ")",
                                     "DecayingState::addDecayChannel");
     
+    // check that DecayChannel has SpinAmplitudes
+    if (c->spinAmplitudes().empty())
+        throw exceptions::Exception("DecayChannel has no SpinAmplitudes", "DecayingState::addDecayChannel");
+    
     Channels_.push_back(c);
 
-    // if spin amplitudes haven't been added by hand, add all possible
-    if (Channels_.back()->spinAmplitudes().empty())
-        addAllPossibleSpinAmplitudes(*Channels_.back(), conserve_parity);
-    
     // create necessary BlattWeisskopf objects
     for (const auto& sa : Channels_.back()->spinAmplitudes()) {
         // if BW is not already stored for L, add it
@@ -133,20 +115,20 @@ std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<Dec
                     // loop over daughters in channel
                     for (size_t d = 0; d < Channels_.back()->daughters().size(); ++d) {
                         
-                        // try to cast daughter to decaying state
-                        auto dp = std::dynamic_pointer_cast<DecayingState>(Channels_.back()->daughters()[d]);
-
                         // if decaying state
-                        if (dp) {
+                        if (is_decaying_state(Channels_.back()->daughters()[d])) {
 
+                            // cast daughter to decaying state
+                            auto& ds = static_cast<DecayingState&>(*(Channels_.back()->daughters()[d]));
+                            
                             // check if daughter has any decay trees with spin projection
-                            if (dp->DecayTrees_.find(two_m[d]) != dp->DecayTrees_.end()) {
+                            if (ds.decayTrees().find(two_m[d]) != ds.decayTrees().end()) {
                                 
                                 // create temp tree vector to store new copies into
                                 DecayTreeVector DTV_temp;
 
                                 // loop over decay trees of daughter with appropriate spin projection
-                                for (const auto& dt : dp->DecayTrees_[two_m[d]]) {
+                                for (const auto& dt : ds.DecayTrees_[two_m[d]]) {
                                     // check that decay channel of free amplitude of decay tree has particle combination
                                     if (dt->freeAmplitude()->decayChannel()->particleCombinations().find(pc->daughters()[d])
                                         != dt->freeAmplitude()->decayChannel()->particleCombinations().end()) {
@@ -197,8 +179,6 @@ std::shared_ptr<DecayChannel> DecayingState::addDecayChannel(std::shared_ptr<Dec
             } // ends loop over spin projections of daughters
         } // ends loop over spin projection of parent
     } // ends loop over spin amplitude
-
-    return Channels_.back();
 }
 
 //-------------------------
@@ -298,7 +278,7 @@ std::string to_decay_string(const DecayingState& ds, unsigned level)
 
         s += pad_right(to_string(c->spinAmplitudes()), sa_padding);
 
-        for (const auto& d : filter(c->daughters(), [](const std::shared_ptr<Particle>& p){return p and is_decaying_state(*p);}))
+        for (const auto& d : filter(c->daughters(), is_decaying_state))
             s += ", " + to_decay_string(static_cast<const DecayingState&>(*d), level + 1);
     }
 

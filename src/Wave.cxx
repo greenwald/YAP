@@ -22,16 +22,16 @@ Wave::Wave(const std::string& name, const QuantumNumbers& q, unsigned l, unsigne
     auto two_j = spins(daughters);
     if (!triangle(two_s, two_j[0], two_j[1]))
         throw exceptions::Exception("j1j2S triangle violated", "Wave::Wave");
-    
+
     // create DecayChannel
     auto dc = std::make_shared<DecayChannel>(daughters);
     if (!dc->model())
         throw exceptions::Exception("DecayChannel's model is nullptr", "Wave::Wave");
 
     // create spin amplitude
-    dc->addSpinAmplitude(const_cast<Model*>(model())->spinAmplitudeCache()->spinAmplitude(quantumNumbers().twoJ(), two_j, l, two_s));
+    dc->addSpinAmplitude(const_cast<Model*>(dc->model())->spinAmplitudeCache()->spinAmplitude(quantumNumbers().twoJ(), two_j, l, two_s));
 
-    addDecayChannel(dc, false);
+    addDecayChannel(dc);
 }
 
 //-------------------------
@@ -74,6 +74,18 @@ std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers
 
     // else return
     return create(name, q, q.twoJ() + two_s, two_s, radial_size, daughters);
+}
+
+//-------------------------
+void Wave::addDecayChannel(std::shared_ptr<DecayChannel> dc)
+{
+    if (!channels().empty())
+        throw exceptions::Exception("Wave already contains DecayChannel. Only one allowed.", "Wave::addDecayChannel");
+
+    if (dc->spinAmplitudes().size() != 1)
+        throw exceptions::Exception("DecayChannel has more than one SpinAmplitude.", "Wave::addDecayChannel");
+
+    DecayingState::addDecayChannel(dc);
 }
 
 }

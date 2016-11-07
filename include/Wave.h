@@ -33,7 +33,7 @@
 namespace yap {
 
 /// Class for a complete description of the full dynamic range of
-/// decay to a particular final state
+/// decay to a particular final state with one DecayChannel with one SpinAmplitude
 class Wave : public DecayingState
 {
 protected:
@@ -54,9 +54,17 @@ public:
     static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, const ParticleVector& daughters)
     { return std::shared_ptr<Wave>(new Wave(name, q, l, two_s, radial_size, daughters)); }
 
-    /// create, l & s provided explicitly
+    /// create
+    /// \param name Name of wave
+    /// \param q QuantumNumbers of wave
+    /// \param l orbital angular momentum of wave
+    /// \param s spin angular momentum of wave
+    /// \param radial_size radial size of wave
+    /// \param A daughter particle
+    /// \param B daughter particle
+    /// \param other_daughters further daughter particles
     template <typename ... Types>
-    std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
     { return create(name, q, l, two_s, radial_size, ParticleVector({A, B, other_daughters...})); }
 
     /// create
@@ -69,26 +77,44 @@ public:
     static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, const ParticleVector& daughters);
 
     /// create
+    /// spin angular momentum is calculated; if ambiguous an exception is thrown
+    /// \param name Name of wave
+    /// \param q QuantumNumbers of wave
+    /// \param l orbital angular momentum of wave
+    /// \param radial_size radial size of wave
+    /// \param A daughter particle
+    /// \param B daughter particle
+    /// \param other_daughters further daughter particles
     template <typename ... Types>
-    std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
     { return create(name, q, l, radial_size, ParticleVector({A, B, other_daughters...})); }
 
     /// create
     /// spin and orbital angular momenta are calculated; if ambiguous an exception is thrown
     /// \param name Name of wave
     /// \param q QuantumNumbers of wave
-    /// \param l orbital angular momentum of wave
     /// \param radial_size radial size of wave
     /// \param daughters daughters of wave
     static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, const ParticleVector& daughters);
 
     /// create
+    /// spin and orbital angular momenta are calculated; if ambiguous an exception is thrown
+    /// \param name Name of wave
+    /// \param q QuantumNumbers of wave
+    /// \param radial_size radial size of wave
+    /// \param A daughter particle
+    /// \param B daughter particle
+    /// \param other_daughters further daughter particles
     template <typename ... Types>
-    std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
     { return create(name, q, radial_size, ParticleVector({A, B, other_daughters...})); }
 
-private:
+ protected:
     
+    /// enforces that only one channel (with only one spin amplitude) is allowed,
+    /// then calls DecayingState::addDecayChannel
+    virtual void addDecayChannel(std::shared_ptr<DecayChannel> dc) override;
+
 };
 
 /// checks if something inherits from Wave

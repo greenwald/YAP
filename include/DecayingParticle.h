@@ -55,21 +55,30 @@ public:
     static std::shared_ptr<DecayingParticle> create(const std::string& name, const QuantumNumbers& q, double radialSize)
     { return std::shared_ptr<DecayingParticle>(new DecayingParticle(name, q, radialSize)); }
 
-    /// Add a DecayChannel and set its parent to this DecayingParticle.
+    /// automatically create all possible spin amplitudes
+    /// \param dc DecayChannel to add to
+    /// \param conserve_parity whether to conserve parity
+    void addAllPossibleSpinAmplitudes(DecayChannel& dc, bool conserve_parity) const;
+    
+    /// Create a DecayChannel and add it to this DecayingParticle
     /// \param daughters ParticleVector of daughters to create DecayChannel object from
     /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically
     /// \return shared_ptr to DecayChannel that has been added
-    std::shared_ptr<DecayChannel> addWeakDecay(const ParticleVector& daughters);
+    std::shared_ptr<DecayChannel> addDecay(const ParticleVector& daughters, bool conserve_parity);
 
-    /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// Parity _is_ converved
+    /// Create and add a DecayChannel, creating SpinAmplitudes with parity conservation ignored
     /// \param daughters ParticleVector of daughters to create DecayChannel object from
-    /// \param conserve_parity whether to conserve parity in decay, when adding spin amplitudes automatically
     /// \return shared_ptr to DecayChannel that has been added
-    std::shared_ptr<DecayChannel> addStrongDecay(const ParticleVector& daughters);
+    std::shared_ptr<DecayChannel> addWeakDecay(const ParticleVector& daughters)
+    { return addDecay(daughters, false); }
 
-    /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// Parity is _not_ converved
+    /// Create and add a DecayChannel, creating SpinAmplitudes with parity conserved
+    /// \param daughters ParticleVector of daughters to create DecayChannel object from
+    /// \return shared_ptr to DecayChannel that has been added
+    std::shared_ptr<DecayChannel> addStrongDecay(const ParticleVector& daughters)
+    { return addDecay(daughters, true); }
+
+    /// Create and add a DecayChannel, creating SpinAmplitudes with parity conservation ignored
     /// \param A shared_ptr to a daughter
     /// \param B shared_ptr to a daughter
     /// \param other_daughters... other daughters
@@ -78,8 +87,7 @@ public:
     std::shared_ptr<DecayChannel> addWeakDecay(std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
     { ParticleVector V{A, B, other_daughters...}; return addWeakDecay(V); }
 
-    /// Add a DecayChannel and set its parent to this DecayingParticle.
-    /// Parity _is_ converved
+    /// Create and add a DecayChannel, creating SpinAmplitudes with parity conserved
     /// \param A shared_ptr to a daughter
     /// \param B shared_ptr to a daughter
     /// \param other_daughters... other daughters
