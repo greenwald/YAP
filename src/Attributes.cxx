@@ -147,6 +147,9 @@ const bool is_not_fixed::operator()(const DecayTree& dt) const
 }
 
 //-------------------------
+const is_not_fixed is_free{};
+
+//-------------------------
 const bool has_free_amplitude::operator()(const DecayTree& dt) const
 {
     for (const auto& fa : free_amplitudes(dt))

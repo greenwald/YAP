@@ -121,6 +121,9 @@ struct is_not_fixed : attribute_of<const bool, ParameterBase, DecayTree>
     virtual const bool operator()(const DecayTree& dt) const override;
 };
 
+/// An is_not_fixed object
+extern const is_not_fixed is_free;
+
 /// Functor class to check if state is decayed to by argument
 /// \ingroup Attributes
 struct to : public has_pointed_to_object<Particle, DecayChannel, FreeAmplitude, DecayTree, Particle>
@@ -242,6 +245,7 @@ struct parent_state : public attribute_of<std::shared_ptr<const DecayingState>,
 };
 
 /// functor to get name of return value of attribute
+/// \ingroup Attributes
 template <typename A>
 class name_of : public with_return_type<std::string>
 {
@@ -277,6 +281,7 @@ struct has_a_mass : public attribute_of<const bool, MassShape, Particle>
 };
 
 /// functor to return mass parameter
+/// \ingroup Attributes
 struct mass_parameter : public attribute_of<const RealParameter&, MassShape, Particle>
 {
     /// \note functors inherited
@@ -290,6 +295,7 @@ struct mass_parameter : public attribute_of<const RealParameter&, MassShape, Par
 };
 
 /// functor to return whether object comes from a particular parent
+/// \ingroup Attributes
 struct from : public has_pointed_to_object<DecayingState, Particle>
 {
     /// \note constructors inherited
