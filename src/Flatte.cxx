@@ -8,12 +8,9 @@
 #include "FinalStateParticle.h"
 #include "FourMomenta.h"
 #include "logging.h"
-#include "MathUtilities.h"
 #include "MeasuredBreakupMomenta.h"
 #include "Model.h"
 #include "Parameter.h"
-#include "Resonance.h"
-#include "StatusManager.h"
 
 namespace yap {
 

@@ -23,6 +23,7 @@
 
 #include "fwd/Wave.h"
 
+#include "fwd/MassShape.h"
 #include "fwd/Particle.h"
 #include "fwd/QuantumNumbers.h"
 
@@ -40,7 +41,7 @@ protected:
 
     /// Constructor
     /// see #create
-    Wave(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, const ParticleVector& daughters);
+    Wave(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters);
 
 public:
 
@@ -51,8 +52,8 @@ public:
     /// \param s spin angular momentum of wave
     /// \param radial_size radial size of wave
     /// \param daughters daughters of wave
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, const ParticleVector& daughters)
-    { return std::shared_ptr<Wave>(new Wave(name, q, l, two_s, radial_size, daughters)); }
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters)
+    { return std::shared_ptr<Wave>(new Wave(name, q, l, two_s, radial_size, mass_shape, daughters)); }
 
     /// create
     /// \param name Name of wave
@@ -60,12 +61,13 @@ public:
     /// \param l orbital angular momentum of wave
     /// \param s spin angular momentum of wave
     /// \param radial_size radial size of wave
+    /// \param mass_shape dynamic amplitude object
     /// \param A daughter particle
     /// \param B daughter particle
     /// \param other_daughters further daughter particles
     template <typename ... Types>
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
-    { return create(name, q, l, two_s, radial_size, ParticleVector({A, B, other_daughters...})); }
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s, double radial_size, std::shared_ptr<MassShape> mass_shape, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    { return create(name, q, l, two_s, radial_size, mass_shape, ParticleVector({A, B, other_daughters...})); }
 
     /// create
     /// spin angular momentum is calculated; if ambiguous an exception is thrown
@@ -73,8 +75,9 @@ public:
     /// \param q QuantumNumbers of wave
     /// \param l orbital angular momentum of wave
     /// \param radial_size radial size of wave
+    /// \param mass_shape dynamic amplitude object
     /// \param daughters daughters of wave
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, const ParticleVector& daughters);
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters);
 
     /// create
     /// spin angular momentum is calculated; if ambiguous an exception is thrown
@@ -82,32 +85,35 @@ public:
     /// \param q QuantumNumbers of wave
     /// \param l orbital angular momentum of wave
     /// \param radial_size radial size of wave
+    /// \param mass_shape dynamic amplitude object
     /// \param A daughter particle
     /// \param B daughter particle
     /// \param other_daughters further daughter particles
     template <typename ... Types>
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
-    { return create(name, q, l, radial_size, ParticleVector({A, B, other_daughters...})); }
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<MassShape> mass_shape, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    { return create(name, q, l, radial_size, mass_shape, ParticleVector({A, B, other_daughters...})); }
 
     /// create
     /// spin and orbital angular momenta are calculated; if ambiguous an exception is thrown
     /// \param name Name of wave
     /// \param q QuantumNumbers of wave
     /// \param radial_size radial size of wave
+    /// \param mass_shape dynamic amplitude object
     /// \param daughters daughters of wave
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, const ParticleVector& daughters);
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters);
 
     /// create
     /// spin and orbital angular momenta are calculated; if ambiguous an exception is thrown
     /// \param name Name of wave
     /// \param q QuantumNumbers of wave
     /// \param radial_size radial size of wave
+    /// \param mass_shape dynamic amplitude object
     /// \param A daughter particle
     /// \param B daughter particle
     /// \param other_daughters further daughter particles
     template <typename ... Types>
-    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
-    { return create(name, q, radial_size, ParticleVector({A, B, other_daughters...})); }
+    static std::shared_ptr<Wave> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape, std::shared_ptr<Particle> A, std::shared_ptr<Particle> B, Types ... other_daughters)
+    { return create(name, q, radial_size, mass_shape, ParticleVector({A, B, other_daughters...})); }
 
  protected:
     

@@ -76,7 +76,7 @@ TEST_CASE( "swapFinalStates" )
     std::vector<yap::MassAxes> mH; // always (pi+, K-), (K-, K+)
     std::vector<yap::DataSet> dH;
 
-    std::vector<int> FSP = {F.pdgCode("K-"), F.pdgCode("pi+"), F.pdgCode("K+")};
+    std::vector<int> FSP = {F["K-"].pdg(), F["pi+"].pdg(), F["K+"].pdg()};
     std::sort(FSP.begin(), FSP.end());
     do {
 

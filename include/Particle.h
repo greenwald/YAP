@@ -28,6 +28,7 @@
 #include "fwd/Model.h"
 #include "fwd/Parameter.h"
 #include "fwd/Particle.h"
+#include "fwd/ParticleFactory.h"
 #include "fwd/Spin.h"
 #include "fwd/StatusManager.h"
 
@@ -44,8 +45,7 @@ namespace yap {
 /// \brief Abstract Particle base class.
 /// \author Johannes Rauch, Daniel Greenwald
 /// \defgroup Particle Particle-related classes
-class Particle :
-    public std::enable_shared_from_this<Particle>
+class Particle : public std::enable_shared_from_this<Particle>
 {
 protected:
 
@@ -55,6 +55,10 @@ protected:
     Particle(const std::string& name, const QuantumNumbers& q)
         : std::enable_shared_from_this<Particle>(),
         QuantumNumbers_(q), Name_(name) {}
+
+    /// Constructor
+    /// \param pte ParticleTableEntry
+    Particle(const ParticleTableEntry& pte);
 
 public:
 

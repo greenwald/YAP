@@ -51,7 +51,11 @@ public:
 
     /// Constructor
     /// \param m mass [GeV]
-    Flatte(double m = -1) : MassShapeWithNominalMass(m) {}
+    Flatte(double m) : MassShapeWithNominalMass(m) {}
+
+    /// Constructor
+    /// \param pte ParticleTableEntry to retrieve parameters from
+    Flatte(const ParticleTableEntry& pte) : MassShapeWithNominalMass(pte) {}
 
     /// Add FlatteChannel
     void add(FlatteChannel fc);

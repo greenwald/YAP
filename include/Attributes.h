@@ -267,7 +267,19 @@ private:
     A Attr_;
 };
 
+/// functor to return whether an argument has a MassShape
+/// \ingroup Attributes
+struct has_a_mass_shape : public attribute_of<const bool, Particle>
+{
+    /// \note functors inherited
+    using attribute_of::operator();
+
+    /// Particle& functor
+    virtual const bool operator()(const Particle& p) const override;
+};
+
 /// functor to return whether an argument has a mass
+/// \ingroup Attributes
 struct has_a_mass : public attribute_of<const bool, MassShape, Particle>
 {
     /// \note functor inherited

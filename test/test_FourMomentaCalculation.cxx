@@ -133,15 +133,15 @@ TEST_CASE( "FourMomentaCalculation" )
     yap::disableLogs(el::Level::Global);
 
     // load particle factory
-    yap::ParticleFactory factory = yap::read_pdl_file("../data/evt.pdl");
+    yap::ParticleFactory F = yap::read_pdl_file("../data/evt.pdl");
     
     // create final state particles
-    auto piPlus = factory.fsp(211);
-    auto piMinus = factory.fsp(-211);
-    auto KPlus = factory.fsp(321);
-    auto KMinus = factory.fsp(-321);
+    auto piPlus  = yap::FinalStateParticle::create(F[211]);
+    auto piMinus = yap::FinalStateParticle::create(F[-211]);
+    auto KPlus   = yap::FinalStateParticle::create(F[321]);
+    auto KMinus  = yap::FinalStateParticle::create(F[-321]);
     
-    double D_mass = factory["D+"].mass();
+    double D_mass = F["D+"].mass();
 
     SECTION("3 final state particles") {
 
@@ -151,11 +151,11 @@ TEST_CASE( "FourMomentaCalculation" )
 
         // create book-keeping resonance
         /// \todo Allow direct phase-space three-body decay
-        auto X = factory.decayingParticle(factory.pdgCode("f_0"), 3);
+        auto X = yap::DecayingParticle::create(F["f_0"], 3);
         X->addStrongDecay(piPlus, KMinus);
 
         // create initial state particle
-        auto D = factory.decayingParticle(factory.pdgCode("D+"), 3);
+        auto D = yap::DecayingParticle::create(F["D+"], 3);
         D->addWeakDecay(X, piPlus);
 
         M.addInitialState(D);
@@ -242,14 +242,14 @@ TEST_CASE( "FourMomentaCalculation" )
 
         // create book-keeping resonance
         /// \todo Allow direct phase-space three-body decay
-        auto X = factory.decayingParticle(factory.pdgCode("f_0"), 3);
+        auto X = yap::DecayingParticle::create(F["f_0"], 3);
         X->addStrongDecay(piPlus, piMinus);
 
-        auto X2 = factory.decayingParticle(factory.pdgCode("f_0"), 3);
+        auto X2 = yap::DecayingParticle::create(F["f_0"], 3);
         X2->addStrongDecay(KPlus, KMinus);
 
         // create initial state particle
-        auto D = factory.decayingParticle(factory.pdgCode("D0"), 3);
+        auto D = yap::DecayingParticle::create(F["D0"], 3);
         D->addWeakDecay(X, X2);
 
         // choose default Dalitz coordinates

@@ -4,6 +4,7 @@
 #include "logging.h"
 #include "Parameter.h"
 #include "ParticleCombination.h"
+#include "ParticleFactory.h"
 
 namespace yap {
 
@@ -18,6 +19,12 @@ FinalStateParticle::FinalStateParticle(const std::string& name, const QuantumNum
 {
     if (Mass_ < 0)
         throw exceptions::Exception("Mass is negative", "FinalStateParticle::FinalStateParticle");
+}
+
+//-------------------------
+FinalStateParticle::FinalStateParticle(const ParticleTableEntry& pte)
+    : FinalStateParticle(pte.name(), pte.quantumNumbers(), pte.mass())
+{
 }
 
 //-------------------------

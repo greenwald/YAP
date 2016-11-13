@@ -1,6 +1,7 @@
 #include <logging.h>
 #include <BreitWigner.h>
 #include <DataSet.h>
+#include <DecayingParticle.h>
 #include <FinalStateParticle.h>
 #include <FourMomenta.h>
 #include <FourVector.h>
@@ -13,7 +14,6 @@
 #include <ParticleCombination.h>
 #include <ParticleFactory.h>
 #include <PDL.h>
-#include <Resonance.h>
 #include <SpinAmplitudeCache.h>
 
 #include <memory>
@@ -29,22 +29,22 @@ int main( int argc, char** argv)
     // use common radial size for all resonances
     double radialSize = 3.; // [GeV^-1]
 
-    yap::ParticleFactory factory = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
+    yap::ParticleFactory F = yap::read_pdl_file((::getenv("YAPDIR") ? (std::string)::getenv("YAPDIR") + "/data" : ".") + "/evt.pdl");
 
-    auto D_mass = factory["D+"].mass();
+    auto D_mass = F["D+"].mass();
 
     // create final state particles
-    auto kPlus  = factory.fsp(+321);
-    auto kMinus = factory.fsp(-321);
-    auto piPlus = factory.fsp(+211);
+    auto kPlus  = yap::FinalStateParticle::create(F[+321]);
+    auto kMinus = yap::FinalStateParticle::create(F[-321]);
+    auto piPlus = yap::FinalStateParticle::create(F[+211]);
 
     M.setFinalState(kPlus, kMinus, piPlus);
 
     // create initial state particle and set final state
-    auto D = factory.decayingParticle(factory.pdgCode("D+"), radialSize);
+    auto D = yap::DecayingParticle::create(F["D+"], radialSize);
 
     // create a phi
-    auto phi = factory.resonance(factory["phi"].pdg(), radialSize, std::make_shared<yap::BreitWigner>());
+    auto phi = yap::DecayingParticle::create(F["phi"], radialSize, std::make_shared<yap::BreitWigner>(F["phi"]));
     phi->addStrongDecay(kPlus, kMinus);
 
     // Add channels to D

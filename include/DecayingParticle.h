@@ -25,6 +25,7 @@
 
 #include "fwd/DecayChannel.h"
 #include "fwd/Particle.h"
+#include "fwd/ParticleFactory.h"
 #include "fwd/QuantumNumbers.h"
 
 #include "AttributeUtilities.h"
@@ -43,17 +44,30 @@ protected:
 
     /// Constructor
     /// see #create
-    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radialSize)
-        : DecayingState(name, q, radialSize) {}
+    DecayingParticle(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape)
+        : DecayingState(name, q, radial_size, mass_shape) {}
 
+    /// Constructor
+    /// see #create
+    DecayingParticle(const ParticleTableEntry& pte, double radial_size, std::shared_ptr<MassShape> mass_shape)
+        : DecayingState(pte, radial_size, mass_shape) {}
+    
 public:
 
     /// create
     /// \param name Name of decaying particle
     /// \param q QuantumNumbers of decaying particle
     /// \param radialSize radial size of decaying particle
-    static std::shared_ptr<DecayingParticle> create(const std::string& name, const QuantumNumbers& q, double radialSize)
-    { return std::shared_ptr<DecayingParticle>(new DecayingParticle(name, q, radialSize)); }
+    /// \param mass_shape Dynamic ampltiude object
+    static std::shared_ptr<DecayingParticle> create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape = nullptr)
+    { return std::shared_ptr<DecayingParticle>(new DecayingParticle(name, q, radial_size, mass_shape)); }
+
+    /// create
+    /// \param pte ParticleTableEntry
+    /// \param radialSize radial size of decaying particle
+    /// \param mass_shape Dynamic ampltiude object
+    static std::shared_ptr<DecayingParticle> create(const ParticleTableEntry& pte, double radial_size, std::shared_ptr<MassShape> mass_shape = nullptr)
+    { return std::shared_ptr<DecayingParticle>(new DecayingParticle(pte, radial_size, mass_shape)); }
 
     /// automatically create all possible spin amplitudes
     /// \param dc DecayChannel to add to

@@ -8,6 +8,8 @@
 #include "FreeAmplitude.h"
 #include "logging.h"
 #include "Parameter.h"
+#include "ParticleFactory.h"
+#include "MassShape.h"
 #include "SpinAmplitude.h"
 #include "VariableStatus.h"
 
@@ -20,9 +22,18 @@ namespace yap {
 const is_of_type<DecayingState> is_decaying_state{};
 
 //-------------------------
- DecayingState::DecayingState(const std::string& name, const QuantumNumbers& q, double radialSize) :
+DecayingState::DecayingState(const std::string& name, const QuantumNumbers& q, double radialSize, std::shared_ptr<MassShape> mass_shape) :
     Particle(name, q),
+    MassShape_(mass_shape),
     RadialSize_(std::make_shared<RealParameter>(radialSize))
+{
+    if (MassShape_)
+        MassShape_->setDecayingState(this);
+}
+
+//-------------------------
+DecayingState::DecayingState(const ParticleTableEntry& pte, double radial_size, std::shared_ptr<MassShape> mass_shape) :
+    DecayingState(pte.name(), pte.quantumNumbers(), radial_size, mass_shape)
 {
 }
 
@@ -50,6 +61,10 @@ bool DecayingState::consistent() const
     // check consistency of all channels
     std::for_each(Channels_.begin(), Channels_.end(), [&](const std::shared_ptr<DecayChannel>& dc) {if (dc) C &= dc->consistent();});
 
+    // check mass shape
+    if (MassShape_)
+        C &= MassShape_->consistent();
+
     return C;
 }
 
@@ -76,6 +91,9 @@ void DecayingState::addDecayChannel(std::shared_ptr<DecayChannel> c)
     // check that DecayChannel has SpinAmplitudes
     if (c->spinAmplitudes().empty())
         throw exceptions::Exception("DecayChannel has no SpinAmplitudes", "DecayingState::addDecayChannel");
+
+    if (MassShape_)
+        MassShape_->checkDecayChannel(*c);
     
     Channels_.push_back(c);
 
@@ -179,6 +197,9 @@ void DecayingState::addDecayChannel(std::shared_ptr<DecayChannel> c)
             } // ends loop over spin projections of daughters
         } // ends loop over spin projection of parent
     } // ends loop over spin amplitude
+
+    if (MassShape_)
+        MassShape_->addDecayChannel(c);
 }
 
 //-------------------------
@@ -195,6 +216,9 @@ void DecayingState::registerWithModel()
 
     for (auto& c : Channels_)
         c->registerWithModel();
+
+    if (MassShape_)
+        MassShape_->registerWithModel();
 }
 
 //-------------------------
@@ -214,6 +238,10 @@ void DecayingState::addParticleCombination(const ParticleCombination& pc)
         if (std::any_of(dc->particleCombinations().begin(), dc->particleCombinations().end(), std::bind(&equal_down, pc.shared_from_this(), std::placeholders::_1)))
             dc->addParticleCombination(pc);
     }
+
+    // add to MassShape
+    if (MassShape_)
+        MassShape_->addParticleCombination(pc);
 }
 
 //-------------------------
@@ -314,6 +342,9 @@ void DecayingState::modifyDecayTree(DecayTree& dt)
         // Add BlattWeisskopf object
         dt.addAmplitudeComponent(*bw->second);
     }
+
+    if (MassShape_)
+        dt.addAmplitudeComponent(*MassShape_);
 }
 
 //-------------------------

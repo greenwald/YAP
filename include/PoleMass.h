@@ -46,12 +46,12 @@ public:
 
     /// Constructor
     /// \param mass Mass of resonance [GeV]
-    PoleMass(std::complex<double> mass = std::complex<double>(-1, -1));
+    PoleMass(std::complex<double> mass);
 
-    /// Set parameters from ParticleTableEntry;
-    /// If width is available, sets M = mass + i/2 * width
-    /// \param entry ParticleTableEntry containing information to create mass shape object
-    virtual void setParameters(const ParticleTableEntry& entry) override;
+    /// Constructor
+    /// Set parameters from ParticleTableEntry: M = mass + i/2 * width
+    /// \param pte ParticleTableEntry containing information to create mass shape object
+    PoleMass(const ParticleTableEntry& entry);
 
     /// Get mass
     std::shared_ptr<ComplexParameter> mass() const

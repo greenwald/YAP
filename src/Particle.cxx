@@ -3,8 +3,15 @@
 #include "logging.h"
 #include "Model.h"
 #include "Parameter.h"
+#include "ParticleFactory.h"
 
 namespace yap {
+
+//-------------------------
+Particle::Particle(const ParticleTableEntry& pte)
+    : Particle(pte.name(), pte.quantumNumbers())
+{
+}
 
 //-------------------------
 bool Particle::consistent() const

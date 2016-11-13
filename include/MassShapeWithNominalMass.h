@@ -33,7 +33,7 @@
 namespace yap {
 
 /// \class MassShapeWithNominalMass
-/// \brief Class for MassShape that gets its nominal mass from its owning resonance
+/// \brief Class for MassShape with a nominal mass
 /// \author Daniel Greenwald
 /// \ingroup MassShapes
 class MassShapeWithNominalMass : public MassShape
@@ -42,12 +42,12 @@ public:
 
     /// Constructor
     /// \param m Mass [GeV]
-    MassShapeWithNominalMass(double m = -1);
+    MassShapeWithNominalMass(double m);
 
-    /// Set parameters from ParticleTableEntry
-    /// \param entry ParticleTableEntry containing information to create mass shape object
-    virtual void setParameters(const ParticleTableEntry& entry) override;
-
+    /// Constructor
+    /// \param pte ParticleTableEntry
+    MassShapeWithNominalMass(const ParticleTableEntry& pte);
+    
     /// Get mass
     std::shared_ptr<RealParameter> mass()
     { return Mass_; }

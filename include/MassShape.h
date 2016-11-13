@@ -24,11 +24,11 @@
 #include "fwd/CachedValue.h"
 #include "fwd/DataPartition.h"
 #include "fwd/DecayChannel.h"
+#include "fwd/DecayingState.h"
 #include "fwd/Model.h"
 #include "fwd/Parameter.h"
 #include "fwd/ParticleCombination.h"
 #include "fwd/ParticleFactory.h"
-#include "fwd/Resonance.h"
 #include "fwd/StatusManager.h"
 
 #include "AmplitudeComponent.h"
@@ -47,9 +47,9 @@ class MassShape : public RecalculableAmplitudeComponent
 {
 public:
 
-    /// Constructor
+    /// constructor
     MassShape();
-
+    
     /// \return dynamic amplitude for data point and particle combination
     /// \param d DataPoint
     /// \param pc shared_ptr to ParticleCombination
@@ -60,40 +60,34 @@ public:
     /// \param D DataPartition to calculate on
     virtual void calculate(DataPartition& D) const override final;
 
-    /// Set parameters from ParticleTableEntry
-    /// Can be overloaded in inheriting classes
-    /// \param entry ParticleTableEntry containing information to create mass shape object
-    virtual void setParameters(const ParticleTableEntry& entry)
-    { }
-
     /// Check consistency of object
     virtual bool consistent() const;
 
-    /// get raw pointer to owning resonance
-    Resonance* resonance() const
-    { return Resonance_; }
+    /// get raw pointer to owning DecayingState
+    DecayingState* decayingState() const
+    { return DecayingState_; }
 
     /// update the calculationStatus for a DataPartition
     virtual void updateCalculationStatus(StatusManager& D) const override final;
 
-    /// get raw pointer to Model through resonance
+    /// get raw pointer to Model through DecayingState
     const Model* model() const override;
 
     /// Check if a DecayChannel is valid for this MassShape; will throw if invalid.
     virtual void checkDecayChannel(const DecayChannel& c) const
     {}
 
-    /// Grant Resonance friendship, so it can set itself as owner
+    /// Grant DecayingState friendship, so it can set itself as owner
     /// and call addDecayChannel
-    friend class Resonance;
+    friend class DecayingState;
 
 protected:
 
-    /// Set raw pointer to owning Resonance.
-    virtual void setResonance(Resonance* r);
+    /// Set raw pointer to owning DecayingState.
+    virtual void setDecayingState(DecayingState* r);
 
     /// Give MassShape chance to perform operations based on the
-    /// addition of a DecayChannel to its Resonance
+    /// addition of a DecayChannel to its DecayingState
     virtual void addDecayChannel(std::shared_ptr<DecayChannel> c)
     {}
 
@@ -113,8 +107,8 @@ protected:
 
 private:
 
-    /// raw pointer to resonance that owns this mass shape
-    Resonance* Resonance_;
+    /// raw pointer to DecayingState that owns this mass shape
+    DecayingState* DecayingState_{nullptr};
 
     /// cached dynamic amplitude
     std::shared_ptr<ComplexCachedValue> T_;

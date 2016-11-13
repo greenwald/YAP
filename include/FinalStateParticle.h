@@ -26,6 +26,7 @@
 #include "fwd/DataPoint.h"
 #include "fwd/Model.h"
 #include "fwd/ParticleCombination.h"
+#include "fwd/ParticleFactory.h"
 
 #include "AttributeUtilities.h"
 #include "Particle.h"
@@ -48,6 +49,10 @@ protected:
     /// see #create
     FinalStateParticle(const std::string& name, const QuantumNumbers& q, double m);
 
+    /// Constructor
+    /// see #create
+    FinalStateParticle(const ParticleTableEntry& pte);
+
 public:
 
     /// create
@@ -57,6 +62,11 @@ public:
     static std::shared_ptr<FinalStateParticle> create(const std::string& name, const QuantumNumbers& q, double m)
     { return std::shared_ptr<FinalStateParticle>(new FinalStateParticle(name, q, m)); }
 
+    /// create
+    /// \param pte ParticleTableEntry
+    static std::shared_ptr<FinalStateParticle> create(const ParticleTableEntry& pte)
+    { return std::shared_ptr<FinalStateParticle>(new FinalStateParticle(pte)); }
+    
     /// Get mass [GeV]
     double mass() const
     { return Mass_; }

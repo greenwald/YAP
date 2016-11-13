@@ -10,8 +10,8 @@ namespace yap {
 
 //-------------------------
 Wave::Wave(const std::string& name, const QuantumNumbers& q, unsigned l, unsigned two_s,
-           double radial_size, const ParticleVector& daughters) :
-    DecayingState(name, q, radial_size)
+           double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters) :
+    DecayingState(name, q, radial_size, mass_shape)
 {
     if (daughters.size() != 2)
         throw exceptions::Exception("Only two-body waves allowed", "Wave::Wave");
@@ -35,7 +35,7 @@ Wave::Wave(const std::string& name, const QuantumNumbers& q, unsigned l, unsigne
 }
 
 //-------------------------
-std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, const ParticleVector& daughters)
+std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers& q, unsigned l, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters)
 {
     if (daughters.size() != 2)
         throw exceptions::Exception("Only two-body waves allowed", "Wave::create");
@@ -44,18 +44,18 @@ std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers
     
     // if only one possible s from daughter spins
     if (std::abs(static_cast<int>(two_j[0]) - static_cast<int>(two_j[1])) == two_j[0] + two_j[1])
-        return create(name, q, l, two_j[0] + two_j[1], radial_size, daughters);
+        return create(name, q, l, two_j[0] + two_j[1], radial_size, mass_shape, daughters);
 
     // if only one possible s from J and L
     if (std::abs(static_cast<int>(q.twoJ()) - 2 * static_cast<int>(l)) == q.twoJ() + 2 * l)
-        return create(name, q, l, q.twoJ() + 2 * l, radial_size, daughters);
+        return create(name, q, l, q.twoJ() + 2 * l, radial_size, mass_shape, daughters);
 
     // else throw
     throw exceptions::Exception("S is ambiguous", "Wave::create");
 }
 
 //-------------------------
-std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers& q, double radial_size, const ParticleVector& daughters)
+std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape, const ParticleVector& daughters)
 {
     if (daughters.size() != 2)
         throw exceptions::Exception("Only two-body waves allowed", "Wave::create");
@@ -73,7 +73,7 @@ std::shared_ptr<Wave> Wave::create(const std::string& name, const QuantumNumbers
         throw exceptions::Exception("L is ambiguous", "Wave::create");
 
     // else return
-    return create(name, q, q.twoJ() + two_s, two_s, radial_size, daughters);
+    return create(name, q, q.twoJ() + two_s, two_s, radial_size, mass_shape, daughters);
 }
 
 //-------------------------

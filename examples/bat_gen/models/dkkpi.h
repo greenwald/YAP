@@ -18,7 +18,6 @@
 #include <PDL.h>
 #include <QuantumNumbers.h>
 #include <RelativisticBreitWigner.h>
-#include <Resonance.h>
 #include <SpinAmplitudeCache.h>
 
 #include <complex>
@@ -32,9 +31,9 @@ inline unique_ptr<Model> dkkpi(unique_ptr<Model> M)
     auto F = read_pdl_file((string)::getenv("YAPDIR") + "/data/evt.pdl");
 
     // final state particles
-    auto kPlus  = F.fsp(+321);
-    auto kMinus = F.fsp(-321);
-    auto piPlus = F.fsp(+211);
+    auto kPlus  = FinalStateParticle::create(F[+321]);
+    auto kMinus = FinalStateParticle::create(F[-321]);
+    auto piPlus = FinalStateParticle::create(F[+211]);
 
     M->setFinalState(kPlus, kMinus, piPlus);
 
@@ -42,34 +41,34 @@ inline unique_ptr<Model> dkkpi(unique_ptr<Model> M)
     double radialSize = 3.; // [GeV^-1]
 
     // initial state particle
-    auto D = F.decayingParticle(F.pdgCode("D+"), radialSize);
+    auto D = DecayingParticle::create(F["D+"], radialSize);
 
-    auto KK0 = Resonance::create("KK0", QuantumNumbers(0, 0), radialSize, make_shared<BreitWigner>(1.1, 0.075));
+    auto KK0 = DecayingParticle::create("KK0", QuantumNumbers(0, 0), radialSize, make_shared<BreitWigner>(1.1, 0.075));
     KK0->addStrongDecay(kPlus, kMinus);
     D->addWeakDecay(KK0, piPlus);
     *free_amplitude(*D, to(KK0)) = polar(0.15, rad(39.));
     
-    /* auto KK1 = Resonance::create("KK1", QuantumNumbers(0, 2), radialSize, make_shared<BreitWigner>(1.35, 0.125)); */
+    /* auto KK1 = DecayingParticle::create("KK1", QuantumNumbers(0, 2), radialSize, make_shared<BreitWigner>(1.35, 0.125)); */
     /* KK1->addStrongDecay(kPlus, kMinus); */
     /* D->addWeakDecay(KK1, piPlus); */
     /* *free_amplitude(*D, to(KK1)) = 1.; */
     
-    /* auto KK2 = Resonance::create("KK2", QuantumNumbers(0, 4), radialSize, make_shared<BreitWigner>(1.6, 0.100)); */
+    /* auto KK2 = DecayingParticle::create("KK2", QuantumNumbers(0, 4), radialSize, make_shared<BreitWigner>(1.6, 0.100)); */
     /* KK2->addStrongDecay(kPlus, kMinus); */
     /* D->addWeakDecay(KK2, piPlus); */
     /* *free_amplitude(*D, to(KK2)) = polar(10., rad(-12.)); */
     
-    /* auto piK0 = Resonance::create("piK0", QuantumNumbers(0, 0), radialSize, make_shared<BreitWigner>(0.75, 0.085)); */
+    /* auto piK0 = DecayingParticle::create("piK0", QuantumNumbers(0, 0), radialSize, make_shared<BreitWigner>(0.75, 0.085)); */
     /* piK0->addStrongDecay(piPlus, kMinus); */
     /* D->addWeakDecay(piK0, kPlus); */
     /* *free_amplitude(*D, to(piK0)) = polar(0.23, rad(112.)); */
 
-    /* auto piK1 = Resonance::create("piK1", QuantumNumbers(0, 2), radialSize, make_shared<BreitWigner>(1.0, 0.125)); */
+    /* auto piK1 = DecayingParticle::create("piK1", QuantumNumbers(0, 2), radialSize, make_shared<BreitWigner>(1.0, 0.125)); */
     /* piK1->addStrongDecay(piPlus, kMinus); */
     /* D->addWeakDecay(piK1, kPlus); */
     /* *free_amplitude(*D, to(piK1)) = polar(1.2, rad(-76.)); */
 
-    /* auto piK2 = Resonance::create("piK2", QuantumNumbers(0, 4), radialSize, make_shared<BreitWigner>(1.25, 0.065)); */
+    /* auto piK2 = DecayingParticle::create("piK2", QuantumNumbers(0, 4), radialSize, make_shared<BreitWigner>(1.25, 0.065)); */
     /* piK2->addStrongDecay(piPlus, kMinus); */
     /* D->addWeakDecay(piK2, kPlus); */
     /* *free_amplitude(*D, to(piK2)) = polar(7.8, rad(56.)); */
@@ -83,13 +82,13 @@ inline bat_fit dkkpi_fit(string name, unique_ptr<Model> M, vector<vector<unsigne
 {
     bat_fit m(name, dkkpi(std::move(M)), pcs);
     
-    auto KK0 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("KK0")));
-    /* auto KK1 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("KK1"))); */
-    /* auto KK2 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("KK2"))); */
+    auto KK0 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("KK0")));
+    /* auto KK1 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("KK1"))); */
+    /* auto KK2 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("KK2"))); */
 
-    /* auto piK0 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("piK0"))); */
-    /* auto piK1 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("piK1"))); */
-    /* auto piK2 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("piK2"))); */
+    /* auto piK0 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("piK0"))); */
+    /* auto piK1 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("piK1"))); */
+    /* auto piK2 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("piK2"))); */
 
     /* m.setPrior(free_amplitude(*m.model(), to(KK0)), 0.05, 0.25, -160., 160.); */
     /* m.fix(free_amplitude(*m.model(), to(KK1)), 1., 0.); */

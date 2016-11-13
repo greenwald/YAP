@@ -31,7 +31,6 @@
 #include <PDL.h>
 #include <QuantumNumbers.h>
 #include <RelativisticBreitWigner.h>
-#include <Resonance.h>
 #include <SpinAmplitudeCache.h>
 
 #include <BAT/BCAux.h>
@@ -66,8 +65,8 @@ inline std::unique_ptr<Model> d4pi()
     auto F = read_pdl_file((std::string)::getenv("YAPDIR") + "/data/evt.pdl");
 
     // final state particles
-    auto piPlus = F.fsp(211);
-    auto piMinus = F.fsp(-211);
+    auto piPlus = FinalStateParticle::create(F[211]);
+    auto piMinus = FinalStateParticle::create(F[-211]);
 
     auto M = std::make_unique<yap::Model>(std::make_unique<yap::HelicityFormalism>());
     M->setFinalState(piPlus, piMinus, piPlus, piMinus);
@@ -76,26 +75,26 @@ inline std::unique_ptr<Model> d4pi()
     double radialSize = 1.2; // [GeV^-1]
 
     // initial state particle
-    auto D = F.decayingParticle(F.pdgCode("D0"), radialSize);
+    auto D = DecayingParticle::create(F["D0"], radialSize);
     
     //
     // resonant particles
     //
     
     // rho
-    auto rho = F.resonance(F.pdgCode("rho0"), radialSize, std::make_shared<RelativisticBreitWigner>());
+    auto rho = DecayingParticle::create(F["rho0"], radialSize, std::make_shared<RelativisticBreitWigner>(F["rho0"]));
     rho->addStrongDecay(piPlus, piMinus);
 
     // omega
-    //auto omega = F.resonance(F.pdgCode("omega"), radialSize, std::make_shared<BreitWigner>());
+    //auto omega = DecayingParticle::create(F["omega"], radialSize, std::make_shared<BreitWigner>(F["omega"]));
     //omega->addStrongDecay({piPlus, piMinus});
 
     // sigma / f_0(500)
-    auto sigma = F.resonance(F.pdgCode("f_0(500)"), radialSize, std::make_shared<BreitWigner>());
+    auto sigma = DecayingParticle::create(F["f_0(500)"], radialSize, std::make_shared<BreitWigner>(F["f_0(500)"]));
     sigma->addStrongDecay(piPlus, piMinus);
 
     // a_1
-    auto a_1 = F.resonance(F.pdgCode("a_1+"), radialSize, std::make_shared<BreitWigner>());
+    auto a_1 = DecayingParticle::create(F["a_1+"], radialSize, std::make_shared<BreitWigner>(F["a_1+"]));
     if (a_rho_pi_S or a_rho_pi_D)
         a_1->addStrongDecay(rho,   piPlus);
     if (a_rho_sigma)
@@ -106,14 +105,14 @@ inline std::unique_ptr<Model> d4pi()
         *free_amplitude(*a_1, to(sigma)) = std::polar(scale_a_rho_sigma * 0.439, rad(193.));
 
     // f_0(980) (as Flatte)
-    auto f_0_980_flatte = std::make_shared<Flatte>();
+    auto f_0_980_flatte = std::make_shared<Flatte>(F["f_0"]);
     f_0_980_flatte->add(FlatteChannel(0.20, *piPlus, *piMinus));
-    f_0_980_flatte->add(FlatteChannel(0.50, *F.fsp(321), *F.fsp(-321))); // K+K-
-    auto f_0_980 = F.resonance(F.pdgCode("f_0"), radialSize, f_0_980_flatte);
+    f_0_980_flatte->add(FlatteChannel(0.50, *FinalStateParticle::create(F[321]), *FinalStateParticle::create(F[-321]))); // K+K-
+    auto f_0_980 = DecayingParticle::create(F["f_0"], radialSize, f_0_980_flatte);
     f_0_980->addStrongDecay(piPlus, piMinus);
 
     // f_2(1270)
-    auto f_2 = F.resonance(F.pdgCode("f_2"), radialSize, std::make_shared<BreitWigner>());
+    auto f_2 = DecayingParticle::create(F["f_2"], radialSize, std::make_shared<BreitWigner>(F["f_2"]));
     f_2->addStrongDecay(piPlus, piMinus); 
 
     // pi+ pi- flat
@@ -198,8 +197,8 @@ inline bat_fit d4pi_fit(std::string name, std::vector<std::vector<unsigned> > pc
 
     // find particles
     auto D     = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("D0")));
-    auto rho   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("rho0")));
-    auto a_1   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("a_1+")));
+    auto rho   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0")));
+    auto a_1   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("a_1+")));
 
     auto fixed_amp = free_amplitude(*a_1, to(rho), l_equals(0));
     if (fixed_amp) {
@@ -244,11 +243,11 @@ inline fit_fitFraction d4pi_fit_fitFraction()
 
     // find particles
     auto D     = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("D0")));
-    auto rho   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("rho0")));
-    auto sigma = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(500)")));
-    auto a_1   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("a_1+")));
-    auto f_0   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0")));
-    auto f_2   = std::static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_2")));
+    auto rho   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0")));
+    auto sigma = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(500)")));
+    auto a_1   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("a_1+")));
+    auto f_0   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0")));
+    auto f_2   = std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_2")));
 
     LOG(INFO) << m.model()->initialStates().at(D).begin()->first;
 

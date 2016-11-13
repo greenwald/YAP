@@ -30,7 +30,6 @@
 #include <PoleMass.h>
 #include <QuantumNumbers.h>
 #include <RelativisticBreitWigner.h>
-#include <Resonance.h>
 #include <SpinAmplitudeCache.h>
 
 #include <BAT/BCGaussianPrior.h>
@@ -47,52 +46,47 @@ inline unique_ptr<Model> d3pi(unique_ptr<Model> M)
     auto F = read_pdl_file((string)::getenv("YAPDIR") + "/data/evt.pdl");
 
     // final state particles
-    auto piPlus = F.fsp(211);
-    auto piMinus = F.fsp(-211);
+    auto piPlus = FinalStateParticle::create(F[211]);
+    auto piMinus = FinalStateParticle::create(F[-211]);
 
     M->setFinalState(piPlus, piMinus, piPlus);
 
     // use common radial size for all resonances
-    double radialSize = 3.; // [GeV^-1]
+    double radial_size = 3.; // [GeV^-1]
 
     // initial state particle
-    auto D = F.decayingParticle(F.pdgCode("D+"), radialSize);
-
+    auto D = DecayingParticle::create(F["D+"], radial_size);
+    
     // rho
-    auto rho = F.resonance(113, radialSize, make_shared<RelativisticBreitWigner>(775.49e-3, 149.4e-3));
+    auto rho = DecayingParticle::create(F[113], radial_size, make_shared<RelativisticBreitWigner>(775.49e-3, 149.4e-3));
     rho->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(rho, piPlus);
 
     // f_2(1270)
-    auto f_2 = F.resonance(225, radialSize, make_shared<RelativisticBreitWigner>());
+    auto f_2 = DecayingParticle::create(F[225], radial_size, make_shared<RelativisticBreitWigner>(F[225]));
     f_2->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(f_2, piPlus);
 
     // f_0(980)
     auto f_0_980_flatte = make_shared<Flatte>(0.965);
     f_0_980_flatte->add(FlatteChannel(0.406, *piPlus, *piMinus));
-    f_0_980_flatte->add(FlatteChannel(0.406 * 2, *F.fsp(321), *F.fsp(-321))); // K+K-
-    auto f_0_980 = Resonance::create("f_0(980)", QuantumNumbers(0, 0), radialSize, f_0_980_flatte);
+    f_0_980_flatte->add(FlatteChannel(0.406 * 2, *FinalStateParticle::create(F[321]), *FinalStateParticle::create(F[-321]))); // K+K-
+    auto f_0_980 = DecayingParticle::create("f_0(980)", F["f_0"].quantumNumbers(), radial_size, f_0_980_flatte);
     f_0_980->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(f_0_980, piPlus);
 
     // f_0(1370)
-    auto f_0_1370 = Resonance::create("f_0(1370)", F["f_0"].quantumNumbers(), radialSize, make_unique<RelativisticBreitWigner>(1.350, 0.265));
+    auto f_0_1370 = DecayingParticle::create("f_0(1370)", F["f_0"].quantumNumbers(), radial_size, make_unique<RelativisticBreitWigner>(1.350, 0.265));
     f_0_1370->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(f_0_1370, piPlus);
 
     // f_0(1500)
-    auto f_0_1500 = F.resonance(F.pdgCode("f_0(1500)"), radialSize, make_unique<RelativisticBreitWigner>());
+    auto f_0_1500 = DecayingParticle::create(F["f_0(1500)"], radial_size, make_unique<RelativisticBreitWigner>(F["f_0(1500)"]));
     f_0_1500->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(f_0_1500, piPlus);
 
-    /* // f_0_fake */
-    /* auto f_0_fake = Resonance::create("f_0_fake", F["f_0"], radialSize, make_unique<RelativisticBreitWigner>(1.10, 0.1)); */
-    /* f_0_fake->addStrongDecay(piPlus, piMinus); */
-    /* D->addWeakDecay(f_0_fake, piPlus); */
-
     // sigma a.k.a. f_0(500)
-    auto sigma = F.resonance(F.pdgCode("f_0(500)"), radialSize, make_unique<PoleMass>(complex<double>(0.470, -0.220)));
+    auto sigma = DecayingParticle::create(F["f_0(500)"], radial_size, make_unique<PoleMass>(complex<double>(0.470, -0.220)));
     sigma->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(sigma, piPlus);
 
@@ -115,41 +109,40 @@ inline bat_fit d3pi_fit(string name, unique_ptr<Model> M, vector<vector<unsigned
 {
     bat_fit m(name, d3pi(move(M)), pcs);
 
-    auto is_rho = is_named("rho0");
+    auto is_for_rho = from(std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0"))));
 
-    for (const auto& p : particles(*m.model(), is_resonance)) {
-        auto fa = free_amplitude(*m.model(), to(p));
+    for (auto& fa : free_amplitudes(*m.model(), is_free)) {
         m.setPriors(fa, new ConstantPrior(0, 5), new ConstantPrior(-180, 180));
         m.setRealImagRanges(fa, -5, 5, -5, 5);
         m.setAbsArgRanges(fa, 0, 5, -180, 180);
-        if (is_rho(*p))
+        if (is_for_rho(fa))
             m.fix(fa, real(fa->value()), imag(fa->value()));
     }
 
-    /* auto f_0_1370 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(1370)"))); */
+    /* auto f_0_1370 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(1370)"))); */
     /* m.addParameter("mass(f_0(1370))", static_pointer_cast<BreitWigner>(f_0_1370->massShape())->mass(), 1.2, 1.5); */
     /* m.GetParameters().Back().SetPriorConstant(); */
     /* m.addParameter("width(f_0(1370))", static_pointer_cast<BreitWigner>(f_0_1370->massShape())->width(), .2, .5); */
     /* m.GetParameters().Back().SetPriorConstant(); */
 
-    /* auto f_0_1500 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(1500)"))); */
+    /* auto f_0_1500 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(1500)"))); */
     /* m.addParameter("mass(f_0(1500))", static_pointer_cast<BreitWigner>(f_0_1500->massShape())->mass(), 1.475, 1.535); */
     /* m.GetParameters().Back().SetPrior(new BCGaussianPrior(1.505, 6e-3)); */
     /* m.addParameter("width(f_0(1500))", static_pointer_cast<BreitWigner>(f_0_1500->massShape())->width(), .075, .143); */
     /* m.GetParameters().Back().SetPrior(new BCGaussianPrior(0.109, 7e-3)); */
 
-    /* auto f_2 = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("f_2"))); */
+    /* auto f_2 = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_2"))); */
     /* m.addParameter("mass(f_2)", static_pointer_cast<BreitWigner>(f_2->massShape())->mass(), 1.270, 1.280); */
     /* m.GetParameters().Back().SetPrior(new BCGaussianPrior(1.2751, 1.2e-3)); */
     /* m.addParameter("width(f_2)", static_pointer_cast<BreitWigner>(f_2->massShape())->width(), .170, .200); */
     /* m.GetParameters().Back().SetPrior(new BCSplitGaussianPrior(0.185, 2.4e-3, 2.9e-3)); */
 
-    /* auto rho = dynamic_pointer_cast<Resonance>(particle(*m.model(), is_named("rho0"))); */
+    /* auto rho = dynamic_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0"))); */
     /* m.addParameter("rho_mass", static_pointer_cast<BreitWigner>(rho->massShape())->mass(), 0.5, 1.2); */
     /* m.GetParameters().Back().SetPriorConstant(); */
     /* m.addParameter("rho_width", static_pointer_cast<BreitWigner>(rho->massShape())->width(), 0.1, 0.2); */
     /* m.GetParameters().Back().SetPriorConstant(); */
-    // m.addParameter("rho_radialSize", rho->radialSize(), 1, 5);
+    // m.addParameter("rho_radial_size", rho->radial_size(), 1, 5);
     // m.GetParameters().Back().SetPriorConstant();
     
     return m;
@@ -160,13 +153,13 @@ inline fit_fitFraction d3pi_fit_fitFractions(string name, unique_ptr<Model> M, v
     fit_fitFraction m(name, d3pi(move(M)), pcs);
     
     // find particles
-    auto D = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("D+")));
-    auto rho      = static_pointer_cast<Resonance>(particle(*m.model(), is_named("rho0")));
-    auto f_2      = static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_2")));
-    auto f_0_980  = static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(980)")));
-    auto f_0_1370 = static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(1370)")));
-    auto f_0_1500 = static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(1500)")));
-    auto sigma    = static_pointer_cast<Resonance>(particle(*m.model(), is_named("f_0(500)")));
+    auto D        = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("D+")));
+    auto rho      = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0")));
+    auto f_2      = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_2")));
+    auto f_0_980  = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(980)")));
+    auto f_0_1370 = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(1370)")));
+    auto f_0_1500 = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(1500)")));
+    auto sigma    = static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("f_0(500)")));
 
     // set fit fractions to fit
     m.setFitFraction(decay_tree(*D, to(rho)),      20e-2,   quad(2.3e-2, 0.9e-2));

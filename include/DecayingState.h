@@ -28,8 +28,10 @@
 #include "fwd/DecayChannel.h"
 #include "fwd/DecayTree.h"
 #include "fwd/FreeAmplitude.h"
+#include "fwd/MassShape.h"
 #include "fwd/Model.h"
 #include "fwd/ParticleCombination.h"
+#include "fwd/ParticleFactory.h"
 #include "fwd/QuantumNumbers.h"
 
 #include "AttributeUtilities.h"
@@ -54,7 +56,10 @@ protected:
 
     /// Constructor
     /// see #create
-    DecayingState(const std::string& name, const QuantumNumbers& q, double radialSize);
+    DecayingState(const std::string& name, const QuantumNumbers& q, double radial_size, std::shared_ptr<MassShape> mass_shape);
+
+    /// Constructor
+    DecayingState(const ParticleTableEntry& pte, double radial_size, std::shared_ptr<MassShape> mass_shape);
 
 public:
 
@@ -62,8 +67,16 @@ public:
     /// \param name Name of decaying state
     /// \param q QuantumNumbers of decaying state
     /// \param radialSize radial size of decaying state
-    static std::shared_ptr<DecayingState> create(const std::string& name, const QuantumNumbers& q, double radialSize)
-    { return std::shared_ptr<DecayingState>(new DecayingState(name, q, radialSize)); }
+    /// \param mass_shape dynamic amplitude component
+    static std::shared_ptr<DecayingState> create(const std::string& name, const QuantumNumbers& q, double radialSize, std::shared_ptr<MassShape> mass_shape)
+    { return std::shared_ptr<DecayingState>(new DecayingState(name, q, radialSize, mass_shape)); }
+
+    /// create
+    /// \param pte ParticleTableEntry
+    /// \param radialSize radial size of decaying state
+    /// \param mass_shape dynamic amplitude component
+    static std::shared_ptr<DecayingState> create(const ParticleTableEntry& pte, double radialSize, std::shared_ptr<MassShape> mass_shape)
+    { return std::shared_ptr<DecayingState>(new DecayingState(pte, radialSize, mass_shape)); }
 
     /// \return DecayTrees
     /// map key is spin projection
@@ -88,6 +101,14 @@ public:
     /// \return Blatt-Weisskopf factors
     const BlattWeisskopfMap& blattWeisskopfs() const
     { return BlattWeisskopfs_; }
+    
+    /// \return MassShape
+    std::shared_ptr<MassShape> massShape()
+    { return MassShape_; }
+
+    /// \return MassShape (const)
+    std::shared_ptr<const MassShape> massShape() const
+    { return MassShape_; }
 
     /// \return raw pointer to Model through first DecayChannel
     const Model* model() const override;
@@ -130,6 +151,9 @@ private:
     /// map of Blatt-Weisskopf barrier factors, key = angular momentum
     BlattWeisskopfMap BlattWeisskopfs_;
 
+    /// MassShape object
+    std::shared_ptr<MassShape> MassShape_;
+    
     /// Radial size parameter [GeV^-1]
     std::shared_ptr<RealParameter> RadialSize_;
 

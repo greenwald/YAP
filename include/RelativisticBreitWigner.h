@@ -51,16 +51,19 @@ public:
     /// Constructor
     /// \param m Mass of resonance [GeV]
     /// \param w Width of resonance [GeV]
-    RelativisticBreitWigner(double m = -1, double w = -1) :
-    BreitWigner(m, w) {}
+    RelativisticBreitWigner(double m, double w) : BreitWigner(m, w) {}
 
+    /// Constructor
+    /// \param pte ParticleTableEntry containing information to create mass shape object
+    RelativisticBreitWigner(const ParticleTableEntry& pte) : BreitWigner(pte) {}
+    
     /// Check if a DecayChannel is valid for this MassShape; will throw if invalid.
     /// Cheks that decay is to two spin-zero particles
     virtual void checkDecayChannel(const DecayChannel& c) const override;
 
 protected:
 
-    /// Retrieve BlattWeisskopf object from Resonance now that it is added to the Model
+    /// Retrieve BlattWeisskopf object from DecayingState now that it is added to the Model
     virtual void addDecayChannel(std::shared_ptr<DecayChannel> c) override;
 
     /// Calculate dynamic amplitude T for and store in each DataPoint in DataPartition

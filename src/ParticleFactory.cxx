@@ -5,7 +5,6 @@
 #include "FinalStateParticle.h"
 #include "logging.h"
 #include "MassShape.h"
-#include "Resonance.h"
 
 #include <algorithm>
 #include <fstream>
@@ -29,25 +28,11 @@ ParticleTableEntry::ParticleTableEntry(int pdg, const std::string& name, Quantum
 }
 
 //-------------------------
-std::shared_ptr<FinalStateParticle> ParticleFactory::fsp(int PDG) const
+const double get_nth_entry(const ParticleTableEntry& pte, size_t n, const std::string& where)
 {
-    const auto& p = (*this)[PDG];
-    return FinalStateParticle::create(p.name(), p.quantumNumbers(), p.mass());
-}
-
-//-------------------------
-std::shared_ptr<DecayingParticle> ParticleFactory::decayingParticle(int PDG, double radialSize) const
-{
-    const auto& p = (*this)[PDG];
-    return DecayingParticle::create(p.name(), p.quantumNumbers(), radialSize);
-}
-
-//-------------------------
-    std::shared_ptr<Resonance> ParticleFactory::resonance(int PDG, double radialSize, std::shared_ptr<MassShape> massShape) const
-{
-    const auto& p = (*this)[PDG];
-    massShape->setParameters(p);
-    return Resonance::create(p.name(), p.quantumNumbers(), radialSize, std::move(massShape));
+    if (pte.massShapeParameters().size() <= n)
+        throw exceptions::Exception("pte.massShapeParameters() does not contain an " + std::to_string(n) + "'th element", where);
+    return pte.massShapeParameters()[n];
 }
 
 //-------------------------
@@ -65,6 +50,17 @@ const ParticleTableEntry& ParticleFactory::operator[](int PDG) const
         throw exceptions::Exception("No particle table entry for PDG " + std::to_string(PDG), "ParticleFactory::operator[]");
     return ParticleTable_.at(PDG);
 }
+
+//-------------------------
+const ParticleTableEntry& ParticleFactory::operator[](const std::string& name) const
+{
+    auto it = std::find_if(ParticleTable_.begin(), ParticleTable_.end(),
+                           [&](const std::map<int, ParticleTableEntry>::value_type & p) {return p.second.name() == name;});
+    if (it == ParticleTable_.end())
+        throw exceptions::Exception("particle with name \"" + name + "\" not found", "ParticleFactory::pdg");
+    return it->second;
+}
+
 
 //-------------------------
 std::pair<ParticleTableMap::iterator, bool> ParticleFactory::insert(const ParticleTableEntry& entry)
@@ -91,16 +87,6 @@ ParticleTableMap::iterator ParticleFactory::insert(ParticleTableMap::iterator hi
     auto it = ParticleTable_.find(entry.pdg());
     it->second = entry;
     return it;
-}
-
-//-------------------------
-int ParticleFactory::pdgCode(const std::string& name) const
-{
-    auto it = std::find_if(ParticleTable_.begin(), ParticleTable_.end(),
-    [&](const std::map<int, ParticleTableEntry>::value_type & p) {return p.second.name() == name;});
-    if (it == ParticleTable_.end())
-        throw exceptions::Exception("particle with name \"" + name + "\" not found", "ParticleFactory::pdgCode");
-    return it->first;
 }
 
 }

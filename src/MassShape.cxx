@@ -3,19 +3,18 @@
 #include "CachedValue.h"
 #include "CalculationStatus.h"
 #include "DataPartition.h"
+#include "DecayingState.h"
 #include "Exceptions.h"
-#include "logging.h"
 #include "Parameter.h"
 #include "ParticleCombination.h"
-#include "Resonance.h"
 #include "VariableStatus.h"
+#include "logging.h"
 
 namespace yap {
 
 //-------------------------
 MassShape::MassShape() :
     RecalculableAmplitudeComponent(equal_by_orderless_content),
-    Resonance_(nullptr),
     T_(ComplexCachedValue::create(*this))
 {}
 
@@ -53,28 +52,34 @@ bool MassShape::consistent() const
 {
     bool C = DataAccessor::consistent();
 
-    // check if owning resonance is set
-    if (!Resonance_) {
-        FLOG(ERROR) << "Owning resonance isn't set";
+    // check if owning DecayingState is set
+    if (!DecayingState_) {
+        FLOG(ERROR) << "Owning DecayingState isn't set";
         C &= false;
     }
 
+    // check owning DecayingState's mass shape
+    if (DecayingState_ and DecayingState_->massShape().get() != this) {
+        FLOG(ERROR) << "Owning DecayingState's mass shape is not this MassShape";
+        C &= false;
+    }
+    
     return C;
 }
 
 //-------------------------
-void MassShape::setResonance(Resonance* r)
+void MassShape::setDecayingState(DecayingState* r)
 {
-    if (Resonance_)
-        throw exceptions::Exception("MassShape already has owning Resonance", "MassShape::setResonance");
+    if (DecayingState_)
+        throw exceptions::Exception("MassShape already has owning DecayingState", "MassShape::setDecayingState");
 
-    Resonance_ = r;
+    DecayingState_ = r;
 }
 
 //-------------------------
 const Model* MassShape::model() const
 {
-    return Resonance_->model();
+    return DecayingState_->model();
 }
 
 }

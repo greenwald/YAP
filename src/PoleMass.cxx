@@ -7,8 +7,6 @@
 #include "Model.h"
 #include "Parameter.h"
 #include "ParticleFactory.h"
-#include "Resonance.h"
-#include "StatusManager.h"
 
 namespace yap {
 
@@ -21,18 +19,9 @@ PoleMass::PoleMass(std::complex<double> mass) :
 }
 
 //-------------------------
-void PoleMass::setParameters(const ParticleTableEntry& entry)
+PoleMass::PoleMass(const ParticleTableEntry& pte) :
+    PoleMass(std::complex<double>(pte.mass(), get_nth_entry(pte, 0, "PoleMass::PoleMass") / 2))
 {
-    // copy current value
-    auto m = Mass_->value();
-
-    if (real(m) < 0)
-        m.real(entry.mass());
-    
-    if (imag(m) < 0 and !entry.massShapeParameters().empty())
-        m.imag(entry.massShapeParameters()[0] / 2.);
-
-    *Mass_ = m;
 }
 
 //-------------------------

@@ -21,6 +21,7 @@
 #include "models/d4pi.h"
 #include "models/dkkpi.h"
 #include "models/D_K0pi0pi0.h"
+#include "models/Lambda.h"
 #include "tools.h"
 
 #include <chrono>
@@ -34,8 +35,9 @@ int main()
     plainLogs(el::Level::Info);
 
     vector<bat_gen*> test_models = {
+        new bat_gen("LAMBDA", Lambda(yap_model<HelicityFormalism>()), 2.28646)
         // new bat_gen("D3PI_PHSP", d3pi_phsp(yap_model<ZemachFormalism>()), 1.86961),
-        new bat_gen("D3PI", d3pi(yap_model<ZemachFormalism>()), 1.86961)
+        // new bat_gen("D3PI", d3pi(yap_model<ZemachFormalism>()), 1.86961)
         // new bat_gen("DKSPIPI_Zemach", D_K0pi0pi0(yap_model<ZemachFormalism>()), 1.86961),
         // new bat_gen("DKSPIPI_Helicity", D_K0pi0pi0(yap_model<HelicityFormalism>()), 1.86961)
         // new bat_gen("DKKPI", dkkpi(yap_model<ZemachFormalism>()), 1.86961),

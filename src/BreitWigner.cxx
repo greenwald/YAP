@@ -4,12 +4,9 @@
 #include "DataPartition.h"
 #include "FourMomenta.h"
 #include "logging.h"
-#include "MathUtilities.h"
 #include "Model.h"
 #include "Parameter.h"
 #include "ParticleFactory.h"
-#include "Resonance.h"
-#include "StatusManager.h"
 
 namespace yap {
 
@@ -22,15 +19,9 @@ BreitWigner::BreitWigner(double m, double w) :
 }
 
 //-------------------------
-void BreitWigner::setParameters(const ParticleTableEntry& entry)
+BreitWigner::BreitWigner(const ParticleTableEntry& pte) :
+    BreitWigner(pte.mass(), get_nth_entry(pte, 0, "BreitWigner::BreitWigner"))
 {
-    MassShapeWithNominalMass::setParameters(entry);
-
-    if (entry.massShapeParameters().empty())
-        throw exceptions::Exception("entry.massShapeParameter() is empty", "BreitWigner::setParameters");
-
-    if (Width_->value() < 0)
-        *Width_ = entry.massShapeParameters()[0];
 }
 
 //-------------------------

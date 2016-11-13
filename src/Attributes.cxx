@@ -11,7 +11,6 @@
 #include "MassShapeWithNominalMass.h"
 #include "Model.h"
 #include "Particle.h"
-#include "Resonance.h"
 #include "SpinAmplitude.h"
 #include "container_utils.h"
 
@@ -255,9 +254,15 @@ std::shared_ptr<const DecayingState> parent_state::operator()(const BlattWeissko
 //-------------------------
 std::shared_ptr<const DecayingState> parent_state::operator()(const MassShape& m) const
 {
-    if (!m.resonance())
+    if (!m.decayingState())
         return nullptr;
-    return std::static_pointer_cast<DecayingState>(m.resonance()->shared_from_this());
+    return std::static_pointer_cast<DecayingState>(m.decayingState()->shared_from_this());
+}
+
+//-------------------------
+const bool has_a_mass_shape::operator()(const Particle& p) const
+{
+    return is_decaying_state(p) and static_cast<const DecayingState&>(p).massShape() != nullptr;
 }
 
 //-------------------------
@@ -269,7 +274,7 @@ const bool has_a_mass::operator()(const MassShape& m) const
 //-------------------------
 const bool has_a_mass::operator()(const Particle& p) const
 {
-    return is_final_state_particle(p) or (is_resonance(p) and operator()(dynamic_cast<const Resonance&>(p).massShape()));
+    return is_final_state_particle(p) or (has_a_mass_shape()(p) and operator()(dynamic_cast<const DecayingState&>(p).massShape()));
 }
 
 //-------------------------
@@ -286,9 +291,9 @@ const RealParameter& mass_parameter::operator()(const MassShape& m) const
 //-------------------------
 const RealParameter& mass_parameter::operator()(const Particle& p) const
 {
-    if (!dynamic_cast<const Resonance*>(&p))
-        throw exceptions::Exception("Particle is not Resonance", "mass_parameter::operator()(Particle)");
-    return operator()(dynamic_cast<const Resonance&>(p).massShape());
+    if (!has_a_mass_shape()(p))
+        throw exceptions::Exception("Particle does not have a MassShape", "mass_parameter::operator()(Particle)");
+    return operator()(static_cast<const DecayingState&>(p).massShape());
 }
     
 //-------------------------

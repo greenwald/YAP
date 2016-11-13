@@ -7,7 +7,6 @@
 #ifndef __BAT__DKSPI0PI0__H
 #define __BAT__DKSPI0PI0__H
 
-
 #include <BreitWigner.h>
 #include <DecayChannel.h>
 #include <DecayingParticle.h>
@@ -20,7 +19,6 @@
 #include <PDL.h>
 #include <PoleMass.h>
 #include <QuantumNumbers.h>
-#include <Resonance.h>
 #include <Parameter.h>
 #include <RelativisticBreitWigner.h>
 #include <SpinAmplitudeCache.h>
@@ -28,14 +26,14 @@
 #include <complex>
 #include <memory>
 
-
+//-------------------------
 inline std::unique_ptr<yap::Model> D_K0pi0pi0(std::unique_ptr<yap::Model> M)
 {
     auto F = yap::read_pdl_file((std::string)::getenv("YAPDIR") + "/data/evt.pdl");
 
     // final state particles
-    auto piZero = F.fsp(F.pdgCode("pi0"));
-    auto Kshort = F.fsp(F.pdgCode("K_S0"));
+    auto piZero = yap::FinalStateParticle::create(F["pi0"]);
+    auto Kshort = yap::FinalStateParticle::create(F["K_S0"]);
 
     M->setFinalState(Kshort, piZero, piZero);
 
@@ -43,11 +41,10 @@ inline std::unique_ptr<yap::Model> D_K0pi0pi0(std::unique_ptr<yap::Model> M)
     double radialSize = 3.; // [GeV^-1]
 
     // initial state particle
-    auto D = F.decayingParticle(F.pdgCode("D0"), radialSize);
+    auto D = yap::DecayingParticle::create(F["D0"], radialSize);
 
     // f_0(500), aka "sigma" (as PoleMass)
-    auto sigma = F.resonance(F.pdgCode("f_0(500)"), radialSize, std::make_shared<yap::PoleMass>(std::complex<double>(0.470, 0.220)));
-    /* auto sigma = yap::Resonance::create(yap::QuantumNumbers(0, 0), 0.470, "f_0(500)", radialSize, std::make_shared<yap::RelativisticBreitWigner>(0.220 * 2)); */
+    auto sigma = yap::DecayingParticle::create(F["f_0(500)"], radialSize, std::make_shared<yap::PoleMass>(std::complex<double>(0.470, 0.220)));
     sigma->addStrongDecay(piZero, piZero);
     D->addWeakDecay(sigma, Kshort);
     
@@ -55,37 +52,37 @@ inline std::unique_ptr<yap::Model> D_K0pi0pi0(std::unique_ptr<yap::Model> M)
     auto f_0_980_flatte = std::make_shared<yap::Flatte>(0.965);
     f_0_980_flatte->add(FlatteChannel(0.406, *piZero, *piZero));
     f_0_980_flatte->add(FlatteChannel(0.406 * 2, *Kshort, *Kshort));
-    auto f_0_980 = yap::Resonance::create("f_0_980", yap::QuantumNumbers(0, 0), radialSize, f_0_980_flatte);
+    auto f_0_980 = yap::DecayingParticle::create("f_0_980", yap::QuantumNumbers(0, 0), radialSize, f_0_980_flatte);
     f_0_980->addStrongDecay(piZero, piZero);
     D->addWeakDecay(f_0_980, Kshort);
 
     // f_0(1370)
-    auto f_0_1370 = yap::Resonance::create("f_0_1370", yap::QuantumNumbers(0, 0), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.35, 0.265));
+    auto f_0_1370 = yap::DecayingParticle::create("f_0_1370", yap::QuantumNumbers(0, 0), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.35, 0.265));
     f_0_1370->addStrongDecay(piZero, piZero);
     D->addWeakDecay(f_0_1370, Kshort);
 
     // f_0(1500)
-    auto f_0_1500 = yap::Resonance::create("f_0_1500", yap::QuantumNumbers(0, 0), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.505, 0.109));
+    auto f_0_1500 = yap::DecayingParticle::create("f_0_1500", yap::QuantumNumbers(0, 0), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.505, 0.109));
     f_0_1500->addStrongDecay(piZero, piZero);
     D->addWeakDecay(f_0_1500, Kshort);
 
     // f_2(1270)
-    auto f_2_1270 = yap::Resonance::create("f_2_1270", yap::QuantumNumbers(0, 2 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.2751, 0.185));
+    auto f_2_1270 = yap::DecayingParticle::create("f_2_1270", yap::QuantumNumbers(0, 2 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.2751, 0.185));
     f_2_1270->addStrongDecay(piZero, piZero);
     D->addWeakDecay(f_2_1270, Kshort);
 
     // K*(892)
-    auto Kstar_892 = yap::Resonance::create("Kstar_892", yap::QuantumNumbers(0, 1 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(0.896, 0.0503));
+    auto Kstar_892 = yap::DecayingParticle::create("Kstar_892", yap::QuantumNumbers(0, 1 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(0.896, 0.0503));
     Kstar_892->addStrongDecay(Kshort, piZero);
     D->addWeakDecay(Kstar_892, piZero);
 
     // K*_2(1430)
-    auto Kstar_2_1430 = yap::Resonance::create("Kstar_2_1430", yap::QuantumNumbers(0, 2 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.4324, .109));
+    auto Kstar_2_1430 = yap::DecayingParticle::create("Kstar_2_1430", yap::QuantumNumbers(0, 2 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.4324, .109));
     Kstar_2_1430->addStrongDecay(Kshort, piZero);
     D->addWeakDecay(Kstar_2_1430, piZero);
 
     // K*(1680)
-    auto Kstar_1680 = yap::Resonance::create("Kstar_1680", yap::QuantumNumbers(0, 1 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.717, 0.322));
+    auto Kstar_1680 = yap::DecayingParticle::create("Kstar_1680", yap::QuantumNumbers(0, 1 * 2), radialSize, std::make_shared<yap::RelativisticBreitWigner>(1.717, 0.322));
     Kstar_1680->addStrongDecay(Kshort, piZero);
     D->addWeakDecay(Kstar_1680, piZero);
 

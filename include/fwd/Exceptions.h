@@ -33,7 +33,6 @@ struct InconsistentSpinProjection;
 struct OutsidePhaseSpace;
 struct NotTwoBodyParticleCombination;
 struct ParameterIsFixed;
-struct ResonanceUnset;
 struct NonfiniteResult;
 struct InconsistentDataPoint;
 struct EmptyFourMomentaVector;

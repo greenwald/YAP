@@ -3,7 +3,9 @@ include_directories(${YAP_SOURCE_DIR}/include)
 set(PROGRAMS
     D4piTest
     D3piTest
-    DKKpiTest)
+    D3piWaveTest
+    DKKpiTest
+    LambdaTest)
 
 # Add the programs to the `make example` dependencies
 set(examples_depends ${examples_depends} ${PROGRAMS} PARENT_SCOPE)

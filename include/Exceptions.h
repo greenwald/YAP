@@ -96,13 +96,6 @@ ParameterIsFixed(const std::string& what_arg = "", const std::string& func_name 
     : Exception(what_arg, func_name) {}
 };
 
-/// \class ResonanceUnset
-/// \ingroup Exceptions
-struct ResonanceUnset : public Exception {
-ResonanceUnset(const std::string& func_name = "")
-    : Exception("Resonance unset", func_name) {}
-};
-
 /// \class NonfiniteResult
 /// \ingroup Exceptions
 struct NonfiniteResult : public Exception {};
