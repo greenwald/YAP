@@ -271,6 +271,23 @@ private:
     A Attr_;
 };
 
+/// Functor class to check whether argument has a particular MassShape
+/// \ingroup Attributes
+struct has_mass_shape : public has_pointed_to_object<MassShape, Particle, DecayTree>
+{
+    /// \note constructors inherited
+    using has_pointed_to_object::has_pointed_to_object;
+
+    /// \note functors inherited
+    using has_pointed_to_object::operator();
+
+    /// Particle& functor
+    virtual const bool operator()(const Particle& p) const override;
+
+    /// DecayTree& functor
+    virtual const bool operator()(const DecayTree& dt) const override;
+};
+
 /// functor to return whether an argument has a MassShape
 /// \ingroup Attributes
 struct has_a_mass_shape : public attribute_of<const bool, Particle>

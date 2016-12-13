@@ -261,7 +261,26 @@ std::shared_ptr<const DecayingParticle> parent_particle::operator()(const ModelC
         return nullptr;
     return operator()(c.decayTrees()[0]);
 }
-    
+
+//-------------------------
+const bool has_mass_shape::operator()(const Particle& p) const
+{
+    if (!is_decaying_particle(p))
+        return false;
+    if (std::find(objects().begin(), objects().end(), static_cast<const DecayingParticle&>(p).massShape().get()) != objects().end())
+        return true;
+    return false;
+}
+
+//-------------------------
+const bool has_mass_shape::operator()(const DecayTree& dt) const
+{
+    for (auto ac : dt.amplitudeComponents())
+        if (std::find(objects().begin(), objects().end(), ac) != objects().end())
+            return true;
+    return false;
+}
+
 //-------------------------
 const bool has_a_mass_shape::operator()(const Particle& p) const
 {

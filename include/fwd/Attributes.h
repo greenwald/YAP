@@ -63,6 +63,7 @@ struct is_not_fixed;
 struct has_free_amplitude;
 struct has_decay_tree;
 struct has_decay_channel;
+struct has_mass_shape;
 
 struct parent_particle;
 template <typename> class name_of;
