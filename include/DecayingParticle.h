@@ -23,6 +23,7 @@
 
 #include "fwd/DecayingParticle.h"
 
+#include "fwd/AmplitudeComponent.h"
 #include "fwd/BlattWeisskopf.h"
 #include "fwd/DecayChannel.h"
 #include "fwd/DecayTree.h"
@@ -189,6 +190,15 @@ protected:
     /// \param dt DecayTree to modify
     virtual void modifyDecayTree(DecayTree& dt);
 
+    /// add an AmplitudeComponent to a DecayTree
+    void addAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const;
+
+    /// remove an AmplitudeCompoent from a DecayTree
+    void removeAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const;
+
+    /// replace FreeAmplitude in a DecayTree
+    void replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> fa, DecayTree& dt) const;
+    
 private:
 
     /// MassShape object

@@ -434,6 +434,25 @@ void DecayingParticle::modifyDecayTree(DecayTree& dt)
 }
 
 //-------------------------
+void DecayingParticle::addAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
+{
+    dt.addAmplitudeComponent(ac);
+}
+
+//-------------------------
+void DecayingParticle::removeAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
+{
+    dt.removeAmplitudeComponent(ac);
+}
+
+//-------------------------
+void DecayingParticle::replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> ac, DecayTree& dt) const
+{
+    dt.replaceFreeAmplitude(ac);
+}
+
+
+//-------------------------
 ParticleSet particles(DecayingParticle& dp)
 {
     ParticleSet S = {dp.shared_from_this()};
