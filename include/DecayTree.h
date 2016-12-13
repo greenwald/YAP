@@ -102,7 +102,9 @@ public:
     /// grant friend status to DecayChannel to call addAmplitudeComponent
     friend class DecayChannel;
 
-    /// grant friend status to DecayingParticle to call addAmplitudeComponent
+    /// grant friend status to DecayingParticle to call
+    /// addAmplitudeComponent, removeAmplitudeComponent, and
+    /// replaceFreeAmplitude
     friend class DecayingParticle;
 
 protected:
@@ -113,8 +115,14 @@ protected:
     void setDaughterDecayTree(unsigned i, std::shared_ptr<DecayTree> dt);
 
     /// Add an AmplitudeComponent
-    void addAmplitudeComponent(const AmplitudeComponent& rda);
+    void addAmplitudeComponent(const AmplitudeComponent& ac);
 
+    /// Remove an AmplitudeComponent
+    void removeAmplitudeComponent(const AmplitudeComponent& ac);
+
+    // Replace FreeAmplitude
+    void replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> fa);
+    
 private:
 
     /// ComplexParameter of the free amplitude for the decay

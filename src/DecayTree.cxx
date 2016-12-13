@@ -153,6 +153,25 @@ void DecayTree::addAmplitudeComponent(const AmplitudeComponent& ac)
 }
 
 //-------------------------
+void DecayTree::removeAmplitudeComponent(const AmplitudeComponent& ac)
+{
+    auto it = std::find(AmplitudeComponents_.begin(), AmplitudeComponents_.end(), &ac);
+    if (it != AmplitudeComponents_.end())
+        AmplitudeComponents_.erase(it);
+}
+
+//-------------------------
+void DecayTree::replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> fa)
+{
+    // check that fa is vcompatible with AmplitudeComponents_
+    for (const auto& pc : fa->particleCombinations())
+        for (const auto& ac : AmplitudeComponents_)
+            if (!ac->validFor(*pc))
+                throw exceptions::Exception("FreeAmplitude not valid for all AmplitudeComponents", "DecayTree::replaceFreeAmplitude");
+    FreeAmplitude_ = fa;
+}
+
+//-------------------------
 std::shared_ptr<DecayingParticle> decayingParticle(const DecayTree& dt)
 {
     if (!dt.model())
