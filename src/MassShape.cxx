@@ -56,7 +56,31 @@ DecayTreeVector& MassShape::ownersDecayTrees()
         throw exceptions::Exception("MassShape has no owner", "MassShape::ownersDecayTrees");
     return Owner_->DecayTrees_;
 }
-    
+
+//-------------------------
+void MassShape::addAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
+{
+    if (!Owner_)
+        throw exceptions::Exception("MassShape has no owner", "MassShape::addAmplitudeComponent");
+    Owner_->addAmplitudeComponent(ac, dt);
+}
+
+//-------------------------
+void MassShape::removeAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
+{
+    if (!Owner_)
+        throw exceptions::Exception("MassShape has no owner", "MassShape::removeAmplitudeComponent");
+    Owner_->removeAmplitudeComponent(ac, dt);
+}
+
+//-------------------------
+void MassShape::replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> ac, DecayTree& dt) const
+{
+    if (!Owner_)
+        throw exceptions::Exception("MassShape has no owner", "MassShape::replaceFreeAmplitude");
+    Owner_->replaceFreeAmplitude(ac, dt);
+}
+
 //-------------------------
 const Model* MassShape::model() const
 {
