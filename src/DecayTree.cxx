@@ -163,7 +163,10 @@ void DecayTree::removeAmplitudeComponent(const AmplitudeComponent& ac)
 //-------------------------
 void DecayTree::replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> fa)
 {
-    // check that fa is vcompatible with AmplitudeComponents_
+    if (fa == FreeAmplitude_)
+        return;
+
+    // check that fa is compatible with AmplitudeComponents_
     for (const auto& pc : fa->particleCombinations())
         for (const auto& ac : AmplitudeComponents_)
             if (!ac->validFor(*pc))
