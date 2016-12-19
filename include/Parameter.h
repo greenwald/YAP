@@ -39,12 +39,25 @@ namespace yap {
 /// \defgroup Parameters
 class ParameterBase
 {
-protected:
+public:
 
     /// Constructor
-    ParameterBase() : VariableStatus_(VariableStatus::changed) {}
+    ParameterBase() = default;
 
-public:
+    /// virtual destructor
+    virtual ~ParameterBase() = default;
+
+    /// copy constructor
+    ParameterBase(const ParameterBase&) = default;
+    
+    /// move constructor
+    ParameterBase(ParameterBase&&) = default;
+
+    /// copy assignment
+    ParameterBase& operator=(const ParameterBase&) = default;
+
+    /// move assignment
+    ParameterBase& operator=(ParameterBase&&) = default;
 
     /// \return VariableStatus
     VariableStatus& variableStatus()
@@ -63,7 +76,7 @@ public:
 private:
 
     /// Status of variable
-    VariableStatus VariableStatus_;
+    VariableStatus VariableStatus_{VariableStatus::changed};
 
 };
 
@@ -87,26 +100,8 @@ class Parameter : public ParameterBase
 {
 public:
 
-    /// Default constructor
-    Parameter() = default;
-
     /// Value-assigning constructor
     explicit Parameter(T t) : ParameterBase(), ParameterValue_(t) {}
-
-    /// virtual destructor defaulted
-    ~Parameter() = default;
-
-    /// copy constructor defaulted
-    Parameter(const Parameter&) = default;
-
-    /// move constructor defaulted
-    Parameter(Parameter&&) = default;
-
-    /// copy assignment defaulted
-    Parameter& operator=(const Parameter&) = default;
-
-    /// move assignment defaulted
-    Parameter& operator=(Parameter&&) = default;
 
     /// \return value of parameter
     virtual typename std::conditional<std::is_fundamental<T>::value, const T, const T&>::type
@@ -246,7 +241,7 @@ class ComplexComponentParameter : public RealParameter
 public:
     /// Constructor
     /// \param par shared_ptr to ComplexParameter to access
-    explicit ComplexComponentParameter(std::shared_ptr<ComplexParameter> par) : RealParameter(0), Parent_(par)
+    explicit ComplexComponentParameter(std::shared_ptr<ComplexParameter> par) : RealParameter(0.), Parent_(par)
     { if (!Parent_) throw exceptions::Exception("Parent unset", "ComplexComponentParameter::ComplexComponentParameter"); }
         
     /// \return value of parameter by accessing parent
