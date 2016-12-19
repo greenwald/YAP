@@ -31,6 +31,7 @@
 #include <QuantumNumbers.h>
 #include <RelativisticBreitWigner.h>
 #include <SpinAmplitudeCache.h>
+#include <StepFunction.h>
 
 #include <BAT/BCGaussianPrior.h>
 #include <BAT/BCSplitGaussianPrior.h>
@@ -103,17 +104,81 @@ inline unique_ptr<Model> d3pi(unique_ptr<Model> M)
     return M;
 }
 
+inline unique_ptr<Model> d3pi_mi(unique_ptr<Model> M)
+{
+    auto T = read_pdl_file((string)::getenv("YAPDIR") + "/data/evt.pdl");
+
+    // final state particles
+    auto piPlus  = FinalStateParticle::create(T[211]);
+    auto piMinus = FinalStateParticle::create(T[-211]);
+
+    M->setFinalState(piPlus, piMinus, piPlus);
+
+    // use common radial size for all resonances
+    double radialSize = 3.; // [GeV^-1]
+
+    // initial state particle
+    auto D = DecayingParticle::create(T["D+"], radialSize);
+
+    // rho
+    auto rho = DecayingParticle::create(T[113], radialSize, make_shared<RelativisticBreitWigner>(775.49e-3, 149.4e-3));
+    rho->addStrongDecay(piPlus, piMinus);
+    D->addWeakDecay(rho, piPlus);
+
+    // f_2(1270)
+    auto f_2 = DecayingParticle::create(T[225], radialSize, make_shared<RelativisticBreitWigner>(T[225]));
+    f_2->addStrongDecay(piPlus, piMinus);
+    D->addWeakDecay(f_2, piPlus);
+    
+    // model independent pipi S wave
+    std::vector<double> bins;
+    double m2_low = pow(2 * T[211].mass(), 2);
+    double m2_high = pow(T["D+"].mass() - T[211].mass(), 2);
+    double m2_f0 = pow(T["f_0(1500)"].mass(), 2);
+    double mw_f0 = T["f_0(1500)"].mass() * T["f_0(1500)"].massShapeParameters()[0];
+    double phi_min = atan((mw_f0 / (m2_f0 - m2_low) - (m2_f0 - m2_low) / mw_f0) / 2);
+    double phi_max = atan((mw_f0 / (m2_f0 - m2_high) - (m2_f0 - m2_high) / mw_f0) / 2) + yap::pi();
+    unsigned Nbins = 20;
+    for (unsigned b = 0; b <= Nbins; ++b) {
+        auto amp = std::polar(0.5 / mw_f0, phi_min + (phi_max - phi_min) * b / 20) + std::complex<double>(0, 0.5 / mw_f0);
+        bins.push_back(m2_f0 - mw_f0 / tan(arg(amp)));
+    }
+    auto pipi_Swave = DecayingParticle::create("pipi_Swave", T["f_0(500)"].quantumNumbers(), radialSize, make_shared<StepFunction>(bins));
+    pipi_Swave->addStrongDecay(piPlus, piMinus);
+    D->addWeakDecay(pipi_Swave, piPlus);
+
+	M->lock();
+
+    // Add channels to D
+    *free_amplitude(*M, to(rho))        = polar(1., 0.);
+    *free_amplitude(*M, to(f_2))        = polar(2.1, rad(-123.));
+    *free_amplitude(*M, to(pipi_Swave)) = polar(3., rad(-44.));
+
+    auto step_function = static_pointer_cast<StepFunction>(pipi_Swave->massShape());
+    double m_f0 = T["f_0(1500)"].mass();
+    double w_f0 = T["f_0(1500)"].massShapeParameters()[0];
+    for (size_t i = 0; i < step_function->steps().size(); ++i) {
+        double m2 = 0.5 * (step_function->lowEdges()[i]->value() + step_function->lowEdges()[i + 1]->value());
+        *step_function->freeAmplitudes()[i] = 1.1 / (m_f0 * m_f0 - m2 - 1_i * m_f0 * w_f0);
+    }
+    
+    return M;
+}
+
 inline bat_fit d3pi_fit(string name, unique_ptr<Model> M, vector<vector<unsigned> > pcs = {})
 {
-    bat_fit m(name, d3pi(move(M)), pcs);
+    bat_fit m(name, d3pi_mi(move(M)), pcs);
 
-    auto is_for_rho = from(std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0"))));
-
+    auto is_to_rho = to(std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("rho0"))));
+    auto is_to_pipiS = to(std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("pipi_Swave"))));
+    auto is_from_pipiS = from(std::static_pointer_cast<DecayingParticle>(particle(*m.model(), is_named("pipi_Swave"))));
+    
     for (const auto& fa : free_amplitudes(*m.model(), is_not_fixed())) {
         m.setPriors(fa, new ConstantPrior(0, 5), new ConstantPrior(-180, 180));
-        m.setRealImagRanges(fa, -5, 5, -5, 5);
-        m.setAbsArgRanges(fa, 0, 5, -180, 180);
-        if (is_for_rho(fa))
+        m.setRealImagRanges(fa, -2, 2, -2, 2);
+        m.setAbsArgRanges(fa, 0, 2, -180, 180);
+        /* if (!is_from_pipiS(fa)) */
+        if (is_to_rho(fa) or is_to_pipiS(fa))
             m.fix(fa, real(fa->value()), imag(fa->value()));
     }
 

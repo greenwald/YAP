@@ -4,7 +4,10 @@ set(SOURCES
     bat_fit.cxx
     bat_gen.cxx
     bat_yap_base.cxx
-    fit_fitFraction.cxx)
+    fit_base.cxx
+    fit_fitFraction.cxx
+    mi_fit.cxx
+    )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/output)
 add_custom_target(link-macros

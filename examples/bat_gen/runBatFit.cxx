@@ -6,6 +6,8 @@
 // ***************************************************************
 
 #include "bat_fit.h"
+#include "fit_base.h"
+#include "mi_fit.h"
 //#include "hist.h"
 #include "models/d3pi.h"
 #include "models/d4pi.h"
@@ -37,7 +39,7 @@ int main()
 {
     yap::plainLogs(el::Level::Info);
 
-    unsigned i_model = 0;
+    unsigned i_model = 3;
 
     std::string model_name;
     switch (i_model) {
@@ -49,6 +51,9 @@ int main()
             break;
         case 2:
             model_name = "D4PI";
+            break;
+        case 3:
+            model_name = "D3PI";
             break;
         default:
             throw yap::exceptions::Exception("No valid model requested.", "runBatFit::main");
@@ -70,7 +75,7 @@ int main()
         throw yap::exceptions::Exception("could not retrieve mcmc tree", "main");
 
     // create model
-    bat_fit* m = nullptr;
+    fit_base* m = nullptr;
     double D_mass(0);
     switch (i_model) {
         case 0:
@@ -84,6 +89,10 @@ int main()
         case 2:
             m = new bat_fit(d4pi_fit(model_name + "_fit"));
             D_mass = 1.8648400; // D0
+            break;
+        case 3:
+            m = new mi_fit(model_name + "_fit", yap_model<yap::ZemachFormalism>(), find_mass_axes(*t_pars));
+            D_mass = 1.86961; // D+
             break;
         default:
             m = nullptr;
@@ -146,21 +155,25 @@ int main()
 
     m->SetNIterationsRun(static_cast<int>(50e3 / m->GetNChains()));
 
+    m->SetInitialPositionAttemptLimit(10000);
+    
     // m->WriteMarkovChain("output/" + m->GetSafeName() + "_mcmc.root", "RECREATE", true, false);
 
     // start timing:
     auto start = std::chrono::steady_clock::now();
 
     // run MCMC, marginalizing posterior
-    m->MarginalizeAll(BCIntegrate::kMargMetropolis);
+    m->MCMCUserInitialize();
+    // m->MarginalizeAll(BCIntegrate::kMargMetropolis);
+
+    m->FindMode();
+    m->FindMode(m->GetBestFitParameters());
 
     // end timing
     auto end = std::chrono::steady_clock::now();
 
-    m->FindMode(m->GetBestFitParameters());
-
     m->PrintSummary();
-    m->PrintAllMarginalized("output/" + m->GetSafeName() + "_plots.pdf", 2, 2);
+    // m->PrintAllMarginalized("output/" + m->GetSafeName() + "_plots.pdf", 2, 2);
 
     // m->SetNIterationsRun(static_cast<int>(10e3 / m->GetNChains()));
     // // m->SetKnowledgeUpdateDrawingStyle(BCAux::kKnowledgeUpdateDetailedPosterior);
@@ -173,6 +186,11 @@ int main()
     BCLog::OutSummary(std::string("Seconds = ") + std::to_string(ms / 1.e6) + " for " + std::to_string(nevents) + " iterations, " + std::to_string(m->likelihoodCalls()) + " calls");
     BCLog::OutSummary(std::to_string(ms / nevents) + " microsec / iteration");
     BCLog::OutSummary(std::to_string(ms / m->likelihoodCalls()) + " microsec / call");
+
+    // Print best fit:
+    // for Model Independent
+    if (dynamic_cast<mi_fit*>(m))
+        dynamic_cast<mi_fit*>(m)->printSwave("output/mi_result.pdf", m->GetBestFitParameters(), m->GetBestFitParameterErrors());
 
     // // close log file
     BCLog::OutSummary("Exiting");

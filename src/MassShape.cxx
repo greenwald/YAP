@@ -32,7 +32,7 @@ bool MassShape::consistent() const
     bool C = DataAccessor::consistent();
 
     // check if owner is set
-    if (!Owner_) {
+    if (!owner()) {
         FLOG(ERROR) << "Owner isn't set";
         C &= false;
     }
@@ -43,7 +43,7 @@ bool MassShape::consistent() const
 //-------------------------
 void MassShape::setOwner(DecayingParticle* dp)
 {
-    if (Owner_)
+    if (owner())
         throw exceptions::Exception("MassShape already has owner", "MassShape::setOwner");
 
     Owner_ = dp;
@@ -52,39 +52,39 @@ void MassShape::setOwner(DecayingParticle* dp)
 //-------------------------
 DecayTreeVector& MassShape::ownersDecayTrees()
 {
-    if (!Owner_)
+    if (!owner())
         throw exceptions::Exception("MassShape has no owner", "MassShape::ownersDecayTrees");
-    return Owner_->DecayTrees_;
+    return owner()->DecayTrees_;
 }
 
 //-------------------------
 void MassShape::addAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
 {
-    if (!Owner_)
+    if (!owner())
         throw exceptions::Exception("MassShape has no owner", "MassShape::addAmplitudeComponent");
-    Owner_->addAmplitudeComponent(ac, dt);
+    owner()->addAmplitudeComponent(ac, dt);
 }
 
 //-------------------------
 void MassShape::removeAmplitudeComponent(const AmplitudeComponent& ac, DecayTree& dt) const
 {
-    if (!Owner_)
+    if (!owner())
         throw exceptions::Exception("MassShape has no owner", "MassShape::removeAmplitudeComponent");
-    Owner_->removeAmplitudeComponent(ac, dt);
+    owner()->removeAmplitudeComponent(ac, dt);
 }
 
 //-------------------------
 void MassShape::replaceFreeAmplitude(std::shared_ptr<FreeAmplitude> ac, DecayTree& dt) const
 {
-    if (!Owner_)
+    if (!owner())
         throw exceptions::Exception("MassShape has no owner", "MassShape::replaceFreeAmplitude");
-    Owner_->replaceFreeAmplitude(ac, dt);
+    owner()->replaceFreeAmplitude(ac, dt);
 }
 
 //-------------------------
 const Model* MassShape::model() const
 {
-    return Owner_->model();
+    return owner()->model();
 }
 
 }

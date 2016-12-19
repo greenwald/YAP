@@ -66,7 +66,7 @@ public:
     virtual bool consistent() const override;
 
     /// get raw pointer to owner
-    DecayingParticle* owner() const
+    virtual DecayingParticle* owner() const
     { return Owner_; }
 
     /// get raw pointer to Model through resonance
