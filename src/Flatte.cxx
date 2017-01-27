@@ -114,6 +114,11 @@ void Flatte::calculate(DataPartition& D, const std::shared_ptr<const ParticleCom
 
     const auto M2 = pow(mass()->value(), 2);
 
+    std::complex<double> W = 0;
+    for (const auto& fc : FlatteChannels_)
+        W += fc.Coupling->value() * std::sqrt(std::complex<double>(measured_breakup_momenta::q2(M2, fc.Particles[0]->mass(), fc.Particles[1]->mass())));
+    auto MW = 2. * W / mass()->value();
+
     // const auto& FSPs = model()->finalStateParticles();
 
     // // get channel particles (both orderings):
@@ -142,7 +147,7 @@ void Flatte::calculate(DataPartition& D, const std::shared_ptr<const ParticleCom
             w += fc.Coupling->value() * std::sqrt(std::complex<double>(measured_breakup_momenta::q2(m2, fc.Particles[0]->mass(), fc.Particles[1]->mass())));
 
         // T = 1 / (M^2 - m^2 - width-term)
-        T_->setValue(1. / (M2 - m2 - 1_i * 2. * w / sqrt(m2)), d, si, D);
+        T_->setValue(MW / (M2 - m2 - 1_i * 2. * w / sqrt(m2)), d, si, D);
     }
 
     D.status(*T_, si) = CalculationStatus::calculated;

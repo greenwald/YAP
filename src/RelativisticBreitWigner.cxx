@@ -63,8 +63,8 @@ void RelativisticBreitWigner::calculate(DataPartition& D, const std::shared_ptr<
     // i * mass^2 * nominal width
     auto im2w_R = 1_i * m2_R * width()->value();
 
-    // // nominal mass * nominal width
-    // double mG = mass()->value() * width()->value();
+    // nominal mass * nominal width
+    auto MG = mass()->value() * width()->value();
 
     // J + 1/2
     unsigned twoLp1 = BlattWeisskopf_->L() + 1;
@@ -93,7 +93,7 @@ void RelativisticBreitWigner::calculate(DataPartition& D, const std::shared_ptr<
 
         auto imw = im2w_R / m_ab * pow(Q, twoLp1) * pow(BlattWeisskopf_->value(d, pc), 2) / squared_barrier_factor(BlattWeisskopf_->L(), q2_nomi * r2);
 
-        T()->setValue(1. / (m2_R - m2_ab - imw), d, si, D);
+        T()->setValue(MG / (m2_R - m2_ab - imw), d, si, D);
 
     }
 

@@ -26,10 +26,15 @@ public:
     virtual void setParameters(const std::vector<double>& p) override;
 
     void printSwave(const std::string& filename, const std::vector<double>& pars = {}, const std::vector<double>& uncs = {});
+
+    std::vector<double> truth() const;
+    
+    virtual double LogAPrioriProbability(const std::vector<double>& P) override;
     
 protected:
 
     std::shared_ptr<yap::FreeAmplitude> FAtoPiPiSwave_;
+    std::shared_ptr<yap::FreeAmplitude> FAtoF2_;
 
     yap::FreeAmplitudeVector FAfromPiPiSwave_;
     

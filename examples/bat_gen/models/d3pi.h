@@ -104,7 +104,7 @@ inline unique_ptr<Model> d3pi(unique_ptr<Model> M)
     return M;
 }
 
-inline unique_ptr<Model> d3pi_mi(unique_ptr<Model> M)
+inline unique_ptr<Model> d3pi_mi(unique_ptr<Model> M, unsigned n_bins = 20)
 {
     auto T = read_pdl_file((string)::getenv("YAPDIR") + "/data/evt.pdl");
 
@@ -134,15 +134,16 @@ inline unique_ptr<Model> d3pi_mi(unique_ptr<Model> M)
     std::vector<double> bins;
     double m2_low = pow(2 * T[211].mass(), 2);
     double m2_high = pow(T["D+"].mass() - T[211].mass(), 2);
-    double m2_f0 = pow(T["f_0(1500)"].mass(), 2);
-    double mw_f0 = T["f_0(1500)"].mass() * T["f_0(1500)"].massShapeParameters()[0];
-    double phi_min = atan((mw_f0 / (m2_f0 - m2_low) - (m2_f0 - m2_low) / mw_f0) / 2);
-    double phi_max = atan((mw_f0 / (m2_f0 - m2_high) - (m2_f0 - m2_high) / mw_f0) / 2) + yap::pi();
-    unsigned Nbins = 20;
-    for (unsigned b = 0; b <= Nbins; ++b) {
-        auto amp = std::polar(0.5 / mw_f0, phi_min + (phi_max - phi_min) * b / 20) + std::complex<double>(0, 0.5 / mw_f0);
-        bins.push_back(m2_f0 - mw_f0 / tan(arg(amp)));
-    }
+    /* double m2_f0 = pow(T["f_0(1500)"].mass(), 2); */
+    /* double mw_f0 = T["f_0(1500)"].mass() * T["f_0(1500)"].massShapeParameters()[0]; */
+    /* double phi_min = atan((mw_f0 / (m2_f0 - m2_low) - (m2_f0 - m2_low) / mw_f0) / 2); */
+    /* double phi_max = atan((mw_f0 / (m2_f0 - m2_high) - (m2_f0 - m2_high) / mw_f0) / 2) + yap::pi(); */
+    /* for (unsigned b = 0; b <= n_bins; ++b) { */
+    /*     auto amp = std::polar(0.5 / mw_f0, phi_min + (phi_max - phi_min) * b / n_bins) + std::complex<double>(0, 0.5 / mw_f0); */
+    /*     bins.push_back(m2_f0 - mw_f0 / tan(arg(amp))); */
+    /* } */
+    for (unsigned b = 0; b <= n_bins; ++b)
+        bins.push_back(m2_low + (m2_high - m2_low) * b / n_bins);
     auto pipi_Swave = DecayingParticle::create("pipi_Swave", T["f_0(500)"].quantumNumbers(), radialSize, make_shared<StepFunction>(bins));
     pipi_Swave->addStrongDecay(piPlus, piMinus);
     D->addWeakDecay(pipi_Swave, piPlus);

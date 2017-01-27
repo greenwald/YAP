@@ -102,7 +102,7 @@ int main()
 
     // load fit data and partition it
     LOG(INFO) << "Load data";
-    load_data(m->fitData(), *m->model(), m->axes(), D_mass, *t_mcmc, 1e4);
+    load_data(m->fitData(), *m->model(), m->axes(), D_mass, *t_mcmc, 5e4);
     m->fitPartitions() = yap::DataPartitionBlock::create(m->fitData(), 4);
 
     // get FSP mass ranges
@@ -110,7 +110,7 @@ int main()
 
     // generate integration data
     std::mt19937 g(0);
-    unsigned n_integrationPoints = 2e4;
+    unsigned n_integrationPoints = 1e5;
     if (true) {
         m->integrationPointGenerator() = std::bind(yap::phsp<std::mt19937>, std::cref(*m->model()), D_mass, m->axes(), m2r, g, std::numeric_limits<unsigned>::max());
         // m->setNIntegrationPoints(4e4, 4e4);
@@ -155,7 +155,7 @@ int main()
 
     m->SetNIterationsRun(static_cast<int>(50e3 / m->GetNChains()));
 
-    m->SetInitialPositionAttemptLimit(10000);
+    m->SetInitialPositionAttemptLimit(100000);
     
     // m->WriteMarkovChain("output/" + m->GetSafeName() + "_mcmc.root", "RECREATE", true, false);
 
@@ -166,8 +166,20 @@ int main()
     m->MCMCUserInitialize();
     // m->MarginalizeAll(BCIntegrate::kMargMetropolis);
 
-    m->FindMode();
-    m->FindMode(m->GetBestFitParameters());
+    BCLog::OutSummary("Optimizing ...");
+
+    std::vector<double> guess;
+    if (dynamic_cast<mi_fit*>(m))
+        guess = static_cast<mi_fit*>(m)->truth();
+    guess.resize(m->GetParameters().Size(), 1);
+    for (size_t i = 0; i < guess.size(); ++i)
+        if (m->GetParameter(i).Fixed())
+            guess[i] = m->GetParameter(i).GetFixedValue();
+
+    m->FindMode(guess);
+    // BCLog::OutSummary("Optimizing more ...");
+    // m->FindMode(m->GetBestFitParameters());
+    BCLog::OutSummary("... done optimizing");
 
     // end timing
     auto end = std::chrono::steady_clock::now();
