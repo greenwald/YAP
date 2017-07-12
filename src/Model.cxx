@@ -145,6 +145,14 @@ const double sum_of_log_intensity(const Model& M, DataPartitionVector& DP, doubl
                            [](double& l, std::future<double>& s) {return l += s.get();});
 }
 
+// //-------------------------
+// const double derivative_of_sum_of_log_intensity(const Model& M, DataPartition& D, const std::shared_ptr<ParameterBase>& P)
+// {
+//     return std::accumulate(D.begin(), D.end(), CompensatedSum<double>(0.),
+//                            [&](CompensatedSum<double>& g, const DataPoint& d)
+//                            {return g += derivative_of_intensity(M, d, P);});
+// }
+
 //-------------------------
 bool Model::consistent() const
 {

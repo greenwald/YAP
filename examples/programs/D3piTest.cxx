@@ -133,8 +133,14 @@ int main( int argc, char** argv)
     LOG(INFO);
     LOG(INFO) << data.size() << " data points of " << data[0].bytes() << " bytes each = " << data.bytes() * 1.e-6 << " MB";
 
-    M.calculate(data);
+    // calls M.calculate(data)
+    auto log_i = sum_of_log_intensity(M, data);
 
+    LOG(INFO) << "ln(intensity) = " << log_i;
+
+    // auto fa_rho_pi = free_amplitude(*D, yap::to(rho));
+    // auto d_log_i__d_fa_rho_pi = derivative_of_sum_of_log_intensity(M, data, fa_rho_pi);
+    
     yap::ModelIntegral MI(M);
     yap::ImportanceSampler::calculate(MI, data);
 

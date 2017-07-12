@@ -322,6 +322,13 @@ const double sum_of_log_intensity(const Model& M, DataPartition& D, double ped =
 /// \param ped Pedestal to substract from each term in the sum
 const double sum_of_log_intensity(const Model& M, DataPartitionVector& DP, double ped = 0);
 
+/// \return The derivative of sum of the logs of squared amplitudes
+///         evaluated over the data partition with respect to a parameter
+/// \param M Model to evaluate
+/// \param D DataPartition to evalue over
+/// \param P shared_ptr to parameter to differentiate with respect to
+const double derivative_of_sum_of_log_intensity(const Model& M, DataPartition& D, const std::share_ptr<ParameterBase>& P);
+
 /// \return all free amplitudes in a model
 FreeAmplitudeSet free_amplitudes(const Model& M);
 
