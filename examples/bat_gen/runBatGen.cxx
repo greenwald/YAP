@@ -30,27 +30,18 @@ int main()
 {
     plainLogs(el::Level::Info);
 
-    vector<bat_gen*> test_models = {
-        // new bat_gen("D3PI_PHSP", d3pi_phsp(yap_model<ZemachFormalism>()), 1.86961),
-        new bat_gen("D3PI", d3pi(yap_model<ZemachFormalism>()), 1.86961),
-        new bat_gen("DKSPIPI_Zemach", D_K0pi0pi0(yap_model<ZemachFormalism>()), 1.8648400),
-        // new bat_gen("DKSPIPI_Helicity", D_K0pi0pi0(yap_model<HelicityFormalism>()), 1.86961)
-        // new bat_gen("DKKPI", dkkpi(yap_model<ZemachFormalism>()), 1.86961),
-        new bat_gen("DKKPI", dkkpi(yap_model<HelicityFormalism>()), 1.86961),
-        new bat_gen("D4PI", d4pi(), 1.8648400)
-    };
+    auto* m = new bat_gen("D3PI", d3pi(yap_model<ZemachFormalism>()), 1.86961);
+    //    auto* m = new bat_gen("DKKPI", dkkpi(yap_model<HelicityFormalism>()), 1.86961),
 
-    for (bat_gen* m : test_models) {
+    // open log file
+    BCLog::OpenLog("output/" + m->GetSafeName() + "_log.txt", BCLog::detail, BCLog::detail);
 
-        // open log file
-        BCLog::OpenLog("output/" + m->GetSafeName() + "_log.txt", BCLog::detail, BCLog::detail);
-
-        // set precision
-        m->SetPrecision(BCEngineMCMC::kMedium);
-        m->SetNChains(4);
-        m->SetMinimumEfficiency(0.95);
-        m->SetMaximumEfficiency(0.99);
-        m->SetInitialPositionAttemptLimit(1e5);
+    // set precision
+    m->SetPrecision(BCEngineMCMC::kMedium);
+    m->SetNChains(4);
+    m->SetMinimumEfficiency(0.95);
+    m->SetMaximumEfficiency(0.99);
+    m->SetInitialPositionAttemptLimit(1e5);
 
         m->SetNIterationsRun(static_cast<int>(1e5 / m->GetNChains()));
 
