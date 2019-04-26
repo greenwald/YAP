@@ -42,7 +42,7 @@ int main( int argc, char** argv)
     //-------------------------
     // create a particle table
     yap::ParticleTable T;
-    // insert particles: pdg code, name, quantum numbers (charge, 2*spin, parity), mass, Breit-Widgner parameters (width) where needed
+    // insert particles: pdg code, name, quantum numbers (charge, 2*spin, parity), mass [GeV], Breit-Widgner parameters (width) [GeV] where needed
     // initial states
     T.insert(-521, "B-",    QuantumNumbers(-1, 0, -1), 5279.32e-3);
     T.insert(-511, "B0bar", QuantumNumbers( 0, 0, -1), 5279.63e-3);
@@ -57,7 +57,8 @@ int main( int argc, char** argv)
     T.insert(-213,     "rho770-",  rho_quantum_numbers, 775.26e-3, 149.4e-3);
     T.insert(-100213,  "rho1450-", rho_quantum_numbers, 1465e-3, 400e-3);
     T.insert(-30213,   "rho1700-", rho_quantum_numbers, 1720e-3, 250e-3);
-    // D's
+    // D*'s
+    // TODO : Put in PDG codes
     T.insert(, "D*2400z", QuantumNumbers( 0, 0, +1), 2318e-3, 267e-3);
     T.insert(, "D*2400-", QuantumNumbers(-1, 0, +1), 2351e-3, 230e-3);
     T.insert(, "D2420z",  QuantumNumbers( 0, 2, +1), 2420.8e-3, 31.7e-3);
@@ -108,22 +109,20 @@ int main( int argc, char** argv)
         B->addWeakDecay(D, rho);
     }
 
-    // for all D resonances add D -> pi pi, and B -> D* pi with proper charge configuration
+    // for all D* resonances add D* -> D pi, and B -> D* pi with proper charge configuration
     for (auto& Dst : {D2400, D2420, D2460}) {
         Dst->addStrongDecay(D, (B_charge == 0 ? piminus : pizero));
         B->addWeakDecay(Dst, (B_charge == 0 ? pizero : piminus));
     }
-    
-    // nonresonant decay
-    D->addWeakDecay(D, piminus, pizero);
 
-    *free_amplitude(*D, yap::to(rho))                     = std::polar(1., 0.);
-    *free_amplitude(*D, yap::to(f_0_980))                 = std::polar(1.4, yap::rad(12.));
-    *free_amplitude(*D, yap::to(f_2))                     = std::polar(2.1, yap::rad(-123.));
-    *free_amplitude(*D, yap::to(f_0_1370))                = std::polar(1.3, yap::rad(-21.));
-    *free_amplitude(*D, yap::to(f_0_1500))                = std::polar(1.1, yap::rad(-44.));
-    *free_amplitude(*D, yap::to(sigma))                   = std::polar(3.7, yap::rad(-3.));
-    *free_amplitude(*D, yap::to(piPlus, piMinus, piPlus)) = std::polar(0.1, yap::rad(45.));
+    // set amplitudes
+    // You need to change these numbers
+    *free_amplitude(*B, yap::to(rho770))  = std::polar(1., 0.);
+    *free_amplitude(*B, yap::to(rho1450)) = std::polar(1.4, yap::rad(12.));
+    *free_amplitude(*B, yap::to(rho1700)) = std::polar(1.4, yap::rad(12.));
+    *free_amplitude(*B, yap::to(D2400)) = std::polar(1.4, yap::rad(12.));
+    *free_amplitude(*B, yap::to(D2420)) = std::polar(1.4, yap::rad(12.));
+    *free_amplitude(*B, yap::to(D2460)) = std::polar(1.4, yap::rad(12.));
 
     M.lock();
 
@@ -139,81 +138,39 @@ int main( int argc, char** argv)
     MULTILINE(LOG(INFO),to_decay_string(*D));
 
     LOG(INFO);
-    LOG(INFO) << "SpinAmplitudeCache:";
-    MULTILINE(LOG(INFO),to_string(*M.spinAmplitudeCache()));
-
-    LOG(INFO);
     LOG(INFO) << "Free amplitudes (sorted by fixed/notfixed, parent_name, l):";
     for (const auto& fa : sort(free_amplitudes(M), yap::compare_by<yap::is_fixed>(),
                                yap::by_parent_name<>(), yap::by_l<>()))
         LOG(INFO) << yap::to_string(*fa);
     
+
     // get default Dalitz axes
+    double B_mass = T[(B_charge == 0 ? "B0bar" : "B-")].mass();
     auto A = M.massAxes();
-    auto m2r = yap::squared(yap::mass_range(T["D+"].mass(), A, M.finalStateParticles()));
+    auto m2r = yap::squared(yap::mass_range(B_mass, A, M.finalStateParticles()));
 
-    // generate points randomly in phase space of model
+    // phase-space generator
     std::mt19937 g(0);
+    auto phsp_gen = std::bind(yap::phsp<std::mt19937>, std::cref(M), B_mass, A, m2r, g, std::numeric_limits<unsigned>::max());
+    
+    // find maximum of model:
+    unsigned maxcalc_n_data_points = 10000;
+    auto maxcalc_data = M.createDataSet();
+    std::generate_n(std::back_inserter(maxcalc_data), maxcalc_n_data_points, phsp_gen);
+    M.calculate(maxcalc_data);
+    double max_intensity = -1;
+    for (const auto& d : maxcalc_data)
+        max_intensity = std::max(max_intensity, yap::intensity(M, d));
+    delete maxcal_cdata;
 
-    // create data set
-    auto data = M.createDataSet();
-
-    // generate 10,000 phase-space-distributed data points
-    std::generate_n(std::back_inserter(data), 10000,
-                    std::bind(yap::phsp<std::mt19937>, std::cref(M), T["D+"].mass(), A, m2r, g, std::numeric_limits<unsigned>::max()));
-
-    LOG(INFO);
-    LOG(INFO) << data.size() << " data points of " << data[0].bytes() << " bytes each = " << data.bytes() * 1.e-6 << " MB";
-
-    M.calculate(data);
-
-    yap::ModelIntegral MI(M);
-    yap::ImportanceSampler::calculate(MI, data);
-
-    for (const auto& mci : MI.integrals()) {
-
-        LOG(INFO);
-        // MULTILINE(LOG(INFO), to_string(mci.Integral.decayTrees()));
-
-        auto A_DT = amplitude(mci.Integral.decayTrees(), data[0]);
-        LOG(INFO) << "A_DT = " << A_DT;
-        LOG(INFO) << "|A_DT|^2 = " << norm(A_DT);
-
-        LOG(INFO) << "integral = " << to_string(integral(mci.Integral));
-        auto ff = fit_fractions(mci.Integral);
-        for (size_t i = 0; i < ff.size(); ++i)
-            LOG(INFO) << "fit fraction " << to_string(100. * ff[i]) << "% for " << to_string(*mci.Integral.decayTrees()[i]->freeAmplitude());
-        LOG(INFO) << "sum of fit fractions = " << to_string(std::accumulate(ff.begin(), ff.end(), yap::RealIntegralElement()));
-
-        // LOG(INFO) << "cached integral components:";
-        // auto I_cached = cached_integrals(mci.Integral);
-        // for (const auto& row : I_cached)
-        //     LOG(INFO) << std::accumulate(row.begin(), row.end(), std::string(""),
-        //                                  [](std::string & s, const yap::ComplexIntegralElement & c)
-        //                                  { return s += "\t" + to_string(c);}).erase(0, 1);
-
-        LOG(INFO) << "integral components:";
-        auto I = integrals(mci.Integral);
-        for (const auto& row : I)
-            LOG(INFO) << std::accumulate(row.begin(), row.end(), std::string(""),
-                                         [](std::string & s, const yap::ComplexIntegralElement & c)
-                                         { return s += "\t" + to_string(c);}).erase(0, 1);
-    }
-
-    // LOG(INFO) << std::endl << "Fixed amplitudes: ";
-    // for (const auto& fa : free_amplitudes(M, yap::is_fixed()))
-    //     LOG(INFO) << yap::to_string(*fa);
-
-    // LOG(INFO) << std::endl << "Free amplitudes: ";
-    // for (const auto& fa : free_amplitudes(M, yap::is_not_fixed()))
-    //     LOG(INFO) << yap::to_string(*fa);
-
-    // for (unsigned l = 0; l <= 2; ++l) {
-    //     LOG(INFO) << std::endl << "Amplitudes with l = " << l << ": ";
-    //     for (const auto& fa : free_amplitudes(M, yap::l_equals(l)))
-    //         LOG(INFO) << yap::to_string(*fa);
+    // generate data
+    // auto data = M.createDataSet();
+    // unsigned n_data_points = 10000;
+    // unsigned max_number_of_tries = 1000000;
+    // for (unsigned n = 0; n < max_number_of_tries && data.size() < n_data_points; ++n) {
+        
     // }
-
+       
     LOG(INFO) << "alright!";
 
     return 0;
