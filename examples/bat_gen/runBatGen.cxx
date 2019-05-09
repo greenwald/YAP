@@ -43,31 +43,30 @@ int main()
     m->SetMaximumEfficiency(0.99);
     m->SetInitialPositionAttemptLimit(1e5);
 
-        m->SetNIterationsRun(static_cast<int>(1e5 / m->GetNChains()));
+    m->SetNIterationsRun(static_cast<int>(1e5 / m->GetNChains()));
 
-        m->WriteMarkovChain("output/" + m->GetSafeName() + "_mcmc.root", "RECREATE", true, false);
+    m->WriteMarkovChain("output/" + m->GetSafeName() + "_mcmc.root", "RECREATE", true, false);
 
-        // start timing:
-        auto start = chrono::steady_clock::now();
+    // start timing:
+    auto start = chrono::steady_clock::now();
+    
+    // run MCMC, marginalizing posterior
+    m->MarginalizeAll(BCIntegrate::kMargMetropolis);
 
-        // run MCMC, marginalizing posterior
-        m->MarginalizeAll(BCIntegrate::kMargMetropolis);
-
-        // end timing
-        auto end = chrono::steady_clock::now();
-
-        // timing:
-        auto diff = end - start;
-        auto ms = chrono::duration<double, micro>(diff).count();
-        auto nevents = (m->GetNIterationsPreRun() + m->GetNIterationsRun()) * m->GetNChains();
-        BCLog::OutSummary(string("Seconds = ") + to_string(ms / 1.e6) + " for " + to_string(nevents) + " iterations, " + to_string(m->likelihoodCalls()) + " calls");
-        BCLog::OutSummary(to_string(ms / nevents) + " microsec / iteration");
-        BCLog::OutSummary(to_string(ms / m->likelihoodCalls()) + " microsec / call");
-
-        // close log file
-        BCLog::OutSummary("Exiting");
-        BCLog::CloseLog();
-    }
+    // end timing
+    auto end = chrono::steady_clock::now();
+    
+    // timing:
+    auto diff = end - start;
+    auto ms = chrono::duration<double, micro>(diff).count();
+    auto nevents = (m->GetNIterationsPreRun() + m->GetNIterationsRun()) * m->GetNChains();
+    BCLog::OutSummary(string("Seconds = ") + to_string(ms / 1.e6) + " for " + to_string(nevents) + " iterations, " + to_string(m->likelihoodCalls()) + " calls");
+    BCLog::OutSummary(to_string(ms / nevents) + " microsec / iteration");
+    BCLog::OutSummary(to_string(ms / m->likelihoodCalls()) + " microsec / call");
+    
+    // close log file
+    BCLog::OutSummary("Exiting");
+    BCLog::CloseLog();
 
     return 0;
 }

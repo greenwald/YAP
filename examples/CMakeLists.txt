@@ -7,8 +7,9 @@ add_subdirectory(programs)
 # Check if $ROOTSYS is set
 if(DEFINED ENV{ROOTSYS})
 
-    # Use the ROOT-provided FindROOT.cmake
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{ROOTSYS}/etc/cmake)
+  list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+  # Use the ROOT-provided FindROOT.cmake
+   # set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{ROOTSYS}/etc/cmake)
 
     find_package(ROOT)
     if(ROOT_FOUND)

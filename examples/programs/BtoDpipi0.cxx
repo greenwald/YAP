@@ -44,19 +44,19 @@ int main( int argc, char** argv)
     yap::ParticleTable T;
     // insert particles: pdg code, name, quantum numbers (charge, 2*spin, parity), mass [GeV], Breit-Widgner parameters (width) [GeV] where needed
     // initial states
-    T.insert(-521, "B-",    QuantumNumbers(-1, 0, -1), 5279.32e-3);
-    T.insert(-511, "B0bar", QuantumNumbers( 0, 0, -1), 5279.63e-3);
+    T.insert(521, "B+", QuantumNumbers(1, 0, -1), 5279.32e-3);
+    T.insert(511, "B0", QuantumNumbers(0, 0, -1), 5279.63e-3);
     // final states
-    T.insert( 411, "D+",    QuantumNumbers(+1, 0, -1), 1869.65e-3);
-    T.insert( 421, "D0",    QuantumNumbers( 0, 0, -1), 1864.83e-3);
-    T.insert(-211, "pi-",   QuantumNumbers(-1, 0, -1), 139.57061e-3);
-    T.insert( 111, "pi0",   QuantumNumbers( 0, 0, -1), 134.9770e-2);
+    T.insert(411, "D+",  QuantumNumbers(1, 0, -1), 1869.65e-3);
+    T.insert(421, "D0",  QuantumNumbers(0, 0, -1), 1864.83e-3);
+    T.insert(211, "pi+", QuantumNumbers(1, 0, -1), 139.57061e-3);
+    T.insert(111, "pi0", QuantumNumbers(0, 0, -1), 134.9770e-2);
     // resonances
     // rho's
     QuantumNumbers rho_quantum_numbers(-1, 2, -1);
-    T.insert(-213,     "rho770-",  rho_quantum_numbers, 775.26e-3, 149.4e-3);
-    T.insert(-100213,  "rho1450-", rho_quantum_numbers, 1465e-3, 400e-3);
-    T.insert(-30213,   "rho1700-", rho_quantum_numbers, 1720e-3, 250e-3);
+    T.insert(213,     "rho(770)+",  rho_quantum_numbers, 775.26e-3, 149.4e-3);
+    T.insert(100213,  "rho(1450)+", rho_quantum_numbers, 1465e-3, 400e-3);
+    T.insert(30213,   "rho(1700)+", rho_quantum_numbers, 1720e-3, 250e-3);
     // D*'s
     // TODO : Put in PDG codes
     T.insert(, "D*2400z", QuantumNumbers( 0, 0, +1), 2318e-3, 267e-3);
@@ -144,32 +144,32 @@ int main( int argc, char** argv)
         LOG(INFO) << yap::to_string(*fa);
     
 
-    // get default Dalitz axes
-    double B_mass = T[(B_charge == 0 ? "B0bar" : "B-")].mass();
-    auto A = M.massAxes();
-    auto m2r = yap::squared(yap::mass_range(B_mass, A, M.finalStateParticles()));
+    // // get default Dalitz axes
+    // double B_mass = T[(B_charge == 0 ? "B0bar" : "B-")].mass();
+    // auto A = M.massAxes();
+    // auto m2r = yap::squared(yap::mass_range(B_mass, A, M.finalStateParticles()));
 
-    // phase-space generator
-    std::mt19937 g(0);
-    auto phsp_gen = std::bind(yap::phsp<std::mt19937>, std::cref(M), B_mass, A, m2r, g, std::numeric_limits<unsigned>::max());
+    // // phase-space generator
+    // std::mt19937 g(0);
+    // auto phsp_gen = std::bind(yap::phsp<std::mt19937>, std::cref(M), B_mass, A, m2r, g, std::numeric_limits<unsigned>::max());
     
-    // find maximum of model:
-    unsigned maxcalc_n_data_points = 10000;
-    auto maxcalc_data = M.createDataSet();
-    std::generate_n(std::back_inserter(maxcalc_data), maxcalc_n_data_points, phsp_gen);
-    M.calculate(maxcalc_data);
-    double max_intensity = -1;
-    for (const auto& d : maxcalc_data)
-        max_intensity = std::max(max_intensity, yap::intensity(M, d));
-    delete maxcal_cdata;
+    // // find maximum of model:
+    // unsigned maxcalc_n_data_points = 10000;
+    // auto maxcalc_data = M.createDataSet();
+    // std::generate_n(std::back_inserter(maxcalc_data), maxcalc_n_data_points, phsp_gen);
+    // M.calculate(maxcalc_data);
+    // double max_intensity = -1;
+    // for (const auto& d : maxcalc_data)
+    //     max_intensity = std::max(max_intensity, yap::intensity(M, d));
+    // delete maxcal_cdata;
 
-    // generate data
-    // auto data = M.createDataSet();
-    // unsigned n_data_points = 10000;
-    // unsigned max_number_of_tries = 1000000;
-    // for (unsigned n = 0; n < max_number_of_tries && data.size() < n_data_points; ++n) {
+    // // generate data
+    // // auto data = M.createDataSet();
+    // // unsigned n_data_points = 10000;
+    // // unsigned max_number_of_tries = 1000000;
+    // // for (unsigned n = 0; n < max_number_of_tries && data.size() < n_data_points; ++n) {
         
-    // }
+    // // }
        
     LOG(INFO) << "alright!";
 

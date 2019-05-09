@@ -1,4 +1,4 @@
-include_directories(${YAP_SOURCE_DIR}/include ${BAT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIR})
+include_directories(${YAP_SOURCE_DIR}/include ${BAT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS})
 
 set(SOURCES
     bat_fit.cxx
@@ -11,6 +11,7 @@ add_custom_target(link-macros
     COMMAND ${CMAKE_COMMAND} -E create_symlink ../../../examples/bat_gen/macros macros)
 
 set(PROGRAMS
+  runBtoDpipi0
     runBatGen
     runBatFit
     runBatFitFitFractions
@@ -24,5 +25,5 @@ configure_file(${YAP_SOURCE_DIR}/data/evt.pdl ${CMAKE_CURRENT_BINARY_DIR}/data/e
 
 foreach(program ${PROGRAMS})
     add_executable(${program} EXCLUDE_FROM_ALL ${program}.cxx ${SOURCES})
-    target_link_libraries(${program} ${ROOT_LIBS} ${BAT_LIBRARIES} YAP)
+    target_link_libraries(${program} ${ROOT_LIBRARIES} ${BAT_LIBRARIES} YAP)
 endforeach(program)
