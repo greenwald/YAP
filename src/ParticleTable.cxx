@@ -28,6 +28,32 @@ ParticleTableEntry::ParticleTableEntry(int pdg, const std::string& name, Quantum
 }
 
 //-------------------------
+ParticleTableEntry cp_conjugate(ParticleTableEntry t, const std::string& prefix)
+{
+    t.quantumNumbers().setQ(-t.quantumNumbers().Q());
+    auto cp_name = t.name();
+    switch (cp_name.back()) {
+    case '+' :
+        cp_name.back() = '-';
+        break;
+    case '-' :
+        cp_name.back() = '+';
+        break;
+    default:
+        cp_name = prefix + cp_name;
+    }
+    t.setName(cp_name);
+    t.pdg(-t.pdg());
+    return t;
+}
+
+//-------------------------
+ParticleTableEntry cp_conjugate(const ParticleTableMap::value_type& t, const std::string& prefix)
+{
+    return cp_conjugate(std::get<1>(t), prefix);
+}
+
+//-------------------------
 double get_nth_element(const ParticleTableEntry& pde, size_t n, const std::string& where)
 {
     if (n >= pde.massShapeParameters().size())

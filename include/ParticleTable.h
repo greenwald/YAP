@@ -74,6 +74,10 @@ public:
     const std::vector<double>& massShapeParameters() const
     { return MassShapeParameters_; }
 
+    /// set pdg
+    void pdg(int p)
+    { PDG_ = p; }
+    
     /// set name
     void setName(const std::string& name)
     { Name_ = name; }
@@ -106,6 +110,9 @@ private:
     /// further parameters of particle (implementation dependent)
     std::vector<double> MassShapeParameters_;
 };
+
+/// \return cp conjugate copy of a particle table entry
+ParticleTableEntry cp_conjugate(ParticleTableEntry t, const std::string& prefix = "anti-");
 
 /// \return n'th element in ParticleTableEntry's MassShapeParameters_, throwing error if necessary
 /// \param pde ParticleTableEntry to access
@@ -195,6 +202,9 @@ private:
     /// maps PDGCodes to ParticleTableEntry's
     ParticleTableMap ParticleTableMap_;
 };
+
+/// \return cp conjugate copy of a particle table entry
+ParticleTableEntry cp_conjugate(const ParticleTableMap::value_type& vt, const std::string& prefix = "anti-");
 
 }
 
